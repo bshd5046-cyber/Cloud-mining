@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wallet | Cloud Miner Pro</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+
+body{
+background-color:#050810;
+font-family:'Inter',sans-serif;
+color:#ffffff;
+-webkit-tap-highlight-color:transparent;
+}
+
+.crypto-card{
+background:linear-gradient(135deg,#1e40af 0%,#7c3aed 100%);
+border:1px solid rgba(255,255,255,0.2);
+position:relative;
+overflow:hidden;
+}
+
+.crypto-card::before{
+content:'';
+position:absolute;
+top:-50%;
+left:-50%;
+width:200%;
+height:200%;
+background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 70%);
+transform:rotate(30deg);
+}
+
+.glass-panel{
+background:rgba(17,24,39,0.6);
+backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,0.05);
+}
+
+.btn-action{
+transition:all 0.2s ease;
+}
+
+.btn-action:active{
+transform:scale(0.95);
+}
+
+.bottom-nav{
+background:rgba(10,15,28,0.95);
+backdrop-filter:blur(15px);
+border-top:1px solid rgba(255,255,255,0.08);
+height:75px;
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+display:flex;
+justify-content:space-around;
+align-items:center;
+z-index:100;
+padding-bottom:env(safe-area-inset-bottom);
+}
+
+.invest-fab{
+width:68px;
+height:68px;
+background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+position:absolute;
+top:-32px;
+left:50%;
+transform:translateX(-50%);
+box-shadow:0 8px 25px rgba(37,99,235,0.5);
+border:6px solid #050810;
+}
+
+.nav-item{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+color:#64748b;
+text-decoration:none;
+font-size:10px;
+}
+
+.nav-item.active{
+color:#3b82f6;
+}
+
+</style>
+</head>
+
+<body class="pb-28">
+
+<div class="px-6 pt-10 flex justify-between items-center">
+<h1 class="text-2xl font-bold">My Wallet</h1>
+<i class="fas fa-bell text-gray-500"></i>
+</div>
+
+<div class="px-6 mt-6">
+<div class="crypto-card rounded-[32px] p-8 shadow-2xl">
+
+<div class="flex justify-between items-start mb-10">
+
+<div>
+<p class="text-blue-100 text-xs uppercase tracking-widest opacity-80">Total Balance</p>
+<h2 class="text-3xl font-bold mt-1">$12,450.85</h2>
+</div>
+
+<i class="fab fa-cc-visa text-3xl text-white/50"></i>
+
+</div>
+
+<div class="flex justify-between items-end">
+
+<div>
+<p class="text-blue-100 text-[10px] uppercase opacity-60">Account Holder</p>
+<p class="text-sm font-medium tracking-wide">ALEX JOHNSON</p>
+</div>
+
+<div class="text-right">
+<p class="text-blue-100 text-[10px] uppercase opacity-60">Profit Rate</p>
+<p class="text-sm font-bold text-green-300">+2.4% / day</p>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="px-6 mt-8 flex gap-4">
+
+<button class="btn-action flex-1 bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-900/20">
+<i class="fas fa-arrow-down"></i>
+<span class="font-bold">Deposit</span>
+</button>
+
+<button class="btn-action flex-1 bg-white/10 hover:bg-white/20 py-4 rounded-2xl flex items-center justify-center gap-3 backdrop-blur-md">
+<i class="fas fa-arrow-up"></i>
+<span class="font-bold">Withdraw</span>
+</button>
+
+</div>
+
+<div class="px-6 mt-10">
+
+<div class="flex justify-between items-center mb-5">
+<h3 class="font-bold text-lg">Market Assets</h3>
+<span class="text-blue-500 text-xs">See All</span>
+</div>
+
+<div class="space-y-4">
+
+<div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
+
+<div class="flex items-center gap-4">
+
+<div class="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+<i class="fab fa-bitcoin text-orange-500 text-xl"></i>
+</div>
+
+<div>
+<p class="font-bold">Bitcoin</p>
+<p class="text-xs text-gray-500 uppercase">BTC</p>
+</div>
+
+</div>
+
+<div class="text-right">
+<p class="font-bold">$64,230.10</p>
+<p class="text-xs text-green-400 font-medium">+1.2%</p>
+</div>
+
+</div>
+
+<div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
+
+<div class="flex items-center gap-4">
+
+<div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-coins text-yellow-500 text-xl"></i>
+</div>
+
+<div>
+<p class="font-bold">BNB</p>
+<p class="text-xs text-gray-500 uppercase">BNB</p>
+</div>
+
+</div>
+
+<div class="text-right">
+<p class="font-bold">$580.45</p>
+<p class="text-xs text-red-400 font-medium">-0.4%</p>
+</div>
+
+</div>
+
+<div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
+
+<div class="flex items-center gap-4">
+
+<div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+<i class="fas fa-dollar-sign text-green-500 text-xl"></i>
+</div>
+
+<div>
+<p class="font-bold">Tether</p>
+<p class="text-xs text-gray-500 uppercase">USDT</p>
+</div>
+
+</div>
+
+<div class="text-right">
+<p class="font-bold">$1.00</p>
+<p class="text-xs text-gray-400 font-medium">Stable</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<nav class="bottom-nav">
+
+<a href="home.html" class="nav-item">
+<i class="fas fa-house mb-1"></i>
+<span>Home</span>
+</a>
+
+<a href="wallet.html" class="nav-item active">
+<i class="fas fa-wallet mb-1"></i>
+<span>Wallet</span>
+</a>
+
+<div class="relative flex-1 flex justify-center">
+<a href="invest.html" class="invest-fab">
+<i class="fas fa-bolt-lightning text-2xl text-white"></i>
+</a>
+</div>
+
+<a href="support.html" class="nav-item">
+<i class="fas fa-headset mb-1"></i>
+<span>Support</span>
+</a>
+
+<a href="profile.html" class="nav-item">
+<i class="fas fa-circle-user mb-1"></i>
+<span>Profile</span>
+</a>
+
+</nav>
+
+</body>
+</html>

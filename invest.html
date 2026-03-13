@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AMANA | Investment Nodes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #050810;
+            --brand: #3b82f6;
+            --border: rgba(255, 255, 255, 0.08);
+            --nav-bg: rgba(10, 15, 28, 0.95);
+        }
+        body { 
+            background-color: var(--bg); 
+            font-family: 'Inter', sans-serif; 
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* تصميم كرت الصندوق */
+        .node-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .node-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--brand); box-shadow: 0 0 15px var(--brand);
+        }
+
+        /* البار السفلي الموحد */
+        .bottom-nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border);
+            height: 75px;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* الزر العائم (Invest) */
+        .invest-fab {
+            width: 68px; height: 68px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute;
+            top: -32px; left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+            border: 6px solid #050810;
+            transition: 0.3s;
+        }
+
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item.active { color: var(--brand); }
+
+        .status-dot {
+            width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+            display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #10b981;
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+    <header class="p-6 pt-12 border-b border-white/5 bg-gradient-to-b from-blue-900/10 to-transparent">
+        <h1 class="text-2xl font-black italic uppercase tracking-tighter">AMANA <span class="text-blue-500">NODES</span></h1>
+        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Quantum Algorithmic Trading</p>
+    </header>
+
+    <div class="grid grid-cols-1 gap-4 px-6 mt-6" id="nodeGrid">
+        </div>
+
+    <nav class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        
+        <a href="wallet.html" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab">
+                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
+            </a>
+            <span class="absolute bottom-[-18px] text-[10px] font-black text-blue-500 uppercase">Invest</span>
+        </div>
+
+        <a href="support.html" class="nav-item">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
+        </a>
+
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-circle-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        const nodes = [
+            { name: "Falcon Trend 🦅", desc: "تقتنص الترند القوي بسرعة", roi: "15%", duration: "24h", min: 10 },
+            { name: "Golden Breakout ✨", desc: "اختراقات قوية للسوق", roi: "22%", duration: "48h", min: 50 },
+            { name: "Shadow Scalper 🌑", desc: "سكالبينغ سريع ودقيق", roi: "28%", duration: "72h", min: 100 },
+            { name: "Titan Momentum ⚡", desc: "استراتيجية زخم قوي", roi: "35%", duration: "5 Days", min: 250 },
+            { name: "Quantum Reversal 🔄", desc: "اصطياد انعكاسات السوق", roi: "42%", duration: "7 Days", min: 500 },
+            { name: "Iron Range 🛡️", desc: "تداول داخل الرينج بثبات", roi: "55%", duration: "10 Days", min: 1000 },
+            { name: "Phoenix Recovery 🔥", desc: "تعويض الخسائر والعودة بقوة", roi: "70%", duration: "15 Days", min: 2500 },
+            { name: "Alpha Wave 🌊", desc: "استراتيجية موجات السوق", roi: "90%", duration: "30 Days", min: 5000 },
+            { name: "Zen Precision 🎯", desc: "دخولات قليلة لكن دقيقة جداً", roi: "135%", duration: "60 Days", min: 10000 }
+        ];
+
+        function init() {
+            const grid = document.getElementById('nodeGrid');
+            grid.innerHTML = nodes.map(node => `
+                <div class="node-card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-sm font-black italic text-white uppercase tracking-tight">${node.name}</h3>
+                            <p class="text-[10px] text-gray-500 font-medium">${node.desc}</p>
+                        </div>
+                        <span class="text-[9px] text-emerald-400 font-bold uppercase"><span class="status-dot"></span>Online</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mb-4">
+                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
+                            <p class="text-[8px] text-gray-500 uppercase font-bold">ROI</p>
+                            <p class="text-[11px] font-black text-blue-400">${node.roi}</p>
+                        </div>
+                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
+                            <p class="text-[8px] text-gray-500 uppercase font-bold">Time</p>
+                            <p class="text-[11px] font-black">${node.duration}</p>
+                        </div>
+                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
+                            <p class="text-[8px] text-gray-500 uppercase font-bold">Min</p>
+                            <p class="text-[11px] font-black">$${node.min}</p>
+                        </div>
+                    </div>
+
+                    <button onclick="activateNode('${node.name}')" class="w-full bg-blue-600/10 hover:bg-blue-600 border border-blue-600/20 py-3 rounded-2xl text-[10px] font-black uppercase transition active:scale-95">
+                        Start Node
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function activateNode(name) {
+            alert("Connecting to Secure Infrastructure...\n\nNode: " + name + "\nStatus: Verifying Balance");
+        }
+
+        init();
+    </script>
+</body>
+</html>
