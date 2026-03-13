@@ -7,21 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #050810; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
-        .input-field {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-        .input-field:focus-within {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.05);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
-        }
-        .gradient-btn {
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
-        }
+        body { background-color: #050810; font-family: 'Inter', sans-serif; color: white; }
+        .input-field { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
+        .input-field:focus-within { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .gradient-btn { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-6">
@@ -34,35 +23,58 @@
 
         <div class="space-y-4">
             <div class="input-field rounded-2xl flex items-center p-4">
-                <i class="fas fa-user text-gray-500 mr-4"></i>
-                <input type="text" placeholder="Full Name" class="bg-transparent border-none outline-none w-full text-sm font-medium">
-            </div>
-
-            <div class="input-field rounded-2xl flex items-center p-4">
                 <i class="fas fa-envelope text-gray-500 mr-4"></i>
-                <input type="email" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+                <input type="email" id="email" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium">
             </div>
 
             <div class="input-field rounded-2xl flex items-center p-4">
                 <i class="fas fa-lock text-gray-500 mr-4"></i>
-                <input type="password" placeholder="Create Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+                <input type="password" id="password" placeholder="Create Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
             </div>
 
-            <div class="flex items-center gap-2 px-2 py-2">
-                <input type="checkbox" id="terms" class="accent-blue-500">
-                <label for="terms" class="text-[10px] text-gray-500 font-medium uppercase">I agree to the terms & conditions</label>
-            </div>
-
-            <button onclick="window.location.href='index.html'" class="gradient-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
+            <button id="signupBtn" class="gradient-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
                 Create Account
             </button>
         </div>
 
+        <p id="message" class="text-center mt-4 text-xs font-bold uppercase"></p>
+
         <p class="text-center mt-8 text-gray-500 text-xs font-bold uppercase">
-            Already have an account? 
-            <a href="login.html" class="text-blue-500 ml-1">Log In</a>
+            Already have an account? <a href="login.html" class="text-blue-500 ml-1">Log In</a>
         </p>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('signupBtn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const msg = document.getElementById('message');
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                msg.style.color = "#4ade80";
+                msg.innerText = "Account Created! Redirecting...";
+                setTimeout(() => window.location.href = "index.html", 2000);
+            } catch (error) {
+                msg.style.color = "#f87171";
+                msg.innerText = error.message;
+            }
+        });
+    </script>
 </body>
 </html>
