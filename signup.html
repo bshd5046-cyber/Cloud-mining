@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Join AMANA | Create Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #050810; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        .input-field:focus-within {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+        }
+        .gradient-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black italic tracking-tighter uppercase">AMANA <span class="text-blue-500">NODES</span></h1>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-2">Start your quantum journey</p>
+        </div>
+
+        <div class="space-y-4">
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-user text-gray-500 mr-4"></i>
+                <input type="text" placeholder="Full Name" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+            </div>
+
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-envelope text-gray-500 mr-4"></i>
+                <input type="email" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+            </div>
+
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-lock text-gray-500 mr-4"></i>
+                <input type="password" placeholder="Create Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+            </div>
+
+            <div class="flex items-center gap-2 px-2 py-2">
+                <input type="checkbox" id="terms" class="accent-blue-500">
+                <label for="terms" class="text-[10px] text-gray-500 font-medium uppercase">I agree to the terms & conditions</label>
+            </div>
+
+            <button onclick="window.location.href='index.html'" class="gradient-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
+                Create Account
+            </button>
+        </div>
+
+        <p class="text-center mt-8 text-gray-500 text-xs font-bold uppercase">
+            Already have an account? 
+            <a href="login.html" class="text-blue-500 ml-1">Log In</a>
+        </p>
+    </div>
+
+</body>
+</html>
