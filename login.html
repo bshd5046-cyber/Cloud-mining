@@ -30,33 +30,20 @@
         <div class="space-y-4">
             <div class="input-field rounded-2xl flex items-center p-4">
                 <i class="fas fa-at text-gray-500 mr-4"></i>
-                <input type="email" placeholder="Email or Username" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+                <input type="email" id="loginEmail" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium">
             </div>
 
             <div class="input-field rounded-2xl flex items-center p-4">
                 <i class="fas fa-shield-alt text-gray-500 mr-4"></i>
-                <input type="password" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+                <input type="password" id="loginPassword" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
             </div>
 
-            <div class="text-right px-2">
-                <a href="#" class="text-[10px] text-gray-500 font-bold uppercase hover:text-blue-500">Forgot Password?</a>
-            </div>
-
-            <button onclick="window.location.href='index.html'" class="bg-white text-black w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
+            <button id="loginBtn" class="bg-white text-black w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
                 Authorize Login
             </button>
-
-            <div class="flex items-center gap-4 my-6">
-                <div class="h-[1px] bg-white/10 flex-1"></div>
-                <span class="text-[10px] text-gray-600 font-black uppercase">Or</span>
-                <div class="h-[1px] bg-white/10 flex-1"></div>
-            </div>
-
-            <button class="w-full border border-white/10 py-4 rounded-2xl flex items-center justify-center gap-3 text-sm font-bold active:bg-white/5 transition">
-                <i class="fab fa-google"></i>
-                Google Access
-            </button>
         </div>
+
+        <p id="loginMessage" class="text-center mt-4 text-xs font-bold uppercase"></p>
 
         <p class="text-center mt-8 text-gray-500 text-xs font-bold uppercase">
             New to Amana? 
@@ -64,5 +51,44 @@
         </p>
     </div>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // وظيفة تسجيل الدخول
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msg = document.getElementById('loginMessage');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                msg.style.color = "#4ade80";
+                msg.innerText = "Login Successful! Redirecting...";
+                // التوجه إلى الصفحة الرئيسية بعد ثانية واحدة
+                setTimeout(() => window.location.href = "index.html", 1000);
+            } catch (error) {
+                msg.style.color = "#f87171";
+                // عرض رسالة خطأ بسيطة للمستخدم
+                if (error.code === 'auth/user-not-found') msg.innerText = "User not found";
+                else if (error.code === 'auth/wrong-password') msg.innerText = "Incorrect password";
+                else msg.innerText = "Login failed. Please try again.";
+            }
+        });
+    </script>
 </body>
 </html>
