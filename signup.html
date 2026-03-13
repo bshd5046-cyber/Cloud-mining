@@ -11,9 +11,9 @@
         .input-field { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
         .input-field:focus-within { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
         .gradient-btn { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
+        .gradient-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         select option { background: #0a0f1c; color: white; }
         
-        /* تصميم رسالة التحذير العلوية */
         #alertBox {
             transform: translateY(-100%);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -24,7 +24,7 @@
 <body class="flex flex-col items-center justify-center min-h-screen p-6 py-12">
 
     <div id="alertBox" class="fixed top-4 left-4 right-4 z-[200] hidden">
-        <div id="alertBg" class="p-4 rounded-2xl border flex items-center gap-3 shadow-2xl backdrop-blur-xl">
+        <div id="alertBg" class="p-4 rounded-2xl border flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-black/80">
             <i id="alertIcon" class="fas"></i>
             <p id="alertMsg" class="text-xs font-bold uppercase tracking-wide"></p>
         </div>
@@ -50,7 +50,8 @@
                         <option value="+20">🇪🇬 +20</option>
                         <option value="+961">🇱🇧 +961</option>
                         <option value="+964">🇮🇶 +964</option>
-                        </select>
+                        <option value="+962">🇯🇴 +962</option>
+                    </select>
                 </div>
                 <div class="input-field rounded-2xl flex-1 flex items-center p-4">
                     <input type="tel" id="phone" placeholder="Phone Number" class="bg-transparent border-none outline-none w-full text-sm font-medium">
@@ -105,7 +106,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // وظيفة إظهار التنبيه
         function showAlert(message, type = "error") {
             const box = document.getElementById('alertBox');
             const bg = document.getElementById('alertBg');
@@ -126,8 +126,6 @@
             }
 
             msg.innerText = message;
-
-            // إخفاء التنبيه بعد 3 ثواني
             setTimeout(() => {
                 box.classList.remove('show');
                 setTimeout(() => box.classList.add('hidden'), 400);
@@ -135,58 +133,57 @@
         }
 
         document.getElementById('signupBtn').addEventListener('click', async () => {
-            const fields = {
-                name: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                confirmPass: document.getElementById('confirmPassword').value
-            };
+            const name = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            const invite = document.getElementById('inviteCode').value.trim();
 
-            // 1. التحقق من الحقول الفارغة
-            if (Object.values(fields).some(val => val === "")) {
-                showAlert("Please fill in all required fields!");
+            if (!name || !phone || !email || !password) {
+                showAlert("Missing information! Please fill all fields.");
                 return;
             }
 
-            // 2. التحقق من تطابق الباسورد
-            if (fields.password !== fields.confirmPass) {
+            if (password !== confirmPass) {
                 showAlert("Passwords do not match!");
                 return;
             }
 
-            try {
-                // تفعيل حالة التحميل على الزر
-                const btn = document.getElementById('signupBtn');
-                btn.innerText = "AUTHORIZING...";
-                btn.disabled = true;
+            const btn = document.getElementById('signupBtn');
+            btn.innerText = "VERIFYING...";
+            btn.disabled = true;
 
-                const userCredential = await createUserWithEmailAndPassword(auth, fields.email, fields.password);
+            try {
+                // خطوة 1: إنشاء الحساب
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
+                // خطوة 2: حفظ البيانات في Firestore
+                // ملاحظة: إذا توقف هنا، تأكد من أنك فعلت Firestore Database في كونسول فيربيز
                 await setDoc(doc(db, "users", user.uid), {
-                    fullName: fields.name,
-                    phoneNumber: document.getElementById('countryCode').value + fields.phone,
-                    email: fields.email,
-                    inviteCode: document.getElementById('inviteCode').value,
+                    fullName: name,
+                    phoneNumber: document.getElementById('countryCode').value + phone,
+                    email: email,
+                    inviteCode: invite,
                     balance: 0,
                     createdAt: new Date().toISOString()
                 });
 
-                showAlert("Account Secured! Welcome.", "success");
-                
-                // الدخول المباشر
+                showAlert("Identity Verified! Access Granted.", "success");
                 setTimeout(() => window.location.href = "index.html", 1500);
 
             } catch (error) {
-                document.getElementById('signupBtn').innerText = "CREATE ACCOUNT";
-                document.getElementById('signupBtn').disabled = false;
+                btn.innerText = "CREATE ACCOUNT";
+                btn.disabled = false;
+                console.error("Firebase Error:", error.code, error.message);
                 
-                let errorMessage = "Registration failed!";
-                if(error.code === 'auth/email-already-in-use') errorMessage = "Email already registered!";
-                if(error.code === 'auth/weak-password') errorMessage = "Password is too weak!";
+                // شرح الأخطاء الشائعة
+                let userMsg = error.message;
+                if (error.code === 'auth/email-already-in-use') userMsg = "Email already in use!";
+                if (error.code === 'permission-denied') userMsg = "Database Error: Please check Firestore Rules.";
                 
-                showAlert(errorMessage);
+                showAlert(userMsg);
             }
         });
     </script>
