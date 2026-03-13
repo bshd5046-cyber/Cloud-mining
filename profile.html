@@ -8,107 +8,91 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
-        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow-x: hidden; }
+        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* تصميم القسم الداخلي للأمان */
+        #securitySection {
+            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #securitySection.open { right: 0; }
+
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
         .nav-item.active { color: var(--primary); }
-        .level-badge { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
-        
-        /* التنبيهات المخصصة */
-        #customAlert { transform: translateY(-100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #customAlert.show { transform: translateY(0); }
+        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; }
+        .input-dark:focus { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
     </style>
 </head>
-<body class="min-h-screen pb-32">
+<body class="min-h-screen">
 
-    <div id="customAlert" class="fixed top-4 left-4 right-4 z-[300] hidden">
-        <div id="alertBg" class="p-4 rounded-2xl border flex items-center gap-3 bg-black/80 backdrop-blur-xl">
-            <i id="alertIcon" class="fas"></i>
-            <p id="alertMsg" class="text-xs font-bold uppercase"></p>
-        </div>
-    </div>
-
-    <div class="relative px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
-        <div class="relative inline-block">
+    <main id="mainProfile" class="h-screen overflow-y-auto pb-32">
+        <div class="relative px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
             <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto">
                 <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover">
             </div>
-            <div class="absolute bottom-1 right-1 bg-green-500 w-5 h-5 border-4 border-[#050810] rounded-full"></div>
+            <h2 id="userName" class="mt-4 text-2xl font-black italic">Loading...</h2>
+            <span class="inline-block mt-2 bg-blue-500/10 text-blue-400 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">Verified Investor</span>
         </div>
-        <h2 id="userName" class="mt-4 text-2xl font-black italic">Loading...</h2>
-        <div class="mt-2 flex justify-center gap-2 items-center">
-            <span class="level-badge uppercase">Lvl 4</span>
-            <span class="text-[10px] text-blue-400 font-black tracking-widest uppercase italic">Verified Investor</span>
-        </div>
-    </div>
 
-    <div class="grid grid-cols-2 gap-4 px-6 mb-8">
-        <div class="glass-card p-5 rounded-[2rem]">
-            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Total Balance</p>
-            <p id="userBalance" class="text-xl font-black text-white">$0.00</p>
-        </div>
-        <div class="glass-card p-5 rounded-[2rem]">
-            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Phone Number</p>
-            <p id="userPhone" class="text-xs font-bold text-blue-400">---</p>
-        </div>
-    </div>
-
-    <div class="px-6 space-y-4">
-        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Security Settings</h3>
-        <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
-            
-            <button onclick="openModal('emailModal')" class="w-full flex items-center justify-between p-5 active:bg-white/5 transition text-left">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500"><i class="fas fa-envelope"></i></div>
-                    <div>
-                        <p class="text-sm font-bold">Email Address</p>
-                        <p id="userEmail" class="text-[9px] text-gray-500">---</p>
-                    </div>
-                </div>
-                <i class="fas fa-pen-to-square text-xs text-purple-500/40"></i>
-            </button>
-
-            <button onclick="openModal('passModal')" class="w-full flex items-center justify-between p-5 active:bg-white/5 transition text-left">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fas fa-key"></i></div>
-                    <div>
-                        <p class="text-sm font-bold">Account Password</p>
-                        <p class="text-[9px] text-gray-500 uppercase tracking-tighter">Change security credentials</p>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-gray-700"></i>
-            </button>
-
-            <button id="logoutBtn" class="w-full flex items-center gap-4 p-5 active:bg-red-500/10 transition group">
-                <div class="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 group-active:scale-90 transition"><i class="fas fa-power-off"></i></div>
-                <span class="text-sm font-bold text-red-500">Secure Logout</span>
-            </button>
-        </div>
-    </div>
-
-    <div id="emailModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] hidden items-center justify-center p-6">
-        <div class="glass-card w-full max-w-sm p-8 rounded-[2.5rem] border-purple-500/30">
-            <h4 class="text-xl font-black mb-4 italic text-purple-500 uppercase">Update Email</h4>
-            <input type="email" id="newEmailInput" placeholder="Enter New Email" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 mb-4 outline-none focus:border-purple-500">
-            <div class="flex gap-2">
-                <button onclick="closeModals()" class="flex-1 py-4 font-bold text-gray-500">Cancel</button>
-                <button id="saveEmailBtn" class="flex-1 py-4 bg-purple-600 rounded-2xl font-black text-xs uppercase">Confirm</button>
+        <div class="grid grid-cols-2 gap-4 px-6 mb-8">
+            <div class="glass-card p-5 rounded-[2rem]">
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Balance</p>
+                <p id="userBalance" class="text-xl font-black text-white">$0.00</p>
+            </div>
+            <div class="glass-card p-5 rounded-[2rem]">
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Phone</p>
+                <p id="userPhone" class="text-xs font-bold text-blue-400">---</p>
             </div>
         </div>
-    </div>
 
-    <div id="passModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] hidden items-center justify-center p-6">
-        <div class="glass-card w-full max-w-sm p-8 rounded-[2.5rem] border-blue-500/30">
-            <h4 class="text-xl font-black mb-4 italic text-blue-500 uppercase">New Password</h4>
-            <input type="password" id="newPassInput" placeholder="Min 6 characters" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 mb-4 outline-none focus:border-blue-500">
-            <div class="flex gap-2">
-                <button onclick="closeModals()" class="flex-1 py-4 font-bold text-gray-500">Cancel</button>
-                <button id="savePassBtn" class="flex-1 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase">Update</button>
+        <div class="px-6 space-y-4">
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">General</h3>
+            <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
+                
+                <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <p class="text-sm font-bold">Security Settings</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-medium">Email & Password</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-gray-700"></i>
+                </button>
+
+                <button id="logoutBtn" class="w-full flex items-center gap-4 p-6 active:bg-red-500/10 transition group">
+                    <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></div>
+                    <span class="text-sm font-bold text-red-500">Logout</span>
+                </button>
             </div>
         </div>
-    </div>
+    </main>
+
+    <section id="securitySection" class="p-6">
+        <div class="flex items-center gap-4 mb-8 pt-6">
+            <button onclick="toggleSecurity(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                <i class="fas fa-arrow-left text-sm"></i>
+            </button>
+            <h2 class="text-xl font-black italic uppercase">Security Settings</h2>
+        </div>
+
+        <div class="space-y-6">
+            <div class="glass-card p-6 rounded-[2rem]">
+                <label class="text-[10px] font-black text-gray-500 uppercase mb-3 block">Update Email Address</label>
+                <input type="email" id="newEmail" placeholder="New email address" class="input-dark mb-4">
+                <button id="saveEmail" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition">Update Email</button>
+            </div>
+
+            <div class="glass-card p-6 rounded-[2rem]">
+                <label class="text-[10px] font-black text-gray-500 uppercase mb-3 block">Change Password</label>
+                <input type="password" id="newPass" placeholder="New password (min 6 chars)" class="input-dark mb-4">
+                <button id="savePass" class="w-full py-4 bg-white/10 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition">Update Password</button>
+            </div>
+        </div>
+    </section>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -122,7 +106,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updatePassword, updateEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -138,81 +122,47 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // وظيفة التنبيهات
-        function showNotif(msg, type="success") {
-            const alertBox = document.getElementById('customAlert');
-            const bg = document.getElementById('alertBg');
-            const icon = document.getElementById('alertIcon');
-            const text = document.getElementById('alertMsg');
-            
-            alertBox.classList.remove('hidden');
-            setTimeout(() => alertBox.classList.add('show'), 10);
-            
-            bg.className = type === "success" ? "p-4 rounded-2xl border border-green-500/30 bg-green-500/10 flex items-center gap-3 backdrop-blur-xl" : "p-4 rounded-2xl border border-red-500/30 bg-red-500/10 flex items-center gap-3 backdrop-blur-xl";
-            icon.className = type === "success" ? "fas fa-circle-check text-green-500" : "fas fa-circle-exclamation text-red-500";
-            text.innerText = msg;
-            text.className = type === "success" ? "text-xs font-bold uppercase text-green-200" : "text-xs font-bold uppercase text-red-200";
-
-            setTimeout(() => {
-                alertBox.classList.remove('show');
-                setTimeout(() => alertBox.classList.add('hidden'), 400);
-            }, 3000);
+        // فتح وإغلاق قسم الأمان
+        window.toggleSecurity = (open) => {
+            const sec = document.getElementById('securitySection');
+            open ? sec.classList.add('open') : sec.classList.remove('open');
         }
 
-        // مراقبة حالة المستخدم وجلب بياناته من Firestore
+        // جلب البيانات
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const docRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(docRef);
+                const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('userName').innerText = data.fullName;
-                    document.getElementById('userBalance').innerText = `$${parseFloat(data.balance).toFixed(2)}`;
-                    document.getElementById('userPhone').innerText = data.phoneNumber || "N/A";
-                    document.getElementById('userEmail').innerText = user.email;
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=2563eb&color=fff`;
+                    const d = docSnap.data();
+                    document.getElementById('userName').innerText = d.fullName;
+                    document.getElementById('userBalance').innerText = `$${parseFloat(d.balance).toFixed(2)}`;
+                    document.getElementById('userPhone').innerText = d.phoneNumber;
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff`;
                 }
-            } else {
-                window.location.href = "login.html";
-            }
+            } else { window.location.href = "login.html"; }
         });
 
-        // دوال النوافذ
-        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
-        window.closeModals = () => {
-            document.getElementById('emailModal').style.display = 'none';
-            document.getElementById('passModal').style.display = 'none';
-        };
-
-        // تحديث الباسورد
-        document.getElementById('savePassBtn').addEventListener('click', async () => {
-            const newPass = document.getElementById('newPassInput').value;
-            if(newPass.length < 6) return showNotif("Password too weak", "error");
+        // تنفيذ التحديثات
+        document.getElementById('saveEmail').addEventListener('click', async () => {
+            const email = document.getElementById('newEmail').value;
             try {
-                await updatePassword(auth.currentUser, newPass);
-                showNotif("Password Changed!");
-                closeModals();
-            } catch (e) { showNotif("Recent Login Required", "error"); }
+                await updateEmail(auth.currentUser, email);
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { email: email });
+                alert("Email Updated!");
+                location.reload();
+            } catch (e) { alert("Security: Please Re-login to update email"); }
         });
 
-        // تحديث الإيميل
-        document.getElementById('saveEmailBtn').addEventListener('click', async () => {
-            const newEmail = document.getElementById('newEmailInput').value;
+        document.getElementById('savePass').addEventListener('click', async () => {
+            const pass = document.getElementById('newPass').value;
             try {
-                await updateEmail(auth.currentUser, newEmail);
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { email: newEmail });
-                showNotif("Email Updated!");
-                setTimeout(() => location.reload(), 1500);
-            } catch (e) { showNotif("Operation Failed", "error"); }
+                await updatePassword(auth.currentUser, pass);
+                alert("Password Changed Successfully!");
+                toggleSecurity(false);
+            } catch (e) { alert("Security: Please Re-login to change password"); }
         });
 
-        // تسجيل الخروج
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            if(confirm("Logout from AMANA?")) {
-                await signOut(auth);
-                window.location.href = "login.html";
-            }
-        });
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
     </script>
 </body>
 </html>
