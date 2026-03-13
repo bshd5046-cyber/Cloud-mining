@@ -7,61 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --bg-dark: #050810;
-            --primary: #3b82f6;
-            --nav-bg: rgba(10, 15, 28, 0.95);
-        }
-        body { 
-            background-color: var(--bg-dark); 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            color: #ffffff;
-        }
-        .glass-card { 
-            background: rgba(17, 24, 39, 0.7); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-        }
-
-        /* البار السفلي الموحد */
-        .bottom-nav {
-            background: var(--nav-bg);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            height: 75px;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* الزر العائم المركزي لصفحة الاستثمار */
-        .invest-fab {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute;
-            top: -32px; left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-            border: 6px solid var(--bg-dark);
-            transition: 0.3s;
-        }
-        .invest-fab:active { transform: translateX(-50%) scale(0.9); }
-        
+        :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
+        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; }
+        .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
-        
-        .level-badge {
-            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
-            padding: 2px 10px; border-radius: 20px;
-            font-size: 11px; font-weight: bold;
-        }
+        .level-badge { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .skeleton { background: rgba(255,255,255,0.05); animate: pulse 1.5s infinite; }
     </style>
 </head>
 <body class="min-h-screen pb-32">
@@ -69,13 +23,13 @@
     <div class="relative px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
         <div class="relative inline-block">
             <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto">
-                <img src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover" alt="User Avatar">
+                <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover">
             </div>
             <div class="absolute bottom-1 right-1 bg-green-500 w-5 h-5 border-4 border-[#050810] rounded-full"></div>
         </div>
-        <h2 class="mt-4 text-2xl font-black tracking-tight text-white italic">Alex Johnson</h2>
+        <h2 id="userName" class="mt-4 text-2xl font-black tracking-tight text-white italic">Loading...</h2>
         <div class="mt-2 flex justify-center gap-2 items-center">
-            <span class="level-badge uppercase">Level 4</span>
+            <span id="userLevel" class="level-badge uppercase">Lvl 1</span>
             <span class="text-[10px] text-blue-400 font-black tracking-widest uppercase italic">Verified Investor</span>
         </div>
     </div>
@@ -83,77 +37,110 @@
     <div class="grid grid-cols-2 gap-4 px-6 mb-8">
         <div class="glass-card p-5 rounded-[2rem]">
             <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Total Balance</p>
-            <p class="text-xl font-black text-white">$4,850.00</p>
+            <p id="userBalance" class="text-xl font-black text-white">$0.00</p>
         </div>
         <div class="glass-card p-5 rounded-[2rem]">
-            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Daily ROI</p>
-            <p class="text-xl font-black text-green-400">+2.5%</p>
+            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-1">Phone Verified</p>
+            <p id="userPhone" class="text-xs font-bold text-blue-400">---</p>
         </div>
     </div>
 
     <div class="px-6 space-y-4">
-        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Account Security</h3>
+        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Personal & Security</h3>
         
         <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
-            <a href="#" class="flex items-center justify-between p-5 active:bg-white/5 transition">
+            <div class="flex items-center justify-between p-5">
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                        <i class="fas fa-shield-halved"></i>
+                        <i class="fas fa-envelope"></i>
                     </div>
-                    <span class="text-sm font-bold">Security & 2FA</span>
+                    <div>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold">Email Address</p>
+                        <p id="userEmail" class="text-sm font-bold">---</p>
+                    </div>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-700"></i>
-            </a>
+            </div>
 
-            <a href="#" class="flex items-center justify-between p-5 active:bg-white/5 transition">
+            <div class="flex items-center justify-between p-5">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500">
-                        <i class="fas fa-wallet"></i>
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                        <i class="fas fa-ticket"></i>
                     </div>
-                    <span class="text-sm font-bold">Payment Methods</span>
+                    <div>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold">Invite Code</p>
+                        <p id="userInvite" class="text-sm font-bold">---</p>
+                    </div>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-700"></i>
-            </a>
+            </div>
 
-            <a href="#" class="flex items-center justify-between p-5 active:bg-red-500/10 transition group">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
-                        <i class="fas fa-power-off"></i>
-                    </div>
-                    <span class="text-sm font-bold text-red-500">Logout</span>
+            <button id="logoutBtn" class="w-full flex items-center gap-4 p-5 active:bg-red-500/10 transition group">
+                <div class="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 group-active:scale-90 transition">
+                    <i class="fas fa-power-off"></i>
                 </div>
-            </a>
+                <span class="text-sm font-bold text-red-500">Secure Logout</span>
+            </button>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-house"></i>
-            <span>Home</span>
-        </a>
-        
-        <a href="wallet.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Wallet</span>
-        </a>
-
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
         <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-            <span class="absolute bottom-[-18px] text-[10px] font-black text-blue-500 uppercase">Invest</span>
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
         </div>
-
-        <a href="support.html" class="nav-item">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </a>
-
-        <a href="profile.html" class="nav-item active">
-            <i class="fas fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // مراقبة حالة المستخدم وجلب بياناته
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('userName').innerText = data.fullName;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(data.balance).toFixed(2)}`;
+                        document.getElementById('userPhone').innerText = data.phoneNumber || "Not Set";
+                        document.getElementById('userEmail').innerText = user.email;
+                        document.getElementById('userInvite').innerText = data.inviteCode || "No Code";
+                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=2563eb&color=fff`;
+                    }
+                } catch (error) {
+                    console.error("Error fetching profile:", error);
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // برمجة زر خروج
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            if(confirm("Are you sure you want to logout?")) {
+                await signOut(auth);
+                window.location.href = "login.html";
+            }
+        });
+    </script>
 </body>
 </html>
