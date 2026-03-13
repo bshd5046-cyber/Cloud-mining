@@ -11,30 +11,32 @@
         body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* تصميم القسم الداخلي للأمان */
+        /* قسم الأمان الداخلي */
         #securitySection {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
         }
         #securitySection.open { right: 0; }
 
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid var(--bg-dark); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item.active { color: var(--primary); }
-        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; }
+        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; font-size: 14px; }
         .input-dark:focus { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); border: 6px solid var(--bg-dark); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; }
+        .nav-item.active { color: var(--primary); }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
     <main id="mainProfile" class="h-screen overflow-y-auto pb-32">
-        <div class="relative px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
-            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto">
+        <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
+            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4">
                 <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover">
             </div>
-            <h2 id="userName" class="mt-4 text-2xl font-black italic">Loading...</h2>
-            <span class="inline-block mt-2 bg-blue-500/10 text-blue-400 text-[10px] font-black px-3 py-1 rounded-full uppercase italic">Verified Investor</span>
+            <h2 id="userName" class="text-2xl font-black italic">Loading...</h2>
+            <p id="userEmail" class="text-gray-500 text-xs mt-1">---</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 px-6 mb-8">
@@ -49,15 +51,13 @@
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">General</h3>
             <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
-                
                 <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition text-left">
                     <div class="flex items-center gap-4">
                         <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fas fa-shield-halved"></i></div>
                         <div>
                             <p class="text-sm font-bold">Security Settings</p>
-                            <p class="text-[9px] text-gray-500 uppercase font-medium">Email & Password</p>
+                            <p class="text-[9px] text-gray-500 uppercase">Change Password & Email</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-xs text-gray-700"></i>
@@ -76,20 +76,28 @@
             <button onclick="toggleSecurity(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                 <i class="fas fa-arrow-left text-sm"></i>
             </button>
-            <h2 class="text-xl font-black italic uppercase">Security Settings</h2>
+            <h2 class="text-xl font-black italic uppercase">Security</h2>
         </div>
 
         <div class="space-y-6">
-            <div class="glass-card p-6 rounded-[2rem]">
-                <label class="text-[10px] font-black text-gray-500 uppercase mb-3 block">Update Email Address</label>
-                <input type="email" id="newEmail" placeholder="New email address" class="input-dark mb-4">
-                <button id="saveEmail" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition">Update Email</button>
+            <div class="glass-card p-6 rounded-[2rem] space-y-4">
+                <h4 class="text-blue-500 font-black text-xs uppercase italic">Change Password</h4>
+                <input type="password" id="newPass" placeholder="New Password" class="input-dark">
+                <input type="password" id="confirmPass" placeholder="Confirm New Password" class="input-dark">
+                
+                <div class="flex gap-2">
+                    <input type="text" id="otpInput" placeholder="6-digit code" class="input-dark flex-[1.5]">
+                    <button id="sendOtpBtn" class="flex-1 bg-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-tighter active:scale-95 transition">Send Code</button>
+                </div>
+                <p id="timer" class="text-[10px] text-gray-500 text-center font-bold">Expires in: <span class="text-blue-400">01:00</span></p>
+                
+                <button id="savePassBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl font-black text-xs uppercase tracking-widest mt-2">Save New Password</button>
             </div>
 
-            <div class="glass-card p-6 rounded-[2rem]">
-                <label class="text-[10px] font-black text-gray-500 uppercase mb-3 block">Change Password</label>
-                <input type="password" id="newPass" placeholder="New password (min 6 chars)" class="input-dark mb-4">
-                <button id="savePass" class="w-full py-4 bg-white/10 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition">Update Password</button>
+            <div class="glass-card p-6 rounded-[2rem] space-y-4">
+                <h4 class="text-purple-500 font-black text-xs uppercase italic">Update Email</h4>
+                <input type="email" id="newEmail" placeholder="New Email Address" class="input-dark">
+                <button id="saveEmailBtn" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest">Update Email</button>
             </div>
         </div>
     </section>
@@ -106,7 +114,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, updatePassword, updateEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -122,13 +130,15 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // فتح وإغلاق قسم الأمان
-        window.toggleSecurity = (open) => {
-            const sec = document.getElementById('securitySection');
-            open ? sec.classList.add('open') : sec.classList.remove('open');
-        }
+        let generatedOtp = null;
+        let timerInterval = null;
 
-        // جلب البيانات
+        // فتح/إغلاق قسم الأمان
+        window.toggleSecurity = (open) => {
+            document.getElementById('securitySection').classList.toggle('open', open);
+        };
+
+        // جلب بيانات المستخدم
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const docSnap = await getDoc(doc(db, "users", user.uid));
@@ -137,29 +147,59 @@
                     document.getElementById('userName').innerText = d.fullName;
                     document.getElementById('userBalance').innerText = `$${parseFloat(d.balance).toFixed(2)}`;
                     document.getElementById('userPhone').innerText = d.phoneNumber;
+                    document.getElementById('userEmail').innerText = user.email;
                     document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff`;
                 }
             } else { window.location.href = "login.html"; }
         });
 
-        // تنفيذ التحديثات
-        document.getElementById('saveEmail').addEventListener('click', async () => {
+        // نظام الـ OTP (محاكاة)
+        document.getElementById('sendOtpBtn').addEventListener('click', () => {
+            generatedOtp = Math.floor(100000 + Math.random() * 900000);
+            alert("Verification Code Sent to: " + auth.currentUser.email + "\nCode: " + generatedOtp);
+            
+            let timeLeft = 60;
+            const timerDisplay = document.querySelector('#timer span');
+            document.getElementById('sendOtpBtn').disabled = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    generatedOtp = null;
+                    document.getElementById('sendOtpBtn').disabled = false;
+                    timerDisplay.innerText = "01:00";
+                }
+            }, 1000);
+        });
+
+        // حفظ كلمة السر الجديدة
+        document.getElementById('savePassBtn').addEventListener('click', async () => {
+            const p1 = document.getElementById('newPass').value;
+            const p2 = document.getElementById('confirmPass').value;
+            const otp = document.getElementById('otpInput').value;
+
+            if (p1 !== p2) return alert("Passwords do not match!");
+            if (p1.length < 6) return alert("Minimum 6 characters required!");
+            if (otp != generatedOtp || !generatedOtp) return alert("Invalid or Expired Code!");
+
+            try {
+                await updatePassword(auth.currentUser, p1);
+                alert("Password Updated Successfully!");
+                toggleSecurity(false);
+            } catch (e) { alert("Security timeout. Please logout and login again."); }
+        });
+
+        // تحديث الإيميل
+        document.getElementById('saveEmailBtn').addEventListener('click', async () => {
             const email = document.getElementById('newEmail').value;
             try {
                 await updateEmail(auth.currentUser, email);
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { email: email });
                 alert("Email Updated!");
                 location.reload();
-            } catch (e) { alert("Security: Please Re-login to update email"); }
-        });
-
-        document.getElementById('savePass').addEventListener('click', async () => {
-            const pass = document.getElementById('newPass').value;
-            try {
-                await updatePassword(auth.currentUser, pass);
-                alert("Password Changed Successfully!");
-                toggleSecurity(false);
-            } catch (e) { alert("Security: Please Re-login to change password"); }
+            } catch (e) { alert("Recent login required to update email."); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
