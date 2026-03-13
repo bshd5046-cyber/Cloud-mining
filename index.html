@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --bg: #050810; --brand: #3b82f6; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: white; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: white; margin: 0; padding: 0; }
         .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 28px; }
-        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid var(--bg); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
@@ -26,7 +26,7 @@
             <h2 class="text-xl font-black italic">ALEX <span class="text-blue-500">JOHNSON</span></h2>
         </div>
         <div class="w-10 h-10 rounded-full border border-blue-500/30 p-0.5">
-            <img src="https://ui-avatars.com/api/?name=Alex&background=3b82f6&color=fff" class="rounded-full">
+            <img src="https://ui-avatars.com/api/?name=Alex&background=3b82f6&color=fff" class="rounded-full shadow-lg shadow-blue-500/20">
         </div>
     </header>
 
@@ -36,7 +36,7 @@
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Trading Volume</p>
                 <h1 class="text-4xl font-black italic">$48,250.00</h1>
                 <div class="mt-4 flex items-center gap-2">
-                    <span class="bg-green-500/10 text-green-400 text-[10px] font-black px-2 py-1 rounded-lg">+12.5% Today</span>
+                    <span class="bg-green-500/10 text-green-400 text-[10px] font-black px-2 py-1 rounded-lg border border-green-500/20">+12.5% Today</span>
                 </div>
             </div>
             <i class="fas fa-chart-line absolute right-[-20px] bottom-[-20px] text-8xl text-white/5 rotate-12"></i>
@@ -44,114 +44,25 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div class="glass-card p-5">
-                <i class="fas fa-microchip text-blue-500 mb-3 text-xl"></i>
-                <p class="text-[9px] text-gray-500 font-bold uppercase">Active Nodes</p>
-                <p class="text-lg font-black">12 Unit</p>
-            </div>
-            <div class="glass-card p-5">
-                <i class="fas fa-bolt text-yellow-500 mb-3 text-xl"></i>
-                <p class="text-[9px] text-gray-500 font-bold uppercase">Hash Power</p>
-                <p class="text-lg font-black">450 TH/s</p>
-            </div>
-        </div>
-
-        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Live Operation</h3>
-        <div class="glass-card p-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-                <span class="text-xs font-bold uppercase">System Status: Stable</span>
-            </div>
-            <span class="text-[10px] text-blue-400 font-black">LATENCY: 12ms</span>
-        </div>
-    </main>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="fas fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="wallet.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Wallet</span>
-        </a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-            <span class="absolute bottom-[-18px] text-[10px] font-black text-blue-500 uppercase">Invest</span>
-        </div>
-        <a href="support.html" class="nav-item">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
-    </nav>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard | AMANA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { --bg: #050810; --brand: #3b82f6; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: white; }
-        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 28px; }
-        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid var(--bg); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 600; }
-        .nav-item.active { color: var(--brand); }
-    </style>
-</head>
-<body class="pb-32">
-
-    <header class="p-6 pt-12 flex justify-between items-center">
-        <div>
-            <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Welcome back,</p>
-            <h2 class="text-xl font-black italic">ALEX <span class="text-blue-500">JOHNSON</span></h2>
-        </div>
-        <div class="w-10 h-10 rounded-full border border-blue-500/30 p-0.5">
-            <img src="https://ui-avatars.com/api/?name=Alex&background=3b82f6&color=fff" class="rounded-full">
-        </div>
-    </header>
-
-    <main class="px-6 space-y-6">
-        <div class="glass-card p-6 relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Trading Volume</p>
-                <h1 class="text-4xl font-black italic">$48,250.00</h1>
-                <div class="mt-4 flex items-center gap-2">
-                    <span class="bg-green-500/10 text-green-400 text-[10px] font-black px-2 py-1 rounded-lg">+12.5% Today</span>
+                <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-microchip text-blue-500"></i>
                 </div>
-            </div>
-            <i class="fas fa-chart-line absolute right-[-20px] bottom-[-20px] text-8xl text-white/5 rotate-12"></i>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div class="glass-card p-5">
-                <i class="fas fa-microchip text-blue-500 mb-3 text-xl"></i>
                 <p class="text-[9px] text-gray-500 font-bold uppercase">Active Nodes</p>
                 <p class="text-lg font-black">12 Unit</p>
             </div>
             <div class="glass-card p-5">
-                <i class="fas fa-bolt text-yellow-500 mb-3 text-xl"></i>
+                <div class="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-3">
+                    <i class="fas fa-bolt text-yellow-500"></i>
+                </div>
                 <p class="text-[9px] text-gray-500 font-bold uppercase">Hash Power</p>
                 <p class="text-lg font-black">450 TH/s</p>
             </div>
         </div>
 
         <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Live Operation</h3>
-        <div class="glass-card p-4 flex items-center justify-between">
+        <div class="glass-card p-4 flex items-center justify-between border-l-4 border-l-green-500">
             <div class="flex items-center gap-4">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
                 <span class="text-xs font-bold uppercase">System Status: Stable</span>
             </div>
             <span class="text-[10px] text-blue-400 font-black">LATENCY: 12ms</span>
