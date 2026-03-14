@@ -8,63 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg-dark: #020617; 
-            --primary: #3b82f6; 
-            --accent: #8b5cf6;
-            --nav-bg: rgba(7, 10, 22, 0.98); 
-        }
-
-        body { 
-            background-color: var(--bg-dark); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #ffffff; 
-            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617;
-            min-height: 100vh;
-        }
-
-        .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(25px); 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        /* --- البار السفلي الموحد --- */
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.05); 
-            height: 85px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 1000; padding-bottom: 15px; 
-        }
-
-        .invest-fab { 
-            width: 68px; height: 68px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -28px; 
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
-            border: 6px solid #020617; 
-        }
-
+        :root { --bg-dark: #020617; --primary: #3b82f6; --accent: #8b5cf6; --nav-bg: rgba(7, 10, 22, 0.98); }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617; min-height: 100vh; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); border: 6px solid #020617; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
-
-        .profile-ring {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            padding: 3px;
-            border-radius: 9999px;
-        }
-
-        .slide-panel {
-            position: fixed; bottom: -100%; left: 0; right: 0; height: 80vh;
-            background: #0a0f1c; z-index: 2000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem;
-        }
+        .profile-ring { background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 3px; border-radius: 9999px; }
+        .slide-panel { position: fixed; bottom: -100%; left: 0; right: 0; height: 80vh; background: #0a0f1c; z-index: 2000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem; }
         .slide-panel.active { bottom: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 1500; }
     </style>
@@ -81,7 +34,6 @@
                 </div>
             </div>
             <h2 id="userName" class="text-xl font-extrabold tracking-tight text-white mb-1 uppercase">---</h2>
-            
             <div class="flex flex-col items-center gap-1.5 mt-3">
                 <div class="flex items-center gap-2">
                     <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest">UID:</span>
@@ -94,27 +46,42 @@
             </div>
         </div>
 
-        <div class="px-6 mb-8">
+        <div class="px-6 mb-4">
             <div class="glass-panel p-6 rounded-[2.5rem] border-white/10 relative overflow-hidden">
                 <div class="flex justify-between items-start mb-6">
                     <div>
-                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Available Assets</p>
+                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Personal Assets</p>
                         <h1 id="userBalance" class="text-3xl font-black text-white">$0.00</h1>
                     </div>
-                    <div id="userTierBadge" class="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase">
-                        Loading...
+                    <div id="userTierBadge" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter">
+                        Checking...
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <div class="flex justify-between text-[9px] font-black uppercase">
-                        <span class="text-slate-500">Mining Status</span>
-                        <span id="statusText" class="text-emerald-500">Live</span>
+                        <span class="text-slate-500">Status Protocol</span>
+                        <span id="statusText" class="">Offline</span>
                     </div>
                     <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <div id="progressBar" class="h-full bg-blue-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="px-6 mb-8">
+            <div class="glass-panel p-5 rounded-[2rem] border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Monthly Team Profit</p>
+                        <p id="monthlyTeamEarn" class="text-lg font-black text-white">+$0.00</p>
+                    </div>
+                </div>
+                <i class="fas fa-arrow-trend-up text-emerald-500 animate-pulse"></i>
             </div>
         </div>
 
@@ -132,7 +99,7 @@
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </button>
 
-                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 text-decoration-none">
+                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 no-underline">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl"><i class="fas fa-users"></i></div>
                         <div class="text-left">
@@ -154,9 +121,7 @@
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
-        </div>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -171,7 +136,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -200,43 +165,51 @@
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
 
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
+                // استخدام onSnapshot لمراقبة التغييرات فوراً (رصيد، حالة، أرباح فريق)
+                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const balance = parseFloat(data.balance || 0);
 
-                    // عرض UID المختصر
-                    document.getElementById('userIdDisplay').innerText = data.referralId || "00000";
+                        // 1. عرض البيانات الأساسية
+                        document.getElementById('userIdDisplay').innerText = data.myReferralCode || "VX-USER";
+                        document.getElementById('userName').innerText = data.fullName || "Member";
+                        document.getElementById('userPhoneDisplay').innerText = data.phoneNumber || "No Phone";
+                        document.getElementById('userBalance').innerText = `$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        
+                        // 2. إجمالي ربح الفريق (الذي أضفته الآن)
+                        const teamProfit = parseFloat(data.totalTeamEarned || 0);
+                        document.getElementById('monthlyTeamEarn').innerText = `+$${teamProfit.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
-                    // عرض اسم المستخدم
-                    document.getElementById('userName').innerText = data.fullName || "Member";
-                    
-                    // عرض الرصيد
-                    document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    
-                    // --- التعديل هنا: قراءة رقم الهاتف ---
-                    // جربنا قراءة phoneNumber (الاسم المستخدم في كود التسجيل) أو phone كاحتياط
-                    document.getElementById('userPhoneDisplay').innerText = data.phoneNumber || data.phone || "Not Linked";
-                    
-                    const tierBadge = document.getElementById('userTierBadge');
-                    if (data.tier && data.tier.trim() !== "") {
-                        tierBadge.innerText = data.tier;
-                        document.getElementById('progressBar').style.width = "100%";
-                    } else {
-                        tierBadge.innerText = "Not Active";
-                        tierBadge.classList.replace('text-blue-400', 'text-slate-500');
-                        tierBadge.classList.replace('bg-blue-500/10', 'bg-white/5');
-                        document.getElementById('statusText').innerText = "Inactive";
-                        document.getElementById('statusText').classList.replace('text-emerald-500', 'text-slate-500');
+                        // 3. نظام ACTIVE / NOT ACTIVE بناءً على شرط الـ $100
+                        const tierBadge = document.getElementById('userTierBadge');
+                        const statusText = document.getElementById('statusText');
+                        const progressBar = document.getElementById('progressBar');
+
+                        if (balance >= 100) {
+                            tierBadge.innerText = "ACTIVE";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                            statusText.innerText = "Quantum Live";
+                            statusText.className = "text-emerald-500 animate-pulse";
+                            progressBar.style.width = "100%";
+                            progressBar.style.background = "#10b981"; // لون أخضر
+                        } else {
+                            tierBadge.innerText = "NOT ACTIVE";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter bg-red-500/10 border-red-500/20 text-red-500";
+                            statusText.innerText = "Below Min Capital";
+                            statusText.className = "text-slate-500";
+                            progressBar.style.width = "35%"; // شكل توضيحي أنه لم يكتمل
+                            progressBar.style.background = "#64748b"; // لون رمادي
+                        }
+
+                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                     }
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
-                }
+                });
             } else { window.location.replace("login.html"); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate current session?")) { 
-                signOut(auth).then(() => window.location.replace("login.html")); 
-            }
+            if (confirm("Terminate current session?")) { signOut(auth).then(() => window.location.replace("login.html")); }
         });
 
         document.getElementById('resetEmailBtn').addEventListener('click', () => {
