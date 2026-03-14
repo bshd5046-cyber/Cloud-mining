@@ -60,17 +60,7 @@
             box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-glow:active { transform: scale(0.96); }
 
-        .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
-        .pulse-dot::after {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background: inherit; border-radius: inherit;
-            animation: pulse-ring 1.5s infinite;
-        }
-        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-
-        /* ستايل الخطط الموحد */
         .plan-card {
             border-radius: 1.5rem;
             padding: 1.25rem;
@@ -84,7 +74,6 @@
             opacity: 0.4;
         }
 
-        /* ستايل الخطة النشطة (الضاوية) */
         .plan-active {
             filter: grayscale(0);
             opacity: 1;
@@ -104,6 +93,14 @@
             padding: 2px 30px;
             transform: rotate(45deg);
         }
+
+        .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
+        .pulse-dot::after {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: inherit; border-radius: inherit;
+            animation: pulse-ring 1.5s infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
     </style>
 </head>
 <body class="pb-32">
@@ -112,7 +109,7 @@
         <div class="flex justify-between items-end mb-8">
             <div>
                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Trading Capital</p>
-                <h2 class="text-4xl font-black italic tracking-tighter text-white leading-none">$<span id="displayBalance">150.00</span></h2>
+                <h2 class="text-4xl font-black italic tracking-tighter text-white leading-none">$<span id="displayBalance">0.00</span></h2>
             </div>
             <div class="text-right">
                 <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-4 py-2 rounded-full border border-blue-500/20 tracking-widest uppercase shadow-lg">Node Active</span>
@@ -122,11 +119,11 @@
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="glass-panel p-5 rounded-[2rem]">
                 <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Personal</p>
-                <p class="text-xl font-black text-emerald-400">+$2.85</p>
+                <p id="dailyPersonal" class="text-xl font-black text-emerald-400">+$0.00</p>
             </div>
             <div class="glass-panel p-5 rounded-[2rem]">
                 <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Team</p>
-                <p class="text-xl font-black text-blue-400">+$0.00</p>
+                <p id="dailyTeam" class="text-xl font-black text-blue-400">+$0.00</p>
             </div>
         </div>
 
@@ -147,99 +144,39 @@
         </div>
     </section>
 
-    <section class="px-6 space-y-3 pb-10">
+    <section class="px-6 space-y-3 pb-10" id="plansContainer">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Available Protocols</h3>
 
-        <div class="plan-card plan-active">
+        <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-cube text-blue-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Silver Protocol</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$50.00 - $499.00</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Silver Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$50 - $499</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">1.9%</p>
-                    <p class="text-[8px] text-blue-400 font-black tracking-tighter">DAILY ROI</p>
-                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black tracking-tighter">DAILY</p></div>
             </div>
         </div>
 
-        <div class="plan-card">
+        <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-gem text-amber-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Gold Catalyst</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$500.00 - $1,999.00</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Gold Catalyst</h4><p class="text-[10px] text-slate-500 font-bold">$500 - $1,999</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">2.2%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY</p></div>
             </div>
         </div>
 
-        <div class="plan-card">
+        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-microchip text-indigo-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Platinum Nexus</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$2,000.00 - $4,999.00</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Platinum Nexus</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">2.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY</p></div>
             </div>
         </div>
-
-        <div class="plan-card">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-atom text-cyan-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Diamond Core</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$5,000.00 - $9,999.00</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.0%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="plan-card">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-crown text-purple-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Vertex Infinite</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$10,000.00+</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -249,7 +186,67 @@
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
     <script>
+        // --- إعدادات Firebase الخاصة بك ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // دالة تحديث الألوان للخطط بناءً على الرصيد
+        function updatePlanStatus(balance) {
+            const plans = document.querySelectorAll('.plan-card');
+            plans.forEach(plan => {
+                const min = parseFloat(plan.dataset.min);
+                const max = plan.dataset.max === "+" ? Infinity : parseFloat(plan.dataset.max);
+                
+                if (balance >= min && balance <= max) {
+                    plan.classList.add('plan-active');
+                } else {
+                    plan.classList.remove('plan-active');
+                }
+            });
+        }
+
+        // قراءة البيانات حية من Firebase
+        function listenToUserData() {
+            // ملاحظة: افترضنا أن اليوزر مسجل دخول، ونأخذ بياناته من مسار users/UID
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    const userRef = db.ref('users/' + user.uid);
+                    userRef.on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            const balance = parseFloat(data.balance || 0);
+                            document.getElementById('displayBalance').innerText = balance.toFixed(2);
+                            document.getElementById('dailyPersonal').innerText = "+$" + (data.dailyEarn || 0).toFixed(2);
+                            document.getElementById('dailyTeam').innerText = "+$" + (data.teamEarn || 0).toFixed(2);
+                            
+                            // تحديث حالة الخطط (تضوي أو تطفي)
+                            updatePlanStatus(balance);
+                        }
+                    });
+                } else {
+                    window.location.href = "login.html"; // إذا مو مسجل يرجع للوجن
+                }
+            });
+        }
+
+        // تشغيل الوظيفة عند تحميل الصفحة
+        window.onload = listenToUserData;
+
+        // دالة الضغط (التزامن)
         let taps = 0;
         function handleExecution() {
             taps++;
@@ -268,8 +265,8 @@
                 count.classList.replace('text-amber-500', 'text-emerald-500');
                 btn.disabled = true;
                 btn.style.opacity = "0.6";
-                btn.style.filter = "grayscale(0.5)";
-                alert("Protocol yield successfully synchronized to your main account.");
+                alert("Protocol yield successfully synchronized.");
+                // هنا ممكن تضيف كود يحدث الـ Firebase إنه تم التزامن لليوم
             }
         }
     </script>
