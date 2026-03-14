@@ -11,7 +11,7 @@
     
     <style>
         :root { --bg: #020617; --brand: #3b82f6; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 110px; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; min-height: 100vh; }
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
         
         .qr-container {
@@ -35,20 +35,35 @@
         }
         .copy-btn:active { transform: scale(0.95); opacity: 0.8; }
 
-        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item span { font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--brand); }
+        /* ستايل زر الرجوع */
+        .back-btn {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: white;
+            transition: 0.3s;
+        }
+        .back-btn:active { background: rgba(255, 255, 255, 0.15); transform: translateX(-3px); }
     </style>
 </head>
-<body class="hero-gradient min-h-screen">
+<body class="hero-gradient">
 
-    <header class="p-6 pt-12 text-center">
-        <h1 class="text-2xl font-black italic tracking-tighter mb-2 text-white">NETWORK EXPANSION</h1>
-        <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.3em]">Invite & Scale Your Yield</p>
+    <header class="p-6 pt-10 flex items-center justify-between">
+        <a href="profile.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="flex-1 text-center mr-11">
+            <h1 class="text-xl font-black italic tracking-tighter text-white">NETWORK</h1>
+            <p class="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em]">Referral Protocol</p>
+        </div>
     </header>
 
-    <main class="px-6 space-y-6">
+    <main class="px-6 space-y-6 pb-12">
         
         <div class="glass-card p-8 text-center relative overflow-hidden">
             <div class="absolute top-0 right-0 p-4 opacity-10">
@@ -90,13 +105,6 @@
 
     </main>
 
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
-        <a href="strategy.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Strategy</span></a>
-        <a href="invite.html" class="nav-item active"><i class="fas fa-user-plus"></i><span>Invite</span></a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
-    </nav>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -118,12 +126,9 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    // 1. جلب بيانات المستخدم من Firestore
                     const userDoc = await getDoc(doc(db, "users", user.uid));
-                    
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        // نستخدم الكود المخزن (myReferralCode) أو ننشئ واحد من الـ UID إذا لم يوجد
                         const userCode = userData.myReferralCode || user.uid.substring(0, 5).toUpperCase();
                         
                         setupReferralUI(userCode);
@@ -138,14 +143,12 @@
         });
 
         function setupReferralUI(code) {
-            // جلب الرابط الأساسي الحالي وتوجيهه لصفحة التسجيل
             const currentPath = window.location.origin + window.location.pathname.replace('invite.html', 'signup.html');
             const refLink = `${currentPath}?ref=${code}`;
 
             document.getElementById('refCodeDisplay').innerText = code;
             document.getElementById('refLinkInput').value = refLink;
 
-            // توليد الـ QR Code
             document.getElementById("qrcode").innerHTML = ""; 
             new QRCode(document.getElementById("qrcode"), {
                 text: refLink,
@@ -157,7 +160,6 @@
             });
         }
 
-        // حساب عدد الأشخاص الذين استخدموا كود المستخدم (Active Nodes)
         async function countReferrals(code) {
             try {
                 const q = query(collection(db, "users"), where("inviteCode", "==", code));
@@ -168,15 +170,13 @@
             }
         }
 
-        // دالة النسخ
         document.getElementById('copyBtn').addEventListener('click', () => {
             const copyText = document.getElementById("refLinkInput");
             navigator.clipboard.writeText(copyText.value).then(() => {
-                const originalText = document.getElementById('copyBtn').innerText;
-                document.getElementById('copyBtn').innerText = "DONE!";
-                setTimeout(() => {
-                    document.getElementById('copyBtn').innerText = originalText;
-                }, 1500);
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerText;
+                btn.innerText = "DONE!";
+                setTimeout(() => { btn.innerText = originalText; }, 1500);
             });
         });
     </script>
