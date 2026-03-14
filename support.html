@@ -3,151 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Support Center | AMANA</title>
+    <title>Support Center | VERTEX PREMIER</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #050810;
-            --brand: #3b82f6;
-            --nav-bg: rgba(10, 15, 28, 0.95);
+        :root { 
+            --bg-dark: #050810; 
+            --primary: #3b82f6; 
+            --accent: #6366f1;
+            --nav-bg: rgba(10, 15, 28, 0.96); 
         }
+
         body { 
-            background-color: var(--bg); 
-            font-family: 'Inter', sans-serif; 
-            color: #ffffff;
-            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-dark); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #ffffff; 
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #050810 100%);
+            min-height: 100vh;
         }
-        
-        /* إخفاء المحتوى حتى التأكد من الهوية */
+
         #mainContent { display: none; }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
+        /* Glassmorphism Panels */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(20px); 
             border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .support-btn {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .support-btn:active { transform: scale(0.95); }
 
-        /* Navigation Style */
-        .bottom-nav {
-            background: var(--nav-bg);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            height: 80px;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 100;
-            padding-bottom: 10px;
+        /* المنيو السفلي الموحد - مطابق 1000% لصفحة البروفايل */
+        .bottom-nav { 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(20px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            height: 85px; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 1000; 
+            padding-bottom: 15px; 
         }
-        .invest-fab {
-            width: 65px; height: 65px;
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; top: -25px;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-            border: 5px solid var(--bg);
+
+        .invest-fab { 
+            width: 68px; 
+            height: 68px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            top: -28px; 
+            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
+            border: 6px solid var(--bg-dark); 
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--brand); }
+
+        .nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #64748b; 
+            text-decoration: none; 
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+
+        .support-card { transition: all 0.3s ease; }
+        .support-card:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.07); }
+        
+        details summary::-webkit-details-marker { display: none; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="mainContent">
-        <header class="p-8 pt-14 text-center">
-            <div class="w-20 h-20 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
-                <i class="fas fa-headset text-3xl text-blue-500"></i>
+        <header class="p-8 pt-16 text-center">
+            <div class="w-24 h-24 bg-blue-600/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-2xl shadow-blue-500/10">
+                <i class="fas fa-headset text-4xl text-blue-500"></i>
             </div>
-            <h1 class="text-2xl font-black italic tracking-tighter uppercase">Support <span class="text-blue-500">Center</span></h1>
-            <p class="text-xs text-gray-500 font-bold mt-2 uppercase tracking-widest">We are here to help 24/7</p>
+            <h1 class="text-3xl font-black italic tracking-tighter uppercase mb-1">Support <span class="text-blue-500">Center</span></h1>
+            <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em]">Protocol Assistance 24/7</p>
         </header>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Fast Channels</h3>
+            <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] ml-4">Emergency Channels</h3>
             
-            <a href="https://t.me/YourUsername" class="support-btn glass-card p-5 flex items-center gap-4 group">
-                <div class="w-12 h-12 bg-[#229ED9]/10 rounded-2xl flex items-center justify-center text-[#229ED9]">
-                    <i class="fab fa-telegram-plane text-2xl"></i>
+            <a href="https://t.me/YourUsername" class="support-card glass-panel rounded-[2.5rem] p-6 flex items-center justify-between">
+                <div class="flex items-center gap-5">
+                    <div class="w-12 h-12 bg-[#229ED9]/10 rounded-2xl flex items-center justify-center text-[#229ED9]">
+                        <i class="fab fa-telegram-plane text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-white">Cloud Support</h4>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Average response: 5m</p>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h4 class="font-black text-sm">Telegram Support</h4>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">Average response: 5 mins</p>
-                </div>
-                <i class="fas fa-external-link-alt text-xs text-gray-700"></i>
+                <i class="fas fa-chevron-right text-xs text-slate-700"></i>
             </a>
 
-            <a href="https://wa.me/YourNumber" class="support-btn glass-card p-5 flex items-center gap-4 group">
-                <div class="w-12 h-12 bg-[#25D366]/10 rounded-2xl flex items-center justify-center text-[#25D366]">
-                    <i class="fab fa-whatsapp text-2xl"></i>
+            <a href="https://wa.me/YourNumber" class="support-card glass-panel rounded-[2.5rem] p-6 flex items-center justify-between">
+                <div class="flex items-center gap-5">
+                    <div class="w-12 h-12 bg-[#25D366]/10 rounded-2xl flex items-center justify-center text-[#25D366]">
+                        <i class="fab fa-whatsapp text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-white">Priority Access</h4>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Direct technical node</p>
+                    </div>
                 </div>
-                <div class="flex-1">
-                    <h4 class="font-black text-sm">WhatsApp Business</h4>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">Direct technical help</p>
-                </div>
-                <i class="fas fa-external-link-alt text-xs text-gray-700"></i>
+                <i class="fas fa-chevron-right text-xs text-slate-700"></i>
             </a>
 
-            <div class="glass-card p-5 flex items-center gap-4">
-                <div class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500">
-                    <i class="fas fa-envelope text-xl"></i>
+            <div class="glass-panel rounded-[2.5rem] p-6 flex items-center gap-5 border border-white/5">
+                <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500">
+                    <i class="fas fa-envelope-open-text text-xl"></i>
                 </div>
-                <div class="flex-1">
-                    <h4 class="font-black text-sm">Email Inquiry</h4>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">support@amana-nodes.io</p>
+                <div>
+                    <h4 class="font-extrabold text-white">Email Protocol</h4>
+                    <p class="text-xs text-slate-400 font-medium lowercase">support@vertex-premier.io</p>
                 </div>
             </div>
 
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2 mt-8">Common Questions</h3>
-            <div class="glass-card divide-y divide-white/5 overflow-hidden">
-                <details class="p-4 group">
-                    <summary class="list-none font-bold text-sm flex justify-between items-center cursor-pointer">
-                        How to deposit?
-                        <i class="fas fa-chevron-down text-[10px] transition-transform group-open:rotate-180"></i>
+            <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] ml-4 mt-8">Core Knowledge</h3>
+            
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden border border-white/5">
+                <details class="group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer list-none active:bg-white/5 transition-all">
+                        <span class="font-bold text-sm text-slate-200">How to authorize deposit?</span>
+                        <i class="fas fa-chevron-down text-[10px] text-slate-600 transition-transform group-open:rotate-180"></i>
                     </summary>
-                    <p class="text-xs text-gray-500 mt-3 leading-relaxed">Go to your Wallet, click Deposit, and copy your unique USDT (TRC20) address.</p>
+                    <div class="px-6 pb-6 text-xs text-slate-500 leading-relaxed font-medium">
+                        Access your Terminal (Wallet), select 'Deposit', and transfer USDT via the TRC20 network to your personal node address.
+                    </div>
                 </details>
-                <details class="p-4 group">
-                    <summary class="list-none font-bold text-sm flex justify-between items-center cursor-pointer">
-                        Withdrawals?
-                        <i class="fas fa-chevron-down text-[10px] transition-transform group-open:rotate-180"></i>
+                
+                <div class="h-[1px] bg-white/5 mx-6"></div>
+
+                <details class="group">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer list-none active:bg-white/5 transition-all">
+                        <span class="font-bold text-sm text-slate-200">Withdrawal timeframe?</span>
+                        <i class="fas fa-chevron-down text-[10px] text-slate-600 transition-transform group-open:rotate-180"></i>
                     </summary>
-                    <p class="text-xs text-gray-500 mt-3 leading-relaxed">Withdrawals are processed instantly and usually arrive within 5-30 minutes.</p>
+                    <div class="px-6 pb-6 text-xs text-slate-500 leading-relaxed font-medium">
+                        All protocol withdrawals are processed automatically. Expected arrival: 5 to 30 minutes depending on network load.
+                    </div>
                 </details>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="wallet.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Wallet</span>
-        </a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-        </div>
-        <a href="support.html" class="nav-item active">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item active"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
     <script type="module">
@@ -166,13 +186,10 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // نظام التحقق من الجلسة
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // المستخدم مسجل، أظهر المحتوى
                 document.getElementById('mainContent').style.display = 'block';
             } else {
-                // غير مسجل، حوله لصفحة الدخول
                 window.location.replace('login.html');
             }
         });
