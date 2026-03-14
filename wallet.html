@@ -9,209 +9,194 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        body {
-            background-color: #050810;
-            font-family: 'Inter', sans-serif;
-            color: #ffffff;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        body { background-color: #050810; font-family: 'Inter', sans-serif; color: #ffffff; -webkit-tap-highlight-color: transparent; }
+        
+        /* تصميم الكارت المتطور */
         .crypto-card {
             background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        .crypto-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            transform: rotate(30deg);
+        .crypto-card::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg); animation: shine 6s infinite linear;
         }
 
-        .glass-panel {
-            background: rgba(17, 24, 39, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
 
-        .btn-action {
-            transition: all 0.2s ease;
-        }
+        .glass-panel { background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .glass-panel:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
 
-        .btn-action:active {
-            transform: scale(0.95);
-        }
-
-        .bottom-nav {
-            background: rgba(10, 15, 28, 0.95);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            height: 75px;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .invest-fab {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute;
-            top: -32px; left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-            border: 6px solid #050810;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #64748b;
-            text-decoration: none;
-            font-size: 10px;
-        }
-
-        .nav-item.active {
-            color: #3b82f6;
-        }
+        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid #050810; }
+        
+        .skeleton { background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #111827 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 
 <body class="pb-28">
 
     <div class="px-6 pt-10 flex justify-between items-center">
-        <h1 class="text-2xl font-bold italic uppercase tracking-tighter">My <span class="text-blue-500">Wallet</span></h1>
-        <i class="fas fa-bell text-gray-500"></i>
+        <div>
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Wallet</span></h1>
+            <p id="lastUpdate" class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">Live Market Data</p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+            <i class="fas fa-wallet text-blue-500"></i>
+        </div>
     </div>
 
     <div class="px-6 mt-6">
-        <div class="crypto-card rounded-[32px] p-8 shadow-2xl">
-            <div class="flex justify-between items-start mb-10">
+        <div class="crypto-card rounded-[35px] p-8">
+            <div class="flex justify-between items-start mb-12">
                 <div>
-                    <p class="text-blue-100 text-[10px] uppercase tracking-widest opacity-80 font-bold">Total Balance</p>
-                    <h2 class="text-3xl font-black mt-1">$12,450.85</h2>
+                    <p class="text-blue-100 text-[10px] uppercase tracking-widest opacity-70 font-black">Main Balance</p>
+                    <h2 id="userBalance" class="text-4xl font-black mt-2 tracking-tight">$ --.--</h2>
                 </div>
-                <i class="fas fa-shield-halved text-2xl text-white/50"></i>
+                <div class="bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                    <span class="text-[9px] font-black italic tracking-widest text-green-400">TRC20</span>
+                </div>
             </div>
 
             <div class="flex justify-between items-end">
                 <div>
-                    <p class="text-blue-100 text-[10px] uppercase opacity-60 font-bold">Account Holder</p>
-                    <p class="text-sm font-black tracking-wide italic">ALEX JOHNSON</p>
+                    <p class="text-blue-100 text-[10px] uppercase opacity-50 font-bold">Holder</p>
+                    <p id="userName" class="text-sm font-black tracking-wide italic">--- ---</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-blue-100 text-[10px] uppercase opacity-60 font-bold">Network</p>
-                    <p class="text-sm font-bold text-green-300 uppercase">TRC20 Active</p>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Tether_Logo.svg" class="w-8 h-8 ml-auto opacity-80" alt="USDT">
                 </div>
             </div>
         </div>
     </div>
 
     <div class="px-6 mt-8 flex gap-4">
-        <button class="btn-action flex-1 bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-900/20">
-            <i class="fas fa-arrow-down"></i>
-            <span class="font-bold uppercase text-xs">Deposit</span>
+        <button onclick="location.href='deposit.html'" class="flex-1 bg-blue-600 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-900/40 active:scale-95 transition">
+            <i class="fas fa-plus-circle"></i>
+            <span class="font-black uppercase text-xs">Deposit</span>
         </button>
-        <button class="btn-action flex-1 bg-white/10 hover:bg-white/20 py-4 rounded-2xl flex items-center justify-center gap-3 backdrop-blur-md">
-            <i class="fas fa-arrow-up"></i>
-            <span class="font-bold uppercase text-xs">Withdraw</span>
+        <button onclick="location.href='withdraw.html'" class="flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition">
+            <i class="fas fa-arrow-up-right-from-square"></i>
+            <span class="font-black uppercase text-xs">Withdraw</span>
         </button>
     </div>
 
     <div class="px-6 mt-10">
-        <div class="flex justify-between items-center mb-5">
-            <h3 class="font-black text-[10px] uppercase tracking-widest text-gray-500">Live Assets</h3>
-            <span class="text-blue-500 text-[10px] font-bold uppercase">Market Cap</span>
+        <div class="flex justify-between items-center mb-5 px-1">
+            <h3 class="font-black text-[10px] uppercase tracking-widest text-gray-500">Market Performance</h3>
+            <div class="flex items-center gap-1">
+                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                <span class="text-[9px] font-black text-gray-400 uppercase">Live</span>
+            </div>
         </div>
 
-        <div class="space-y-3">
-            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                        <i class="fab fa-bitcoin text-orange-500 text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm">Bitcoin</p>
-                        <p class="text-[10px] text-gray-500 uppercase font-black">BTC / USDT</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="font-black text-sm">$64,230.10</p>
-                    <p class="text-[10px] text-green-400 font-bold">+1.2%</p>
-                </div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                        <i class="fab fa-ethereum text-blue-500 text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm">Ethereum</p>
-                        <p class="text-[10px] text-gray-500 uppercase font-black">ETH / USDT</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="font-black text-sm">$3,450.12</p>
-                    <p class="text-[10px] text-green-400 font-bold">+0.8%</p>
-                </div>
-            </div>
-
-            <div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-dollar-sign text-green-500 text-xl"></i>
-                    </div>
-                    <div>
-                        <p class="font-bold text-sm">Tether</p>
-                        <p class="text-[10px] text-gray-500 uppercase font-black">USDT (TRC20)</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="font-black text-sm">$1.00</p>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">Stable</p>
-                </div>
-            </div>
+        <div id="assetsList" class="space-y-3">
+            <div class="skeleton h-20 w-full rounded-2xl opacity-20"></div>
+            <div class="skeleton h-20 w-full rounded-2xl opacity-15"></div>
+            <div class="skeleton h-20 w-full rounded-2xl opacity-10"></div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-house mb-1"></i>
-            <span>Home</span>
-        </a>
-        <a href="wallet.html" class="nav-item active">
-            <i class="fas fa-wallet mb-1"></i>
-            <span>Wallet</span>
-        </a>
+        <a href="index.html" class="nav-item"><i class="fas fa-house mb-1 text-lg"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet mb-1 text-lg"></i><span>Wallet</span></a>
         <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-            <span class="absolute bottom-[-18px] text-[10px] font-black text-blue-500 uppercase">Invest</span>
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
         </div>
-        <a href="support.html" class="nav-item">
-            <i class="fas fa-headset mb-1"></i>
-            <span>Support</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-circle-user mb-1"></i>
-            <span>Profile</span>
-        </a>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset mb-1 text-lg"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user mb-1 text-lg"></i><span>Profile</span></a>
     </nav>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Config (استخدم بياناتك الحقيقية هنا)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 1. مراقبة الرصيد من Firebase (بشكل حي)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onSnapshot(doc(db, "users", user.uid), (doc) => {
+                    if (doc.exists()) {
+                        const data = doc.data();
+                        document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        document.getElementById('userName').innerText = data.fullName.toUpperCase();
+                    }
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // 2. جلب أسعار العملات الحقيقية
+        async function fetchMarketData() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                const assets = [
+                    { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', icon: 'fa-bitcoin', color: 'orange' },
+                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-ethereum', color: 'blue' },
+                    { id: 'binancecoin', name: 'BNB', symbol: 'BNB', icon: 'fa-coins', color: 'yellow' },
+                    { id: 'tether', name: 'Tether', symbol: 'USDT', icon: 'fa-dollar-sign', color: 'green' }
+                ];
+
+                let html = '';
+                assets.forEach(asset => {
+                    const price = data[asset.id].usd;
+                    const change = data[asset.id].usd_24h_change || 0;
+                    const isPositive = change >= 0;
+
+                    html += `
+                        <div class="glass-panel p-5 rounded-[2rem] flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-${asset.color}-500/20 rounded-2xl flex items-center justify-center border border-${asset.color}-500/20">
+                                    <i class="fab ${asset.icon} text-${asset.color}-500 text-2xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-black text-sm">${asset.name}</p>
+                                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">${asset.symbol} / USDT</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-black text-sm">$${price.toLocaleString()}</p>
+                                <p class="text-[10px] ${isPositive ? 'text-green-400' : 'text-red-400'} font-black italic">
+                                    ${isPositive ? '+' : ''}${change.toFixed(2)}%
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('assetsList').innerHTML = html;
+                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString()}`;
+
+            } catch (error) {
+                console.error("Market API Error:", error);
+            }
+        }
+
+        // تحديث الأسعار كل 30 ثانية
+        fetchMarketData();
+        setInterval(fetchMarketData, 30000);
+
+    </script>
 </body>
 </html>
