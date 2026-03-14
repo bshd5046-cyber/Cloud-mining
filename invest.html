@@ -19,7 +19,9 @@
             color: #ffffff;
             -webkit-tap-highlight-color: transparent;
         }
-        
+
+        #mainContent { display: none; }
+
         .node-card {
             background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid var(--border);
@@ -33,35 +35,32 @@
             background: var(--brand); box-shadow: 0 0 15px var(--brand);
         }
 
-        .bottom-nav {
-            background: var(--nav-bg);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border);
-            height: 75px;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+        /* Unified Navigation Style */
+        .bottom-nav { 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(15px); 
+            border-top: 1px solid var(--border); 
+            height: 80px; 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
             z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: 10px;
         }
-
-        .invest-fab {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: absolute;
-            top: -32px; left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
-            border: 6px solid #050810;
+        .invest-fab { 
+            width: 65px; height: 65px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -25px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); 
+            border: 5px solid var(--bg); 
         }
-
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 600; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--brand); }
 
         .status-dot {
@@ -72,12 +71,14 @@
 </head>
 <body class="pb-32">
 
-    <header class="p-6 pt-12 border-b border-white/5 bg-gradient-to-b from-blue-900/10 to-transparent">
-        <h1 class="text-2xl font-black italic uppercase tracking-tighter">AMANA <span class="text-blue-500">NODES</span></h1>
-        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Quantum Algorithmic Trading</p>
-    </header>
+    <div id="mainContent">
+        <header class="p-6 pt-12 border-b border-white/5 bg-gradient-to-b from-blue-900/10 to-transparent">
+            <h1 class="text-2xl font-black italic uppercase tracking-tighter">AMANA <span class="text-blue-500">NODES</span></h1>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Quantum Algorithmic Trading</p>
+        </header>
 
-    <div class="grid grid-cols-1 gap-4 px-6 mt-6" id="nodeGrid">
+        <div class="grid grid-cols-1 gap-4 px-6 mt-6" id="nodeGrid">
+            </div>
     </div>
 
     <nav class="bottom-nav">
@@ -85,31 +86,43 @@
             <i class="fas fa-house"></i>
             <span>Home</span>
         </a>
-        
         <a href="wallet.html" class="nav-item">
             <i class="fas fa-wallet"></i>
             <span>Wallet</span>
         </a>
-
         <div class="relative flex-1 flex justify-center">
             <a href="invest.html" class="invest-fab">
                 <i class="fas fa-bolt-lightning text-2xl text-white"></i>
             </a>
-            <span class="absolute bottom-[-18px] text-[10px] font-black text-blue-500 uppercase">Invest</span>
         </div>
-
         <a href="support.html" class="nav-item">
             <i class="fas fa-headset"></i>
             <span>Support</span>
         </a>
-
         <a href="profile.html" class="nav-item">
             <i class="fas fa-circle-user"></i>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         const nodes = [
             { name: "Falcon Trend 🦅", desc: "تقتنص الترند القوي بسرعة", roi: "15%", duration: "24h", min: 10 },
             { name: "Golden Breakout ✨", desc: "اختراقات قوية للسوق", roi: "22%", duration: "48h", min: 50 },
@@ -122,7 +135,23 @@
             { name: "Zen Precision 🎯", desc: "دخولات قليلة لكن دقيقة جداً", roi: "135%", duration: "60 Days", min: 10000 }
         ];
 
-        function init() {
+        let userBalance = 0;
+
+        // Auth Guard
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('mainContent').style.display = 'block';
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    userBalance = userDoc.data().balance || 0;
+                }
+                renderNodes();
+            } else {
+                window.location.replace("login.html");
+            }
+        });
+
+        function renderNodes() {
             const grid = document.getElementById('nodeGrid');
             grid.innerHTML = nodes.map(node => `
                 <div class="node-card">
@@ -149,18 +178,21 @@
                         </div>
                     </div>
 
-                    <button onclick="activateNode('${node.name}')" class="w-full bg-blue-600/10 hover:bg-blue-600 border border-blue-600/20 py-3 rounded-2xl text-[10px] font-black uppercase transition active:scale-95">
+                    <button onclick="handleActivation('${node.name}', ${node.min})" class="w-full bg-blue-600/10 hover:bg-blue-600 border border-blue-600/20 py-3 rounded-2xl text-[10px] font-black uppercase transition active:scale-95">
                         Start Node
                     </button>
                 </div>
             `).join('');
         }
 
-        function activateNode(name) {
-            alert("Connecting to Secure Infrastructure...\n\nNode: " + name + "\nStatus: Verifying Balance");
-        }
-
-        init();
+        window.handleActivation = (name, min) => {
+            if (userBalance < min) {
+                alert(`Insufficient Balance!\n\nThis node requires min. $${min}.\nYour balance: $${userBalance.toFixed(2)}`);
+            } else {
+                alert(`Node Initialized: ${name}\n\nConnecting to quantum servers...`);
+                // هنا يمكن إضافة وظيفة خصم الرصيد وبدء التعدين لاحقاً
+            }
+        };
     </script>
 </body>
 </html>
