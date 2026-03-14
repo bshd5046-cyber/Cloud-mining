@@ -3,205 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VERTEX | Tactical Strategy</title>
+    <title>VERTEX | Referral Protocol</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <style>
-        :root { --bg: #020617; --brand: #3b82f6; --emerald: #10b981; }
+        :root { --bg: #020617; --brand: #3b82f6; }
         body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 110px; }
-
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
-
-        .execution-gate {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 24px;
-            position: relative;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-        }
         
-        .btn-glow {
+        .qr-container {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+            display: inline-block;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            backdrop-filter: blur(12px);
+        }
+
+        .copy-btn {
             background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-glow:active { transform: scale(0.95); }
-
-        .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
-        .pulse-dot::after {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background: inherit; border-radius: inherit;
-            animation: pulse-ring 1.5s infinite;
-        }
-        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-
-        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
-        .tier-card { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; transition: 0.3s; }
-        .tier-active { border-color: var(--brand); box-shadow: 0 0 25px rgba(59, 130, 246, 0.1); }
+        .copy-btn:active { transform: scale(0.92); }
 
         .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
         .nav-item span { font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--brand); }
-        .invest-fab { width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -20px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); border: 4px solid #020617; }
     </style>
 </head>
-<body class="hero-gradient">
+<body class="hero-gradient min-h-screen">
 
-    <section class="p-6 pt-12">
-        <div class="flex justify-between items-end mb-8">
-            <div>
-                <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Trading Capital</p>
-                <h2 class="text-4xl font-black italic tracking-tighter">$<span id="displayBalance">0.00</span></h2>
-            </div>
-            <div class="text-right">
-                <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-blue-500/20 tracking-widest uppercase">Node Verified</span>
-            </div>
-        </div>
+    <header class="p-6 pt-12 text-center">
+        <h1 class="text-2xl font-black italic tracking-tighter mb-2">EXPANSION HUB</h1>
+        <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.3em]">Build Your Tactical Network</p>
+    </header>
 
-        <div class="grid grid-cols-2 gap-3 mb-3">
-            <div class="stat-box p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Daily Personal</p>
-                <p class="text-lg font-black text-emerald-400">+$0.00</p>
-            </div>
-            <div class="stat-box p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Daily Team</p>
-                <p class="text-lg font-black text-blue-400">+$0.00</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 mb-8">
-            <div class="stat-box p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Total Personal Yield</p>
-                <p class="text-lg font-black text-white">$0.00</p>
-            </div>
-            <div class="stat-box p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Total Team Yield</p>
-                <p class="text-lg font-black text-white">$0.00</p>
-            </div>
-        </div>
-
-        <div class="execution-gate p-4 text-center">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <div class="flex items-center gap-2">
-                    <div class="pulse-dot"></div>
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantum Engine</span>
-                </div>
-                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase">Status: Ready 0/2</span>
+    <main class="px-6 space-y-6">
+        
+        <div class="glass-card p-8 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 opacity-[0.03] rotate-12">
+                <i class="fas fa-users text-[12rem]"></i>
             </div>
             
-            <button id="execBtn" onclick="handleExecution()" class="btn-glow w-full py-4 rounded-2xl flex items-center justify-center gap-3">
-                <i class="fas fa-microchip text-white text-sm"></i>
-                <span id="execText" class="text-xs font-black uppercase tracking-widest text-white">Execute Yield Sequence</span>
-            </button>
+            <div class="qr-container mb-6">
+                <div id="qrcode"></div> 
+            </div>
             
-            <p class="text-[8px] text-gray-600 mt-3 italic font-medium">* System synchronization required twice daily for full ROI</p>
-        </div>
-    </section>
-
-    <section class="px-6 space-y-4 pb-10">
-        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2 px-1">Institutional Levels</h3>
-
-        <div class="tier-card tier-active p-5">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h4 class="text-sm font-black italic tracking-tight text-white">SILVER DISCOVERY</h4>
-                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1 tracking-tighter">Current Protocol</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">1.9%</p>
-                    <p class="text-[8px] text-gray-500 font-bold">DAILY ROI</p>
-                </div>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-400 font-bold border-t border-white/5 pt-4">
-                <span><i class="fas fa-wallet mr-1 text-blue-500"></i> $50 - $500</span>
-                <span><i class="fas fa-users mr-1 text-blue-500"></i> 0 Refs</span>
+            <div class="space-y-1">
+                <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Network Member ID</p>
+                <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white">------</h3>
             </div>
         </div>
 
-        <div class="tier-card p-5 opacity-90">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="text-sm font-black italic text-gray-300">GOLDEN CATALYST</h4>
-                    <p class="text-[10px] text-amber-500 font-black mt-1">2.2% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
-                </div>
-                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
-                    $500 - $2,000<br>5 REFS
-                </div>
+        <div class="glass-card p-5">
+            <p class="text-[10px] text-gray-500 font-black uppercase mb-3 px-1">Your Protocol Link</p>
+            <div class="flex items-center gap-2 bg-black/40 p-2 pl-4 rounded-2xl border border-white/5">
+                <input id="refLinkInput" type="text" readonly 
+                       class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" 
+                       value="Generating link...">
+                <button onclick="copyLink()" class="copy-btn px-6 py-3 rounded-xl text-[10px] font-black uppercase text-white">
+                    Copy
+                </button>
             </div>
         </div>
 
-        <div class="tier-card p-5 opacity-75">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="text-sm font-black italic text-gray-400">PLATINUM NEXUS</h4>
-                    <p class="text-[10px] text-slate-400 font-black mt-1">2.4% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
-                </div>
-                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
-                    $2,000 - $6,000<br>10 REFS
-                </div>
+        <div class="grid grid-cols-2 gap-3 pb-8">
+            <div class="glass-card p-5 border-l-2 border-l-blue-500">
+                <p class="text-[9px] text-gray-500 font-black uppercase">Active Nodes</p>
+                <p class="text-2xl font-black text-white">0</p>
+            </div>
+            <div class="glass-card p-5 border-l-2 border-l-emerald-500">
+                <p class="text-[9px] text-gray-500 font-black uppercase">Team Yield</p>
+                <p class="text-2xl font-black text-emerald-400">+$0.00</p>
             </div>
         </div>
 
-        <div class="tier-card p-5 opacity-60">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="text-sm font-black italic text-sky-400">DIAMOND APEX</h4>
-                    <p class="text-[10px] text-sky-500 font-black mt-1">2.8% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
-                </div>
-                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
-                    $6,000 - $10,000<br>20 REFS
-                </div>
-            </div>
-        </div>
-
-        <div class="tier-card p-5 border-purple-500/20 opacity-40">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="text-sm font-black italic text-purple-400">QUANTUM ZENITH</h4>
-                    <p class="text-[10px] text-purple-500 font-black mt-1">3.5% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
-                </div>
-                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
-                    $10,000 - MAX<br>30 REFS
-                </div>
-            </div>
-        </div>
-    </section>
+    </main>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
-        </div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        <a href="strategy.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Strategy</span></a>
+        <a href="invite.html" class="nav-item active"><i class="fas fa-user-plus"></i><span>Invite</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
     <script>
-        let taps = 0;
-        function handleExecution() {
-            taps++;
-            const btn = document.getElementById('execBtn');
-            const text = document.getElementById('execText');
-            const count = document.getElementById('tapCount');
-            
-            if(taps === 1) {
-                text.innerText = "Processing Sequence...";
-                count.innerText = "Status: Syncing 1/2";
-                count.classList.replace('text-blue-500', 'text-amber-500');
-                btn.style.background = "linear-gradient(135deg, #065f46 0%, #10b981 100%)";
-            } else if(taps === 2) {
-                text.innerText = "Yield Secured";
-                count.innerText = "Status: Complete 2/2";
-                count.classList.replace('text-amber-500', 'text-emerald-500');
-                btn.disabled = true;
-                btn.style.opacity = "0.5";
-                btn.style.filter = "grayscale(1)";
-                alert("Protocol sequence complete. Daily earnings added to your balance.");
+        // 1. وظيفة الحصول على الكود الثابت (المحروق) للمستخدم
+        function getPersistentRefCode() {
+            let code = localStorage.getItem('vertex_ref_code');
+            if (!code) {
+                // توليد كود رقمي عشوائي فريد
+                code = Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('vertex_ref_code', code);
             }
+            return code;
+        }
+
+        // 2. إعداد البيانات
+        const userCode = getPersistentRefCode();
+        // الرابط يقرأ دومين الموقع الحالي ويضيف صفحة التسجيل مع كود الدعوة
+        const baseUrl = window.location.origin + window.location.pathname.replace('invite.html', 'register.html');
+        const refLink = baseUrl + "?ref=" + userCode;
+
+        // 3. عرض البيانات في الواجهة
+        document.getElementById('refCodeDisplay').innerText = userCode;
+        document.getElementById('refLinkInput').value = refLink;
+
+        // 4. توليد الـ QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: refLink,
+            width: 160,
+            height: 160,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // 5. وظيفة النسخ مع تنبيه جمالي
+        function copyLink() {
+            const copyText = document.getElementById("refLinkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            
+            // يمكنك استبدال Alert بـ Toast مخصص لاحقاً
+            alert("Referral protocol link copied to clipboard!");
         }
     </script>
 </body>
