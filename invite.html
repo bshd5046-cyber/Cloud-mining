@@ -13,7 +13,7 @@
         :root { --bg: #020617; --brand: #3b82f6; }
         body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; min-height: 100vh; }
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
-        .qr-container { background: white; padding: 15px; border-radius: 20px; display: inline-block; }
+        .qr-container { background: white; padding: 15px; border-radius: 20px; display: inline-block; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
         .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; backdrop-filter: blur(10px); }
         .copy-btn { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .back-btn { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; }
@@ -26,36 +26,37 @@
         <a href="profile.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
         <div class="flex-1 text-center mr-11">
             <h1 class="text-xl font-black italic tracking-tighter text-white">NETWORK</h1>
-            <p class="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em]">Referral System</p>
+            <p class="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em]">Quantum Referral Engine</p>
         </div>
     </header>
 
     <main class="px-6 space-y-6 pb-20">
-        <div class="glass-card p-8 text-center relative">
+        <div class="glass-card p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-3xl rounded-full"></div>
             <div class="qr-container mb-6">
                 <div id="qrcode"></div> 
             </div>
             <div class="space-y-2">
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Referral ID</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Private Node ID</p>
                 <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white">------</h3>
             </div>
         </div>
 
         <div class="glass-card p-5">
-            <p class="text-[10px] text-gray-500 font-black uppercase mb-3 px-1">Referral Link</p>
-            <div class="flex items-center gap-3 bg-black/40 p-2 pl-4 rounded-2xl border border-white/5">
-                <input id="refLinkInput" type="text" readonly class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" value="Loading...">
-                <button id="copyBtn" class="copy-btn px-6 py-3 rounded-xl text-[10px] font-black uppercase text-white shadow-lg">Copy</button>
+            <p class="text-[10px] text-gray-500 font-black uppercase mb-3 px-1">Network Access Link</p>
+            <div class="flex items-center gap-2 bg-black/40 p-2 pl-4 rounded-2xl border border-white/5">
+                <input id="refLinkInput" type="text" readonly class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" value="Generating link...">
+                <button id="copyBtn" class="copy-btn px-6 py-3 rounded-xl text-[10px] font-black uppercase text-white shadow-lg active:scale-90">Copy</button>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
             <div class="glass-card p-5">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Total Friends</p>
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Direct Nodes (L1)</p>
                 <p id="totalFriends" class="text-xl font-black text-white">0</p>
             </div>
             <div class="glass-card p-5">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Active (+$100)</p>
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Active Status</p>
                 <p id="qualifiedFriends" class="text-xl font-black text-emerald-400">0</p>
             </div>
         </div>
@@ -64,34 +65,38 @@
             <div class="flex gap-3">
                 <i class="fas fa-circle-info text-blue-400 mt-1"></i>
                 <p class="text-[11px] text-blue-100 leading-relaxed font-medium">
-                    <strong class="text-white uppercase">Network Status:</strong> 
-                    Friends are marked <span class="text-emerald-400 font-bold">ACTIVE</span> only if their balance is <span class="text-white font-bold">$100.00+</span>.
+                    <strong class="text-white uppercase">Activation Protocol:</strong> 
+                    Nodes activate upon <span class="text-white font-bold">$100.00</span> capital deposit. 
+                    Rewards are calculated from <span class="text-emerald-400 font-bold">Daily ROI</span>.
                 </p>
             </div>
         </div>
 
         <div class="glass-card p-6">
-            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-4 italic">Commission Tiers</h4>
+            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-4 italic">Reward Architecture</h4>
             <div class="space-y-3">
-                <div class="flex justify-between text-[11px] font-bold border-b border-white/5 pb-2">
+                <div class="flex justify-between items-center text-[11px] font-bold border-b border-white/5 pb-2">
                     <span class="text-gray-400">Level 1 (Direct)</span>
-                    <span class="text-blue-400">20% ROI Share</span>
+                    <span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded">20% ROI</span>
                 </div>
-                <div class="flex justify-between text-[11px] font-bold border-b border-white/5 pb-2">
-                    <span class="text-gray-400">Level 2</span>
-                    <span class="text-purple-400">9% ROI Share</span>
+                <div class="flex justify-between items-center text-[11px] font-bold border-b border-white/5 pb-2">
+                    <span class="text-gray-400">Level 2 (Indirect)</span>
+                    <span class="bg-purple-500/20 text-purple-400 px-2 py-1 rounded">9% ROI</span>
                 </div>
-                <div class="flex justify-between text-[11px] font-bold">
-                    <span class="text-gray-400">Level 3</span>
-                    <span class="text-emerald-400">5% ROI Share</span>
+                <div class="flex justify-between items-center text-[11px] font-bold">
+                    <span class="text-gray-400">Level 3 (Network)</span>
+                    <span class="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">5% ROI</span>
                 </div>
             </div>
         </div>
 
         <div class="glass-card p-6">
-            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-4">Your Team List</h4>
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">Direct Assets</h4>
+                <span class="text-[9px] text-gray-500 font-bold uppercase" id="teamCountTop">0 Members</span>
+            </div>
             <div id="friendsList" class="space-y-2">
-                <p class="text-center text-[10px] text-gray-500 py-4 italic">Scanning network...</p>
+                <p class="text-center text-[10px] text-gray-600 py-6 italic">Synchronizing with blockchain...</p>
             </div>
         </div>
     </main>
@@ -116,53 +121,62 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // استخدام onSnapshot لمراقبة بيانات المستخدم وكوده بشكل حي
+                // مراقبة بيانات المستخدم الحالي
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const userData = docSnap.data();
-                        // تأكد أن الحقل في الفايربيس اسمه myReferralCode
+                        // نستخدم الكود المخزن أو نولد واحد مؤقت إذا لم يوجد
                         const userCode = userData.myReferralCode || "VX-" + user.uid.substring(0, 5).toUpperCase();
                         setupReferralUI(userCode);
                         listenToTeam(userCode);
                     }
                 });
-            } else { window.location.href = "login.html"; }
+            } else { 
+                window.location.href = "login.html"; 
+            }
         });
 
         function setupReferralUI(code) {
-            const currentPath = window.location.origin + "/signup.html"; // تأكد من اسم صفحة التسجيل عندك
-            const refLink = `${currentPath}?ref=${code}`;
+            // رابط التسجيل - تأكد أن اسم الصفحة signup.html
+            const refLink = `${window.location.origin}/signup.html?ref=${code}`;
             document.getElementById('refCodeDisplay').innerText = code;
             document.getElementById('refLinkInput').value = refLink;
             
             const qrElem = document.getElementById("qrcode");
             qrElem.innerHTML = ""; 
             new QRCode(qrElem, {
-                text: refLink, width: 140, height: 140,
-                colorDark : "#020617", colorLight : "#ffffff"
+                text: refLink,
+                width: 140,
+                height: 140,
+                colorDark : "#020617",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
         }
 
-        // دالة مراقبة الفريق بشكل حي
         async function listenToTeam(code) {
             const friendsList = document.getElementById('friendsList');
-            // نبحث عن المستخدمين الذين يملكون inviteCode يساوي كود المستخدم الحالي
+            // استعلام عن المباشرين فقط (الجيل الأول)
             const q = query(collection(db, "users"), where("inviteCode", "==", code));
             
-            onSnapshot(q, (querySnapshot) => {
+            onSnapshot(q, (snapshot) => {
                 friendsList.innerHTML = "";
                 let total = 0;
                 let activeCount = 0;
 
-                if (querySnapshot.empty) {
-                    friendsList.innerHTML = '<p class="text-center text-[10px] text-gray-500 py-4 italic text-slate-600">No team members yet.</p>';
+                if (snapshot.empty) {
+                    friendsList.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-users-slash text-gray-700 text-2xl mb-2"></i>
+                            <p class="text-[10px] text-gray-600 italic">Your network is currently empty.</p>
+                        </div>`;
                 }
 
-                querySnapshot.forEach((doc) => {
+                snapshot.forEach((doc) => {
                     total++;
                     const data = doc.data();
                     const balance = parseFloat(data.balance || 0);
-                    const isActive = balance >= 100; // الشرط الأساسي
+                    const isActive = balance >= 100;
                     
                     if(isActive) activeCount++;
 
@@ -170,19 +184,22 @@
                     div.className = "friend-item";
                     div.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                <i class="fas fa-user text-[10px] text-blue-400"></i>
+                            <div class="w-9 h-9 rounded-xl ${isActive ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/10'} border flex items-center justify-center">
+                                <i class="fas fa-microchip text-[12px] ${isActive ? 'text-emerald-400' : 'text-slate-500'}"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-bold text-white">${data.email ? data.email.split('@')[0] : 'Anonymous'}</p>
-                                <p class="text-[8px] font-black uppercase tracking-tighter ${isActive ? 'text-emerald-500' : 'text-red-500/70'}">
-                                    ${isActive ? '<i class="fas fa-check-circle mr-1"></i>Active' : '<i class="fas fa-times-circle mr-1 text-red-500/50"></i>Inactive'}
-                                </p>
+                                <p class="text-[11px] font-extrabold text-white">${data.email ? data.email.split('@')[0] : 'Node_' + doc.id.substring(0,4)}</p>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500/50'}"></span>
+                                    <p class="text-[8px] font-black uppercase tracking-tighter ${isActive ? 'text-emerald-500' : 'text-red-500/70'}">
+                                        ${isActive ? 'Active Node' : 'Inactive'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-[10px] font-black text-slate-300">$${balance.toFixed(2)}</p>
-                            <p class="text-[7px] text-slate-500 font-bold uppercase">Balance</p>
+                            <p class="text-[11px] font-black text-white">$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                            <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Stake Amount</p>
                         </div>
                     `;
                     friendsList.appendChild(div);
@@ -190,15 +207,25 @@
 
                 document.getElementById('totalFriends').innerText = total;
                 document.getElementById('qualifiedFriends').innerText = activeCount;
+                document.getElementById('teamCountTop').innerText = `${total} Members`;
             });
         }
 
+        // تحسين وظيفة النسخ
         document.getElementById('copyBtn').addEventListener('click', () => {
             const copyText = document.getElementById("refLinkInput");
+            if (copyText.value === "Generating link...") return;
+
             navigator.clipboard.writeText(copyText.value).then(() => {
                 const btn = document.getElementById('copyBtn');
-                btn.innerText = "COPIED!";
-                setTimeout(() => { btn.innerText = "COPY"; }, 2000);
+                const originalText = btn.innerText;
+                btn.innerText = "COPIED";
+                btn.style.background = "#059669";
+                
+                setTimeout(() => { 
+                    btn.innerText = originalText;
+                    btn.style.background = ""; 
+                }, 2000);
             });
         });
     </script>
