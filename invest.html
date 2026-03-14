@@ -270,25 +270,30 @@
         const db = getFirestore(app);
 
         let currentUserId = null;
-        let userBalance = 0;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
+                // استخدام onSnapshot لجعل القراءة حية ومباشرة
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        userBalance = parseFloat(data.balance || 0);
+                        const balance = parseFloat(data.balance || 0);
                         
-                        // تحديث الأرقام في الصفحة
-                        document.getElementById('displayBalance').innerText = userBalance.toLocaleString(undefined, {minimumFractionDigits: 2});
-                        document.getElementById('dailyPersonal').innerText = "+$" + (data.dailyEarn || 0).toFixed(2);
-                        document.getElementById('dailyTeam').innerText = "+$" + (data.teamEarn || 0).toFixed(2);
+                        // تحديث الرصيد والأرباح في الصفحة
+                        document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
+                        document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(data.dailyEarn || 0).toFixed(2);
+                        document.getElementById('dailyTeam').innerText = "+$" + parseFloat(data.teamEarn || 0).toFixed(2);
                         
-                        updatePlanStatus(userBalance);
+                        // تحديث حالة الخطط (Active/Inactive) بناءً على الرصيد
+                        updatePlanStatus(balance);
                     }
+                }, (error) => {
+                    console.error("Error reading data:", error);
                 });
-            } else { window.location.replace('login.html'); }
+            } else { 
+                window.location.replace('login.html'); 
+            }
         });
 
         function updatePlanStatus(balance) {
@@ -304,11 +309,12 @@
             });
         }
 
-        // منطق النقر (Execution)
         let taps = 0;
         const execBtn = document.getElementById('execBtn');
         
         execBtn.addEventListener('click', async () => {
+            if (!currentUserId) return;
+            
             taps++;
             const text = document.getElementById('execText');
             const count = document.getElementById('tapCount');
@@ -326,7 +332,6 @@
                 execBtn.style.opacity = "0.6";
 
                 try {
-                    // تحديث Firebase لتسجيل أن المستخدم أتم العملية اليوم
                     await updateDoc(doc(db, "users", currentUserId), {
                         lastExecution: serverTimestamp(),
                         executionStatus: "completed"
