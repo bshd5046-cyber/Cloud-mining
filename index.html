@@ -2,170 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard | VertexCloud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERTEX | Secure Digital Asset Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050810; --brand: #3b82f6; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; color: white; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 28px; }
-        
-        .bottom-nav { 
-            background: rgba(10, 15, 28, 0.95); 
-            backdrop-filter: blur(15px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 80px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 100; 
-            padding-bottom: 10px;
-        }
-        
-        .invest-fab { 
-            width: 65px; 
-            height: 65px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative;
-            top: -25px;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); 
-            border: 5px solid var(--bg); 
-        }
-
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; transition: 0.3s; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--brand); }
-        
-        /* لإخفاء المحتوى حتى يتم التحقق من المستخدم */
-        #mainContent { display: none; }
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e40af 0%, #020617 80%); }
+        .glass-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 32px; transition: 0.4s; }
+        .glass-card:hover { border-color: #3b82f6; transform: translateY(-10px); }
+        .text-gradient { background: linear-gradient(to right, #60a5fa, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
     </style>
 </head>
-<body class="pb-32">
+<body>
 
-    <div id="mainContent">
-        <header class="p-6 pt-12 flex justify-between items-center">
-            <div>
-                <p class="text-[10px] text-gray-500 font-black uppercase tracking-widest">Welcome back,</p>
-                <h2 id="displayUserName" class="text-xl font-black italic uppercase">Loading...</h2>
-            </div>
-            <div class="w-10 h-10 rounded-full border border-blue-500/30 p-0.5">
-                <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff" class="rounded-full">
-            </div>
-        </header>
-
-        <main class="px-6 space-y-6">
-            <div class="glass-card p-6 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Trading Volume</p>
-                    <h1 id="displayBalance" class="text-4xl font-black italic">$0.00</h1>
-                    <div class="mt-4 flex items-center gap-2">
-                        <span class="bg-green-500/10 text-green-400 text-[10px] font-black px-2 py-1 rounded-lg border border-green-500/20">+12.5% Today</span>
-                    </div>
-                </div>
-                <i class="fas fa-chart-line absolute right-[-20px] bottom-[-20px] text-8xl text-white/5 rotate-12"></i>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-card p-5">
-                    <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-microchip text-blue-500"></i>
-                    </div>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Active Nodes</p>
-                    <p class="text-lg font-black">12 Unit</p>
-                </div>
-                <div class="glass-card p-5">
-                    <div class="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-3">
-                        <i class="fas fa-bolt text-yellow-500"></i>
-                    </div>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase">Hash Power</p>
-                    <p class="text-lg font-black">450 TH/s</p>
-                </div>
-            </div>
-
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Live Operation</h3>
-            <div class="glass-card p-4 flex items-center justify-between border-l-4 border-l-green-500">
-                <div class="flex items-center gap-4">
-                    <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-                    <span class="text-xs font-bold uppercase">System Status: Stable</span>
-                </div>
-                <span class="text-[10px] text-blue-400 font-black">LATENCY: 12ms</span>
-            </div>
-        </main>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="fas fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="wallet.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Wallet</span>
-        </a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
+    <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto sticky top-0 z-50 backdrop-blur-md">
+        <div class="text-2xl font-black italic tracking-tighter text-blue-500">VERTEX<span class="text-white">CLOUD</span></div>
+        <div class="flex gap-4">
+            <a href="login.html" class="text-xs font-bold uppercase tracking-widest px-6 py-2">Login</a>
+            <a href="register.html" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest btn-glow hover:bg-blue-700 transition">Get Started</a>
         </div>
-        <a href="support.html" class="nav-item">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
     </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <section class="hero-gradient min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
+        <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-full mb-8">
+            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Military-Grade Security Verified</span>
+        </div>
+        
+        <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tighter leading-tight">
+            Invest Smarter. <br> <span class="text-gradient">Grow Faster.</span>
+        </h1>
+        
+        <p class="max-w-2xl text-gray-400 text-sm md:text-lg leading-relaxed mb-12">
+            مرحباً بكم في <span class="text-white font-bold tracking-wider">VERTEX</span>. منصة استثمارية ذكية تتيح لك الوصول إلى صناديق استثمارية متنوعة، آمنة بالكامل، ومصممة لتحقيق أقصى درجات الربحية بضمان استدامة رأس المال.
+        </p>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
-            authDomain: "cloud-mining-6f190.firebaseapp.com",
-            projectId: "cloud-mining-6f190",
-            storageBucket: "cloud-mining-6f190.firebasestorage.app",
-            messagingSenderId: "144227180849",
-            appId: "1:144227180849:web:ccbda447d074efbbddd010"
-        };
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="register.html" class="bg-white text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition">ابدأ الآن</a>
+            <a href="#plans" class="bg-white/5 border border-white/10 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 transition">استكشف الصناديق</a>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        <div class="mt-24 max-w-5xl mx-auto float-anim px-4">
+            <div class="p-2 glass-card rounded-[2.5rem] shadow-2xl">
+                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200" class="rounded-[2rem] opacity-90 border border-white/10">
+            </div>
+        </div>
+    </section>
 
-        // كود التحقق من الجلسة والحماية
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // المستخدم مسجل دخول، أظهر المحتوى واجلب البيانات
-                document.getElementById('mainContent').style.display = 'block';
-                
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const balance = data.balance || 0;
-                        const fullName = data.fullName || "User";
-                        
-                        // تحديث الواجهة ببيانات المستخدم الحقيقية
-                        document.getElementById('displayUserName').innerHTML = `${fullName.split(' ')[0]} <span class="text-blue-500">${fullName.split(' ')[1] || ''}</span>`;
-                        document.getElementById('displayBalance').innerText = `$${parseFloat(balance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${fullName}&background=3b82f6&color=fff`;
-                    }
-                });
-            } else {
-                // المستخدم غير مسجل، حوله لصفحة تسجيل الدخول فوراً
-                window.location.replace('login.html');
-            }
-        });
-    </script>
+    <section class="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
+        <div class="space-y-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-lock-shield"></i></div>
+            <h3 class="text-xl font-black italic uppercase">أمان مطلق</h3>
+            <p class="text-gray-500 text-xs leading-loose">نستخدم تقنيات التشفير البارد (Cold Storage) لحماية أصولك من أي مخاطر خارجية.</p>
+        </div>
+        <div class="space-y-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-headset"></i></div>
+            <h3 class="text-xl font-black italic uppercase">دعم فني فوري</h3>
+            <p class="text-gray-500 text-xs leading-loose">فريق مختص متاح على مدار الساعة للإجابة على كافة استفساراتكم بكل سرعة واحترافية.</p>
+        </div>
+        <div class="space-y-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-rocket"></i></div>
+            <h3 class="text-xl font-black italic uppercase">تطور مستمر</h3>
+            <p class="text-gray-500 text-xs leading-loose">نحدث أنظمتنا دورياً لنواكب أحدث تقنيات الاستثمار في الأسواق العالمية.</p>
+        </div>
+    </section>
+
+    <section id="plans" class="py-24 px-6 bg-blue-600/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-black uppercase italic tracking-tighter">صناديق <span class="text-blue-500">الاستثمار</span></h2>
+                <p class="text-gray-500 text-sm mt-2 font-bold">كل صندوق مصمم بعناية ليناسب تطلعاتك</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-10 flex flex-col items-center">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Basic Box</span>
+                    <h4 class="text-4xl font-black italic mb-6">5% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 7 أيام</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $100</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> سحب فوري للأرباح</li>
+                    </ul>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">ابدأ الآن</a>
+                </div>
+
+                <div class="glass-card p-10 flex flex-col items-center border-blue-500 scale-105 bg-blue-500/5 relative">
+                    <div class="absolute -top-4 bg-blue-600 px-4 py-1 rounded-full text-[8px] font-black uppercase">Most Popular</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Pro Box</span>
+                    <h4 class="text-4xl font-black italic mb-6">12.5% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 15 يوم</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $500</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> حماية رأس مال كاملة</li>
+                    </ul>
+                    <a href="register.html" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] text-center btn-glow">استثمر الآن</a>
+                </div>
+
+                <div class="glass-card p-10 flex flex-col items-center">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Whale Box</span>
+                    <h4 class="text-4xl font-black italic mb-6">25% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 30 يوم</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $2,500</li>
+                        <li><i class="fas fa-check text-blue-500 mr-2"></i> مدير حساب شخصي</li>
+                    </ul>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">ابدأ الآن</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-12 px-6 text-center border-t border-white/5">
+        <p class="text-[10px] text-gray-600 font-black uppercase tracking-widest">© 2026 VertexCloud Digital Assets. <br> التطور نحو القمة لا يتوقف.</p>
+    </footer>
+
 </body>
 </html>
