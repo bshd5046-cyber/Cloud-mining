@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-dark: #050810; 
+            --bg-dark: #020617; 
             --primary: #3b82f6; 
             --accent: #6366f1;
-            --nav-bg: rgba(10, 15, 28, 0.96); 
+            --nav-bg: rgba(10, 15, 28, 0.98); 
         }
 
         body { 
@@ -20,7 +20,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 40%), #050810;
+            background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), #020617;
             min-height: 100vh;
         }
 
@@ -28,39 +28,46 @@
             background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(20px); 
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Stats Card Styling */
+        .stat-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
             border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 85px; 
+            height: 75px; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
-            z-index: 1000; padding-bottom: 15px; 
+            z-index: 1000; padding-bottom: 10px; 
         }
 
+        /* Smaller FAB */
         .invest-fab { 
-            width: 68px; height: 68px; 
+            width: 58px; height: 58px; 
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -28px; 
-            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
-            border: 6px solid var(--bg-dark); 
+            position: relative; top: -20px; 
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); 
+            border: 4px solid var(--bg-dark); 
         }
 
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); }
 
         .btn-glow {
             background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: all 0.3s ease;
         }
-        .btn-glow:active { transform: scale(0.96); }
 
         .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
         .pulse-dot::after {
@@ -86,9 +93,8 @@
         .plan-active {
             filter: grayscale(0);
             opacity: 1;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.3);
             transform: scale(1.02);
         }
 
@@ -106,42 +112,75 @@
 </head>
 <body class="pb-32">
 
-    <section class="p-6 pt-16">
-        <div class="flex justify-between items-end mb-8">
-            <div>
-                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Trading Capital</p>
-                <h2 class="text-4xl font-black italic tracking-tighter text-white leading-none">$<span id="displayBalance">0.00</span></h2>
-            </div>
-            <div class="text-right">
-                <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-4 py-2 rounded-full border border-blue-500/20 tracking-widest uppercase shadow-lg">Node Active</span>
+    <section class="p-6 pt-12">
+        <div class="text-center mb-8">
+            <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Available Trading Capital</p>
+            <h2 class="text-5xl font-black tracking-tighter text-white mb-2">
+                <span class="text-blue-500 text-3xl">$</span><span id="displayBalance">0.00</span>
+            </h2>
+            <div class="inline-flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <div class="pulse-dot bg-emerald-400"></div>
+                <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">System Operational</span>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Personal</p>
-                <p id="dailyPersonal" class="text-xl font-black text-emerald-400">+$0.00</p>
+        <div class="grid grid-cols-1 gap-4 mb-8">
+            <div class="stat-card flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                        <i class="fas fa-user-tie text-blue-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase">Personal Yield</p>
+                        <div class="flex gap-4">
+                            <div>
+                                <p class="text-[8px] text-slate-400 font-bold">Today</p>
+                                <p id="dailyPersonal" class="text-md font-black text-white">+$0.00</p>
+                            </div>
+                            <div class="border-l border-white/5 pl-4">
+                                <p class="text-[8px] text-slate-400 font-bold">Total</p>
+                                <p id="totalPersonal" class="text-md font-black text-blue-400">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Team</p>
-                <p id="dailyTeam" class="text-xl font-black text-blue-400">+$0.00</p>
+
+            <div class="stat-card flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                        <i class="fas fa-users text-purple-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase">Affiliate Rewards</p>
+                        <div class="flex gap-4">
+                            <div>
+                                <p class="text-[8px] text-slate-400 font-bold">Today</p>
+                                <p id="dailyTeam" class="text-md font-black text-white">+$0.00</p>
+                            </div>
+                            <div class="border-l border-white/5 pl-4">
+                                <p class="text-[8px] text-slate-400 font-bold">Total</p>
+                                <p id="totalTeam" class="text-md font-black text-purple-400">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
             <div class="flex justify-between items-center mb-5 px-2">
                 <div class="flex items-center gap-3">
-                    <div class="pulse-dot"></div>
+                    <i class="fas fa-microchip text-blue-500 text-xs"></i>
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantum Engine</span>
                 </div>
-                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full">Ready 0/2</span>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Ready 0/2</span>
             </div>
             
-            <button id="execBtn" class="btn-glow w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3">
-                <i class="fas fa-microchip text-white text-lg"></i>
+            <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex items-center justify-center gap-3">
                 <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Execute Sequence</span>
             </button>
-            <p class="text-[9px] text-slate-600 mt-4 italic font-bold leading-relaxed">* Synchronization required twice daily</p>
+            <p class="text-[9px] text-slate-600 mt-4 italic font-bold">* Node synchronization required twice daily</p>
         </div>
     </section>
 
@@ -165,7 +204,6 @@
                 </div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -201,42 +239,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="plan-card" id="plan-diamond" data-min="5000" data-max="9999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-atom text-cyan-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Diamond Core</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$5,000.00 - $9,999.00</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.0%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="plan-card" id="plan-infinite" data-min="10000" data-max="9999999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-crown text-purple-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Vertex Infinite</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$10,000.00+</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
     </section>
 
     <nav class="bottom-nav">
@@ -244,7 +246,7 @@
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
         <div class="relative flex-1 flex justify-center">
             <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
+                <i class="fas fa-bolt-lightning text-xl text-white"></i>
             </a>
         </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
@@ -287,7 +289,9 @@
                         
                         document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
                         document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
+                        document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                         document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
+                        document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
                         
                         updatePlanStatus(balance);
                         checkExecutionAvailability();
@@ -296,43 +300,25 @@
             } else { window.location.replace('login.html'); }
         });
 
+        // --- Keep original Logic Functions (checkExecutionAvailability, resetButtonUI, etc.) ---
         function checkExecutionAvailability() {
-            // إذا لم ينفذ أبداً، نفتح الزر
-            if (!userData.lastExecution) {
-                resetButtonUI();
-                return;
-            }
-
+            if (!userData.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
-            // توقيت لندن الحالي
             const ukTime = new Intl.DateTimeFormat('en-GB', { 
                 timeZone: 'Europe/London', 
                 year: 'numeric', month: 'numeric', day: 'numeric', 
                 hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false 
             }).format(now);
-
             const lastExecDate = userData.lastExecution.toDate();
-            // تاريخ لندن لآخر تنفيذ
             const lastExecUKDate = new Intl.DateTimeFormat('en-GB', { 
-                timeZone: 'Europe/London', 
-                year: 'numeric', month: 'numeric', day: 'numeric' 
+                timeZone: 'Europe/London', year: 'numeric', month: 'numeric', day: 'numeric' 
             }).format(lastExecDate);
-
-            // تفكيك الوقت الحالي في لندن
             const [datePart, timePart] = ukTime.split(', ');
             const currentUKHour = parseInt(timePart.split(':')[0]);
 
-            // المنطق: إذا كان تاريخ لندن اليوم مختلف عن تاريخ آخر تنفيذ، والساعة أصبحت 1 صباحاً أو أكثر -> افتح
-            if (datePart !== lastExecUKDate && currentUKHour >= 1) {
-                resetButtonUI();
-            } else if (datePart === lastExecUKDate) {
-                // إذا نفذ في نفس التاريخ (اليوم)
-                lockButtonUI();
-            } else {
-                // تاريخ مختلف (يوم جديد) ولكن لم تصل الساعة الواحدة صباحاً بعد
-                lockButtonUI();
-                execText.innerText = "Wait until 01:00 AM";
-            }
+            if (datePart !== lastExecUKDate && currentUKHour >= 1) { resetButtonUI(); } 
+            else if (datePart === lastExecUKDate) { lockButtonUI(); } 
+            else { lockButtonUI(); execText.innerText = "Wait until 01:00 AM"; }
         }
 
         function resetButtonUI() {
@@ -341,7 +327,6 @@
             execBtn.style.background = "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)";
             execText.innerText = "Execute Sequence";
             tapCount.innerText = "Ready 0/2";
-            tapCount.style.color = "#3b82f6"; // Blue
             taps = 0;
         }
 
@@ -350,7 +335,6 @@
             execBtn.style.opacity = "0.6";
             execText.innerText = "Locked Until 01:00 AM";
             tapCount.innerText = "Completed";
-            tapCount.style.color = "#10b981"; // Emerald
         }
 
         function calculateDailyROI(balance) {
@@ -364,14 +348,11 @@
 
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || taps >= 2) return;
-
             taps++;
-            
             if (taps === 1) {
                 execBtn.disabled = true;
                 let timeLeft = 10;
                 tapCount.innerText = "Syncing 1/2";
-                
                 const timer = setInterval(() => {
                     timeLeft--;
                     execText.innerText = `Synchronizing (${timeLeft}s)`;
@@ -383,17 +364,14 @@
                         execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
                     }
                 }, 1000);
-
             } else if (taps === 2) {
                 const currentBalance = parseFloat(userData.balance || 0);
                 const profit = calculateDailyROI(currentBalance);
-
                 if (currentBalance < 50) {
-                    alert("Insufficient Trading Capital. Minimum $50 required.");
+                    alert("Insufficient Capital. Min $50.");
                     resetButtonUI();
                     return;
                 }
-
                 try {
                     await updateDoc(doc(db, "users", currentUserId), {
                         balance: increment(profit),
@@ -402,12 +380,9 @@
                         lastExecution: serverTimestamp(),
                         executionStatus: "completed"
                     });
-                    
-                    alert(`Sequence successful. Daily Yield: $${profit.toFixed(2)} added.`);
+                    alert(`Success. Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
-                } catch (error) {
-                    console.error("Sync Error:", error);
-                }
+                } catch (e) { console.error(e); }
             }
         });
 
@@ -416,11 +391,8 @@
             plans.forEach(plan => {
                 const min = parseFloat(plan.getAttribute('data-min'));
                 const max = parseFloat(plan.getAttribute('data-max'));
-                if (balance >= min && balance <= max) {
-                    plan.classList.add('plan-active');
-                } else {
-                    plan.classList.remove('plan-active');
-                }
+                if (balance >= min && balance <= max) plan.classList.add('plan-active');
+                else plan.classList.remove('plan-active');
             });
         }
     </script>
