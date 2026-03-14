@@ -3,50 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Profile | AMANA</title>
+    <title>Profile | VERTEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
         body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
-        
-        /* إخفاء المحتوى حتى التأكد من الهوية */
         #mainProfile { display: none; }
-
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
         #securitySection {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
         }
         #securitySection.open { right: 0; }
-
         .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; font-size: 14px; color: white; }
         .input-dark:focus { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
-
-        /* Unified Navigation Style */
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(15px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 80px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 100;
-            padding-bottom: 10px;
-        }
-        .invest-fab { 
-            width: 65px; height: 65px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -25px;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); 
-            border: 5px solid var(--bg-dark); 
-        }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 80px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 10px; }
+        .invest-fab { width: 65px; height: 65px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -25px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 5px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
@@ -57,34 +31,34 @@
 
     <main id="mainProfile" class="h-screen overflow-y-auto">
         <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
-            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4">
-                <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover">
+            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4 overflow-hidden">
+                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/20">
             </div>
+            <h1 class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-1">Vertex Account</h1>
             <h2 id="userName" class="text-2xl font-black italic tracking-tight uppercase">Loading...</h2>
             <p id="userEmailDisplay" class="text-gray-500 text-[10px] mt-1 font-bold uppercase tracking-widest">---</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 px-6 mb-8">
             <div class="glass-card p-5 rounded-[2rem]">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Total Balance</p>
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Equity Balance</p>
                 <p id="userBalance" class="text-xl font-black text-white">$0.00</p>
             </div>
             <div class="glass-card p-5 rounded-[2rem]">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Phone Number</p>
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Verified Phone</p>
                 <p id="userPhone" class="text-xs font-bold text-blue-400">---</p>
             </div>
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Account Settings</h3>
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Security Hub</h3>
             <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
-                
                 <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition text-left">
                     <div class="flex items-center gap-4">
                         <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fas fa-shield-halved"></i></div>
                         <div>
-                            <p class="text-sm font-bold">Security Settings</p>
-                            <p class="text-[9px] text-gray-500 uppercase">Password & Email</p>
+                            <p class="text-sm font-bold">Authentication Settings</p>
+                            <p class="text-[9px] text-gray-500 uppercase">Manage Password & Email</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-xs text-gray-700"></i>
@@ -92,7 +66,7 @@
 
                 <button id="logoutBtn" class="w-full flex items-center gap-4 p-6 active:bg-red-500/10 transition group text-left">
                     <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></div>
-                    <span class="text-sm font-bold text-red-500">Secure Logout</span>
+                    <span class="text-sm font-bold text-red-500">Terminate Session</span>
                 </button>
             </div>
         </div>
@@ -103,56 +77,35 @@
             <button onclick="toggleSecurity(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                 <i class="fas fa-arrow-left text-sm"></i>
             </button>
-            <h2 class="text-xl font-black italic uppercase">Security</h2>
+            <h2 class="text-xl font-black italic uppercase">Security Center</h2>
         </div>
 
         <div class="space-y-6">
-            <div class="glass-card p-6 rounded-[2rem] space-y-4 text-center">
+            <div class="glass-card p-6 rounded-[2rem] space-y-4 text-center border-t-2 border-blue-500/20">
                 <div class="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-500">
-                    <i class="fas fa-key text-xl"></i>
+                    <i class="fas fa-envelope-open-text text-xl"></i>
                 </div>
-                <h4 class="text-white font-black text-xs uppercase italic">Change Password</h4>
-                <p class="text-[10px] text-gray-500 px-2">We will send a reset link to your email.</p>
-                <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest">Send Reset Link</button>
-            </div>
-
-            <div class="glass-card p-6 rounded-[2rem] space-y-4">
-                <h4 class="text-purple-500 font-black text-xs uppercase italic">Update Email</h4>
-                <input type="email" id="newEmail" placeholder="New Email Address" class="input-dark">
-                <button id="saveEmailBtn" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest">Update Email</button>
+                <h4 class="text-white font-black text-xs uppercase italic">Request Password Reset</h4>
+                <p class="text-[10px] text-gray-500 px-2 leading-relaxed">A secure reset link will be dispatched to your registered email address via <b>Vertex Cloud Support</b>.</p>
+                <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">Send Reset Link</button>
             </div>
         </div>
     </section>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item">
-            <i class="fas fa-house"></i>
-            <span>Home</span>
-        </a>
-        <a href="wallet.html" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>Wallet</span>
-        </a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-        </div>
-        <a href="support.html" class="nav-item">
-            <i class="fas fa-headset"></i>
-            <span>Support</span>
-        </a>
-        <a href="profile.html" class="nav-item active">
-            <i class="fas fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, updateEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Firebase Config (Your project)
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -166,13 +119,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Security Toggle
         window.toggleSecurity = (open) => {
             const sec = document.getElementById('securitySection');
             open ? sec.classList.add('open') : sec.classList.remove('open');
         };
 
-        // Auth Guard and Data Fetch
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainProfile').style.display = 'block';
@@ -181,10 +132,10 @@
                     if (docSnap.exists()) {
                         const d = docSnap.data();
                         document.getElementById('userName').innerText = d.fullName;
-                        document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toFixed(2)}`;
-                        document.getElementById('userPhone').innerText = d.phoneNumber || "N/A";
+                        document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString()}`;
+                        document.getElementById('userPhone').innerText = d.phoneNumber || "NOT LINKED";
                         document.getElementById('userEmailDisplay').innerText = user.email;
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff`;
+                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff&bold=true&size=128`;
                     }
                 } catch (e) { console.error(e); }
             } else {
@@ -192,35 +143,30 @@
             }
         });
 
-        // Logout Function
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Are you sure you want to logout?")) {
+            if (confirm("Terminate secure session?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
 
-        // Password Reset
         document.getElementById('sendResetBtn').addEventListener('click', async () => {
             const btn = document.getElementById('sendResetBtn');
             try {
-                btn.innerText = "SENDING...";
+                btn.disabled = true;
+                btn.innerText = "PROCESSING...";
+                // سيرسل الإيميل بالدومين الجديد الخاص بك تلقائياً لأننا فعلناه في Firebase Console
                 await sendPasswordResetEmail(auth, auth.currentUser.email);
-                alert("Reset link sent to your email!");
-                btn.innerText = "LINK SENT ✓";
-            } catch (e) { alert(e.message); }
-        });
-
-        // Email Update
-        document.getElementById('saveEmailBtn').addEventListener('click', async () => {
-            const emailInput = document.getElementById('newEmail').value;
-            if (!emailInput) return alert("Enter email!");
-            try {
-                await updateEmail(auth.currentUser, emailInput);
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { email: emailInput });
-                alert("Email updated!");
-                location.reload();
-            } catch (e) {
-                alert("Please logout and login again to verify your identity before changing email.");
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
+                btn.innerText = "EMAIL DISPATCHED ✓";
+                setTimeout(() => {
+                    btn.innerText = "Send Reset Link";
+                    btn.classList.replace('bg-green-600', 'bg-blue-600');
+                    btn.disabled = false;
+                }, 3000);
+            } catch (e) { 
+                alert("Error: " + e.message);
+                btn.disabled = false;
+                btn.innerText = "RETRY REQUEST";
             }
         });
     </script>
