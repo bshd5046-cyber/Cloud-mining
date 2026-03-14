@@ -30,7 +30,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Stats Card Styling */
         .stat-card {
             background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
             border-radius: 24px;
@@ -49,7 +48,6 @@
             z-index: 1000; padding-bottom: 10px; 
         }
 
-        /* Smaller FAB */
         .invest-fab { 
             width: 58px; height: 58px; 
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
@@ -77,6 +75,7 @@
         }
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
+        /* مراحل الاستثمار */
         .plan-card {
             border-radius: 1.5rem;
             padding: 1.25rem;
@@ -114,13 +113,13 @@
 
     <section class="p-6 pt-12">
         <div class="text-center mb-8">
-            <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Available Trading Capital</p>
+            <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Available Capital</p>
             <h2 class="text-5xl font-black tracking-tighter text-white mb-2">
                 <span class="text-blue-500 text-3xl">$</span><span id="displayBalance">0.00</span>
             </h2>
             <div class="inline-flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
                 <div class="pulse-dot bg-emerald-400"></div>
-                <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">System Operational</span>
+                <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Quantum Live</span>
             </div>
         </div>
 
@@ -171,21 +170,25 @@
         <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
             <div class="flex justify-between items-center mb-5 px-2">
                 <div class="flex items-center gap-3">
-                    <i class="fas fa-microchip text-blue-500 text-xs"></i>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantum Engine</span>
+                    <i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span>
                 </div>
-                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Ready 0/2</span>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Step 0/2</span>
             </div>
             
-            <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex items-center justify-center gap-3">
-                <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Execute Sequence</span>
+            <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
+                <div id="btnContent" class="flex items-center gap-3">
+                    <i id="btnIcon" class="fas fa-bolt-lightning text-white"></i>
+                    <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start</span>
+                </div>
+                <div id="loaderBar" class="absolute bottom-0 left-0 h-1 bg-white/40 transition-all duration-150" style="width: 0%"></div>
             </button>
-            <p class="text-[9px] text-slate-600 mt-4 italic font-bold">* Node synchronization required twice daily</p>
+            <p class="text-[9px] text-slate-600 mt-4 italic font-bold uppercase tracking-widest">Nodes synch required</p>
         </div>
     </section>
 
     <section class="px-6 space-y-3 pb-10">
-        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Available Protocols</h3>
+        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
 
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
@@ -194,16 +197,17 @@
                         <i class="fas fa-cube text-blue-400 text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-black uppercase italic">Silver Protocol</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$50.00 - $499.00</p>
+                        <h4 class="text-sm font-black uppercase italic">Silver</h4>
+                        <p class="text-[10px] text-slate-500 font-bold">$50 - $499</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-xl font-black text-white">1.9%</p>
-                    <p class="text-[8px] text-blue-400 font-black tracking-tighter">DAILY ROI</p>
+                    <p class="text-[8px] text-blue-400 font-black uppercase">Daily</p>
                 </div>
             </div>
         </div>
+
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -211,13 +215,13 @@
                         <i class="fas fa-gem text-amber-400 text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-black uppercase italic">Gold Catalyst</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$500.00 - $1,999.00</p>
+                        <h4 class="text-sm font-black uppercase italic">Gold</h4>
+                        <p class="text-[10px] text-slate-500 font-bold">$500 - $1,999</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-xl font-black text-white">2.2%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
+                    <p class="text-[8px] text-slate-500 font-black uppercase">Daily</p>
                 </div>
             </div>
         </div>
@@ -229,13 +233,13 @@
                         <i class="fas fa-microchip text-indigo-400 text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="text-sm font-black uppercase italic">Platinum Nexus</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$2,000.00 - $4,999.00</p>
+                        <h4 class="text-sm font-black uppercase italic">Platinum</h4>
+                        <p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <p class="text-xl font-black text-white">2.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
+                    <p class="text-[8px] text-slate-500 font-black uppercase">Daily</p>
                 </div>
             </div>
         </div>
@@ -245,9 +249,7 @@
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
         <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-xl text-white"></i>
-            </a>
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-xl text-white"></i></a>
         </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
@@ -278,6 +280,8 @@
         const execBtn = document.getElementById('execBtn');
         const execText = document.getElementById('execText');
         const tapCount = document.getElementById('tapCount');
+        const loaderBar = document.getElementById('loaderBar');
+        const btnIcon = document.getElementById('btnIcon');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -286,7 +290,6 @@
                     if (docSnap.exists()) {
                         userData = docSnap.data();
                         const balance = parseFloat(userData.balance || 0);
-                        
                         document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
                         document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                         document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
@@ -300,45 +303,39 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // --- Keep original Logic Functions (checkExecutionAvailability, resetButtonUI, etc.) ---
         function checkExecutionAvailability() {
             if (!userData.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
-            const ukTime = new Intl.DateTimeFormat('en-GB', { 
-                timeZone: 'Europe/London', 
-                year: 'numeric', month: 'numeric', day: 'numeric', 
-                hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false 
-            }).format(now);
+            const ukTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now);
             const lastExecDate = userData.lastExecution.toDate();
-            const lastExecUKDate = new Intl.DateTimeFormat('en-GB', { 
-                timeZone: 'Europe/London', year: 'numeric', month: 'numeric', day: 'numeric' 
-            }).format(lastExecDate);
-            const [datePart, timePart] = ukTime.split(', ');
-            const currentUKHour = parseInt(timePart.split(':')[0]);
+            const lastExecUK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(lastExecDate);
+            const currentUKDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(now);
 
-            if (datePart !== lastExecUKDate && currentUKHour >= 1) { resetButtonUI(); } 
-            else if (datePart === lastExecUKDate) { lockButtonUI(); } 
-            else { lockButtonUI(); execText.innerText = "Wait until 01:00 AM"; }
+            if (currentUKDay !== lastExecUK && parseInt(ukTime) >= 1) { resetButtonUI(); } 
+            else { lockButtonUI(); }
         }
 
         function resetButtonUI() {
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
             execBtn.style.background = "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)";
-            execText.innerText = "Execute Sequence";
+            execText.innerText = "Start Sequence";
             tapCount.innerText = "Ready 0/2";
+            loaderBar.style.width = "0%";
+            btnIcon.className = "fas fa-bolt-lightning text-white";
             taps = 0;
         }
 
         function lockButtonUI() {
             execBtn.disabled = true;
             execBtn.style.opacity = "0.6";
-            execText.innerText = "Locked Until 01:00 AM";
-            tapCount.innerText = "Completed";
+            execText.innerText = "Completed";
+            tapCount.innerText = "Locked";
+            loaderBar.style.width = "100%";
+            btnIcon.className = "fas fa-lock text-white";
         }
 
         function calculateDailyROI(balance) {
-            if (balance >= 10000) return balance * 0.035;
             if (balance >= 5000) return balance * 0.030;
             if (balance >= 2000) return balance * 0.025;
             if (balance >= 500) return balance * 0.022;
@@ -349,38 +346,37 @@
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || taps >= 2) return;
             taps++;
+
             if (taps === 1) {
                 execBtn.disabled = true;
-                let timeLeft = 10;
-                tapCount.innerText = "Syncing 1/2";
+                tapCount.innerText = "Syncing...";
+                let progress = 0;
                 const timer = setInterval(() => {
-                    timeLeft--;
-                    execText.innerText = `Synchronizing (${timeLeft}s)`;
-                    if (timeLeft <= 0) {
+                    progress += 5;
+                    loaderBar.style.width = `${progress}%`;
+                    execText.innerText = `Sync ${progress}%`;
+                    if (progress >= 100) {
                         clearInterval(timer);
                         execBtn.disabled = false;
-                        execText.innerText = "Finalize Sequence";
+                        execText.innerText = "Confirm";
                         tapCount.innerText = "Ready 2/2";
+                        btnIcon.className = "fas fa-check-circle text-white";
                         execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
                     }
-                }, 1000);
+                }, 100);
             } else if (taps === 2) {
                 const currentBalance = parseFloat(userData.balance || 0);
                 const profit = calculateDailyROI(currentBalance);
-                if (currentBalance < 50) {
-                    alert("Insufficient Capital. Min $50.");
-                    resetButtonUI();
-                    return;
-                }
+                if (currentBalance < 50) { alert("Min $50 required"); resetButtonUI(); return; }
+                
                 try {
                     await updateDoc(doc(db, "users", currentUserId), {
                         balance: increment(profit),
                         dailyEarn: profit,
                         totalEarned: increment(profit),
-                        lastExecution: serverTimestamp(),
-                        executionStatus: "completed"
+                        lastExecution: serverTimestamp()
                     });
-                    alert(`Success. Yield: $${profit.toFixed(2)}`);
+                    alert(`Success! Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
                 } catch (e) { console.error(e); }
             }
