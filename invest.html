@@ -242,7 +242,11 @@
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab active-glow"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab active-glow">
+                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
+            </a>
+        </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -252,7 +256,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
     <script>
-        // --- قم بتغيير هذه الإعدادات بمعلومات مشروعك في Firebase ---
+        // 1. إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSy...", 
             authDomain: "your-project.firebaseapp.com",
@@ -265,7 +269,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // دالة تحديث الخطط بناءً على الرصيد
+        // 2. تحديث حالة الخطط الاستثمارية
         function updatePlanStatus(balance) {
             const plans = document.querySelectorAll('.plan-card');
             plans.forEach(plan => {
@@ -274,13 +278,14 @@
                 
                 if (balance >= min && balance <= max) {
                     plan.classList.add('plan-active');
+                    plan.scrollIntoView({ behavior: 'smooth', block: 'center' }); // تمرير تلقائي للخطة النشطة
                 } else {
                     plan.classList.remove('plan-active');
                 }
             });
         }
 
-        // قراءة البيانات من Firebase بشكل حي (Real-time)
+        // 3. تشغيل التطبيق وجلب البيانات
         function initApp() {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -289,24 +294,24 @@
                         const data = snapshot.val();
                         if (data) {
                             const balance = parseFloat(data.balance || 0);
-                            // تحديث الواجهة
-                            document.getElementById('displayBalance').innerText = balance.toFixed(2);
+                            document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
                             document.getElementById('dailyPersonal').innerText = "+$" + (data.dailyEarn || 0).toFixed(2);
                             document.getElementById('dailyTeam').innerText = "+$" + (data.teamEarn || 0).toFixed(2);
                             
-                            // تشغيل نظام الخطط الذكي
                             updatePlanStatus(balance);
                         }
                     });
                 } else {
-                    window.location.href = "login.html"; 
+                    // تم تعطيل سطر الطرد مؤقتاً لغرض المعاينة
+                    console.warn("المستخدم غير مسجل دخول. (تم تعطيل التوجيه لصفحة Login للمعاينة)");
+                    // window.location.href = "login.html"; 
                 }
             });
         }
 
         window.onload = initApp;
 
-        // دالة الزر (Sequence Execution)
+        // 4. منطق زر تنفيذ التسلسل (Execution)
         let taps = 0;
         function handleExecution() {
             taps++;
@@ -326,6 +331,8 @@
                 btn.disabled = true;
                 btn.style.opacity = "0.6";
                 alert("Protocol yield successfully synchronized to your main account.");
+                
+                // هنا يمكنك إضافة كود لتحديث البيانات في Firebase بعد النقر مرتين
             }
         }
     </script>
