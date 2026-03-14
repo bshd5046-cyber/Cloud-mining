@@ -3,83 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AMANA | Investment Nodes</title>
+    <title>VERTEX | Strategic Tiers</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #050810;
-            --brand: #3b82f6;
-            --border: rgba(255, 255, 255, 0.08);
-            --nav-bg: rgba(10, 15, 28, 0.95);
-        }
-        body { 
-            background-color: var(--bg); 
-            font-family: 'Inter', sans-serif; 
-            color: #ffffff;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #mainContent { display: none; }
-
-        .node-card {
+        :root { --bg: #020617; --brand: #3b82f6; --gold: #fbbf24; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 100px; }
+        
+        /* Stats Cards Styling */
+        .stat-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 16px; }
+        .tier-card { 
             background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px;
             position: relative;
-            overflow: hidden;
+            transition: 0.3s;
         }
-        .node-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--brand); box-shadow: 0 0 15px var(--brand);
-        }
-
+        .tier-active { border-color: var(--brand); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .tier-locked { opacity: 0.6; filter: grayscale(0.5); }
+        
+        .status-badge { font-size: 8px; font-weight: 900; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; }
+        
         /* Unified Navigation Style */
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(15px); 
-            border-top: 1px solid var(--border); 
-            height: 80px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 100;
-            padding-bottom: 10px;
-        }
-        .invest-fab { 
-            width: 65px; height: 65px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -25px;
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); 
-            border: 5px solid var(--bg); 
-        }
+        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--brand); }
-
-        .status-dot {
-            width: 6px; height: 6px; background: #10b981; border-radius: 50%;
-            display: inline-block; margin-right: 5px; box-shadow: 0 0 8px #10b981;
-        }
+        .invest-fab { width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -20px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); border: 4px solid var(--bg); }
     </style>
 </head>
-<body class="pb-32">
+<body>
 
-    <div id="mainContent">
-        <header class="p-6 pt-12 border-b border-white/5 bg-gradient-to-b from-blue-900/10 to-transparent">
-            <h1 class="text-2xl font-black italic uppercase tracking-tighter">AMANA <span class="text-blue-500">NODES</span></h1>
-            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Quantum Algorithmic Trading</p>
-        </header>
-
-        <div class="grid grid-cols-1 gap-4 px-6 mt-6" id="nodeGrid">
+    <section class="p-6 pt-10">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest">Available Capital</p>
+                <h2 class="text-4xl font-black italic">$<span id="displayBalance">0.00</span></h2>
             </div>
-    </div>
+            <div class="text-right">
+                <span class="status-badge bg-blue-500/20 text-blue-400 border border-blue-500/30">Tier 1 Member</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="stat-card">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Personal Daily</p>
+                <p class="text-lg font-black text-emerald-400">+$0.00</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Team Daily</p>
+                <p class="text-lg font-black text-blue-400">+$0.00</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="stat-card">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Personal Total</p>
+                <p class="text-lg font-black text-white">$0.00</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Team Total</p>
+                <p class="text-lg font-black text-white">$0.00</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="px-6 py-4">
+        <h3 class="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6">Level Progression System</h3>
+        
+        <div class="space-y-4" id="tierContainer">
+            <div class="tier-card tier-active p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="text-lg font-black italic tracking-tighter">SILVER DISCOVERY</h4>
+                        <p class="text-[9px] text-blue-400 font-bold uppercase">Basic Node Active</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-black">1.9%</p>
+                        <p class="text-[8px] text-gray-500 font-bold">MAX DAILY</p>
+                    </div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-400 font-bold border-t border-white/5 pt-4">
+                    <span><i class="fas fa-wallet mr-1"></i> $50 - $500</span>
+                    <span><i class="fas fa-users mr-1"></i> 0 Referrals</span>
+                </div>
+            </div>
+
+            <div class="tier-card p-6 border-white/10">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="text-lg font-black italic tracking-tighter">GOLDEN CATALYST</h4>
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">Requirements Not Met</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-black text-gray-400">2.2%</p>
+                        <p class="text-[8px] text-gray-500 font-bold">MAX DAILY</p>
+                    </div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-400 font-bold border-t border-white/5 pt-4">
+                    <span><i class="fas fa-wallet mr-1 text-gold"></i> $500 - $2,000</span>
+                    <span class="text-red-400"><i class="fas fa-users mr-1"></i> 5 Referrals</span>
+                </div>
+            </div>
+
+            <div class="tier-card p-6 border-white/10 opacity-70">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="text-lg font-black italic tracking-tighter text-blue-400">PLATINUM NEXUS</h4>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xl font-black">2.4%</p>
+                        <p class="text-[8px] text-gray-500 font-bold">MAX DAILY</p>
+                    </div>
+                </div>
+                <div class="flex justify-between text-[10px] text-gray-400 font-bold border-t border-white/5 pt-4">
+                    <span><i class="fas fa-wallet mr-1"></i> $2,000 - $6,000</span>
+                    <span><i class="fas fa-users mr-1"></i> 10 Referrals</span>
+                </div>
+            </div>
+
+            <div class="text-center py-4">
+                <button class="text-[10px] font-black text-blue-500 uppercase tracking-widest">View Higher Institutional Tiers (Level 4 & 5)</button>
+            </div>
+        </div>
+    </section>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item">
@@ -123,76 +171,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const nodes = [
-            { name: "Falcon Trend 🦅", desc: "تقتنص الترند القوي بسرعة", roi: "15%", duration: "24h", min: 10 },
-            { name: "Golden Breakout ✨", desc: "اختراقات قوية للسوق", roi: "22%", duration: "48h", min: 50 },
-            { name: "Shadow Scalper 🌑", desc: "سكالبينغ سريع ودقيق", roi: "28%", duration: "72h", min: 100 },
-            { name: "Titan Momentum ⚡", desc: "استراتيجية زخم قوي", roi: "35%", duration: "5 Days", min: 250 },
-            { name: "Quantum Reversal 🔄", desc: "اصطياد انعكاسات السوق", roi: "42%", duration: "7 Days", min: 500 },
-            { name: "Iron Range 🛡️", desc: "تداول داخل الرينج بثبات", roi: "55%", duration: "10 Days", min: 1000 },
-            { name: "Phoenix Recovery 🔥", desc: "تعويض الخسائر والعودة بقوة", roi: "70%", duration: "15 Days", min: 2500 },
-            { name: "Alpha Wave 🌊", desc: "استراتيجية موجات السوق", roi: "90%", duration: "30 Days", min: 5000 },
-            { name: "Zen Precision 🎯", desc: "دخولات قليلة لكن دقيقة جداً", roi: "135%", duration: "60 Days", min: 10000 }
-        ];
-
-        let userBalance = 0;
-
-        // Auth Guard
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById('mainContent').style.display = 'block';
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    userBalance = userDoc.data().balance || 0;
+                    const data = userDoc.data();
+                    document.getElementById('displayBalance').innerText = (data.balance || 0).toFixed(2);
+                    // هنا نضع المنطق البرمجي لتغيير شكل الـ Tiers حسب بياناته الحقيقية
                 }
-                renderNodes();
             } else {
                 window.location.replace("login.html");
             }
         });
-
-        function renderNodes() {
-            const grid = document.getElementById('nodeGrid');
-            grid.innerHTML = nodes.map(node => `
-                <div class="node-card">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-sm font-black italic text-white uppercase tracking-tight">${node.name}</h3>
-                            <p class="text-[10px] text-gray-500 font-medium">${node.desc}</p>
-                        </div>
-                        <span class="text-[9px] text-emerald-400 font-bold uppercase"><span class="status-dot"></span>Online</span>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">ROI</p>
-                            <p class="text-[11px] font-black text-blue-400">${node.roi}</p>
-                        </div>
-                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">Time</p>
-                            <p class="text-[11px] font-black">${node.duration}</p>
-                        </div>
-                        <div class="bg-white/5 p-2 rounded-xl border border-white/5 text-center">
-                            <p class="text-[8px] text-gray-500 uppercase font-bold">Min</p>
-                            <p class="text-[11px] font-black">$${node.min}</p>
-                        </div>
-                    </div>
-
-                    <button onclick="handleActivation('${node.name}', ${node.min})" class="w-full bg-blue-600/10 hover:bg-blue-600 border border-blue-600/20 py-3 rounded-2xl text-[10px] font-black uppercase transition active:scale-95">
-                        Start Node
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        window.handleActivation = (name, min) => {
-            if (userBalance < min) {
-                alert(`Insufficient Balance!\n\nThis node requires min. $${min}.\nYour balance: $${userBalance.toFixed(2)}`);
-            } else {
-                alert(`Node Initialized: ${name}\n\nConnecting to quantum servers...`);
-                // هنا يمكن إضافة وظيفة خصم الرصيد وبدء التعدين لاحقاً
-            }
-        };
     </script>
 </body>
 </html>
