@@ -82,6 +82,7 @@
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
+        
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -91,6 +92,7 @@
                 <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
         </div>
+
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -100,6 +102,7 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
+
         <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -107,6 +110,26 @@
                     <div><h4 class="text-sm font-black uppercase italic">Platinum</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-diamond" data-min="5000" data-max="14999">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-ring text-cyan-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Diamond</h4><p class="text-[10px] text-slate-500 font-bold">$5,000 - $14,999</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-elite" data-min="15000" data-max="1000000">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-yellow-500 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Elite</h4><p class="text-[10px] text-slate-500 font-bold">$15,000+</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
     </section>
@@ -160,49 +183,46 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // --- محرك توزيع أرباح الفريق المطور ---
         async function distributeTeamRewards(parentCode, childProfit) {
             if (!parentCode) return;
             try {
-                // المستوى الأول: 20%
+                // Gen 1 (20%)
                 const q1 = query(collection(db, "users"), where("myReferralCode", "==", parentCode));
                 const snap1 = await getDocs(q1);
-                
                 if (!snap1.empty) {
-                    const d1Ref = snap1.docs[0].ref;
-                    const d1Data = snap1.docs[0].data();
+                    const d1 = snap1.docs[0];
                     const reward1 = childProfit * 0.20;
-
-                    await updateDoc(d1Ref, {
+                    await updateDoc(doc(db, "users", d1.id), {
                         balance: increment(reward1),
-                        teamEarn: reward1, // ربح اليوم من الفريق
+                        teamEarn: reward1, // Set direct to avoid stacking errors
                         totalTeamEarned: increment(reward1)
                     });
 
-                    // المستوى الثاني: 9%
+                    // Gen 2 (9%)
+                    const d1Data = d1.data();
                     if (d1Data.inviteCode) {
                         const q2 = query(collection(db, "users"), where("myReferralCode", "==", d1Data.inviteCode));
                         const snap2 = await getDocs(q2);
                         if (!snap2.empty) {
-                            const d2Ref = snap2.docs[0].ref;
-                            const d2Data = snap2.docs[0].data();
+                            const d2 = snap2.docs[0];
                             const reward2 = childProfit * 0.09;
-                            await updateDoc(d2Ref, {
+                            await updateDoc(doc(db, "users", d2.id), {
                                 balance: increment(reward2),
-                                teamEarn: reward2,
+                                teamEarn: increment(reward2),
                                 totalTeamEarned: increment(reward2)
                             });
 
-                            // المستوى الثالث: 5%
+                            // Gen 3 (5%)
+                            const d2Data = d2.data();
                             if (d2Data.inviteCode) {
                                 const q3 = query(collection(db, "users"), where("myReferralCode", "==", d2Data.inviteCode));
                                 const snap3 = await getDocs(q3);
                                 if (!snap3.empty) {
-                                    const d3Ref = snap3.docs[0].ref;
+                                    const d3 = snap3.docs[0];
                                     const reward3 = childProfit * 0.05;
-                                    await updateDoc(d3Ref, {
+                                    await updateDoc(doc(db, "users", d3.id), {
                                         balance: increment(reward3),
-                                        teamEarn: reward3,
+                                        teamEarn: increment(reward3),
                                         totalTeamEarned: increment(reward3)
                                     });
                                 }
@@ -210,7 +230,7 @@
                         }
                     }
                 }
-            } catch (e) { console.error("Reward Error:", e); }
+            } catch (e) { console.error("Team Reward Sync Failed", e); }
         }
 
         function checkExecutionAvailability() {
@@ -220,7 +240,6 @@
             const lastExecUK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(lastExecDate);
             const currentUKDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(now);
             const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now));
-            
             if (currentUKDay !== lastExecUK && ukHour >= 1) resetButtonUI();
             else lockButtonUI();
         }
@@ -241,20 +260,17 @@
             if (!currentUserId || taps >= 2) return;
             taps++;
             if (taps === 1) {
-                execBtn.disabled = true; tapCount.innerText = "Processing...";
+                execBtn.disabled = true; tapCount.innerText = "Syncing...";
                 let progress = 0;
                 const timer = setInterval(() => {
-                    progress += 5; loaderBar.style.width = `${progress}%`; execText.innerText = `Node Sync ${progress}%`;
-                    if (progress >= 100) { clearInterval(timer); execBtn.disabled = false; execText.innerText = "Confirm Mining"; tapCount.innerText = "Step 2/2"; btnIcon.className = "fas fa-check-circle text-white"; }
+                    progress += 5; loaderBar.style.width = `${progress}%`; execText.innerText = `Sync ${progress}%`;
+                    if (progress >= 100) { clearInterval(timer); execBtn.disabled = false; execText.innerText = "Confirm"; tapCount.innerText = "Ready 2/2"; btnIcon.className = "fas fa-check-circle text-white"; }
                 }, 100);
             } else if (taps === 2) {
                 const bal = parseFloat(userData.balance || 0);
                 const profit = calculateDailyROI(bal);
-                
-                if (bal < 50) { alert("Insufficient Capital (Min $50)"); resetButtonUI(); return; }
-
+                if (bal < 50) { alert("Min $50 required"); resetButtonUI(); return; }
                 try {
-                    // 1. تحديث المستخدم نفسه
                     await updateDoc(doc(db, "users", currentUserId), { 
                         balance: increment(profit), 
                         dailyEarn: profit, 
@@ -262,14 +278,13 @@
                         lastExecution: serverTimestamp() 
                     });
 
-                    // 2. توزيع العمولات فوراً
                     if (userData.inviteCode) {
                         await distributeTeamRewards(userData.inviteCode, profit);
                     }
 
-                    alert(`Mining Successful! Yield: $${profit.toFixed(2)}`);
+                    alert(`Success! Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
-                } catch (e) { alert("Error in processing: " + e.message); }
+                } catch (e) { console.error(e); }
             }
         });
 
