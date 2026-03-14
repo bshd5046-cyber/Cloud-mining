@@ -19,7 +19,6 @@
             background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
-            overflow-x: hidden;
             background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #050810;
             min-height: 100vh;
         }
@@ -34,7 +33,6 @@
             background: linear-gradient(135deg, var(--primary), var(--accent));
             padding: 3px;
             border-radius: 9999px;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
         }
 
         .bottom-nav { 
@@ -61,19 +59,7 @@
             border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem;
         }
         .slide-panel.active { bottom: 0; }
-
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 1500; }
-        
-        .badge-step {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 2px 10px;
-            border-radius: 8px;
-            font-size: 9px;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-        }
     </style>
 </head>
 <body class="pb-24">
@@ -89,46 +75,51 @@
             </div>
             <h2 id="userName" class="text-xl font-extrabold tracking-tight text-white mb-1 uppercase">---</h2>
             
-            <div class="flex items-center justify-center gap-3 mt-2">
-                <span class="text-[10px] text-slate-500 font-bold bg-white/5 px-2 py-1 rounded">ID: <span id="userIdDisplay" class="text-slate-300">---</span></span>
-                <span class="text-[10px] text-slate-500 font-bold bg-white/5 px-2 py-1 rounded"><i class="fas fa-phone text-[8px] mr-1"></i><span id="userPhoneDisplay" class="text-slate-300">---</span></span>
+            <div class="flex flex-col items-center gap-1.5 mt-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest">UID:</span>
+                    <span id="userIdDisplay" class="text-[10px] text-blue-400 font-mono font-bold">---</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Phone:</span>
+                    <span id="userPhoneDisplay" class="text-[10px] text-slate-300 font-bold">---</span>
+                </div>
             </div>
         </div>
 
-        <div class="px-6 mb-6">
-            <div class="glass-panel p-5 rounded-[2rem] border-white/10 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/10 blur-3xl"></div>
-                
-                <div class="flex justify-between items-start mb-4">
+        <div class="px-6 mb-8">
+            <div class="glass-panel p-6 rounded-[2.5rem] border-white/10 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Balance</p>
-                        <h1 id="userBalance" class="text-2xl font-black text-white tracking-tight">$0.00</h1>
+                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Available Assets</p>
+                        <h1 id="userBalance" class="text-3xl font-black text-white">$0.00</h1>
                     </div>
-                    <div class="badge-step" id="userTier">Tier 1</div>
+                    <div id="userTierBadge" class="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase">
+                        Loading...
+                    </div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-[9px] font-bold uppercase tracking-tighter">
-                        <span class="text-slate-400">Current Phase</span>
-                        <span class="text-blue-400">Active</span>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-[9px] font-black uppercase">
+                        <span class="text-slate-500">Mining Status</span>
+                        <span id="statusText" class="text-emerald-500">Live</span>
                     </div>
                     <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-500 rounded-full" style="width: 65%"></div>
+                        <div id="progressBar" class="h-full bg-blue-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Account Management</h3>
-            
+            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Terminal Access</h3>
             <div class="glass-panel rounded-[2rem] overflow-hidden">
                 <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg"><i class="fas fa-shield-halved"></i></div>
                         <div class="text-left">
-                            <p class="text-[13px] font-bold text-white">Security Vault</p>
-                            <p class="text-[10px] text-slate-500">Protection & Recovery</p>
+                            <p class="text-[14px] font-bold text-white">Security Vault</p>
+                            <p class="text-[10px] text-slate-500">Credentials Management</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
@@ -136,69 +127,22 @@
 
                 <a href="invite.html" class="flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg"><i class="fas fa-share-nodes"></i></div>
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg"><i class="fas fa-users"></i></div>
                         <div class="text-left">
-                            <p class="text-[13px] font-bold text-white">Referral Hub</p>
-                            <p class="text-[10px] text-slate-500">Commission Center</p>
+                            <p class="text-[14px] font-bold text-white">Affiliate Program</p>
+                            <p class="text-[10px] text-slate-500">Referral Commissions</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </a>
 
-                <button onclick="togglePanel('downloadPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-lg"><i class="fas fa-download"></i></div>
-                        <div class="text-left">
-                            <p class="text-[13px] font-bold text-white">Download App</p>
-                            <p class="text-[10px] text-slate-500">Mobile Terminal</p>
-                        </div>
-                    </div>
-                    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
-                </button>
-
                 <button id="logoutBtn" class="w-full flex items-center gap-4 p-5 active:bg-red-500/5">
                     <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 text-lg"><i class="fas fa-power-off"></i></div>
-                    <p class="text-[13px] font-bold text-red-500">Logout Session</p>
+                    <p class="text-[14px] font-bold text-red-500">Terminate Session</p>
                 </button>
             </div>
         </div>
     </main>
-
-    <div id="downloadPanel" class="slide-panel">
-        <div class="flex items-center justify-between mb-8">
-            <button onclick="togglePanel('downloadPanel', false)" class="text-slate-400"><i class="fas fa-xmark text-xl"></i></button>
-            <h4 class="text-sm font-black tracking-widest uppercase">App Installer</h4>
-            <div class="w-6"></div>
-        </div>
-        <div class="space-y-4">
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <div class="flex items-center gap-4 mb-4">
-                    <i class="fab fa-android text-2xl text-emerald-500"></i>
-                    <h5 class="font-bold text-sm">Android APK</h5>
-                </div>
-                <button class="w-full bg-white text-black py-3 rounded-xl font-black text-[10px] uppercase">Download Now</button>
-            </div>
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <div class="flex items-center gap-4 mb-4">
-                    <i class="fab fa-apple text-2xl text-white"></i>
-                    <h5 class="font-bold text-sm">iOS Guide (PWA)</h5>
-                </div>
-                <p class="text-[10px] text-slate-400">Open in Safari > Share > Add to Home Screen</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="securityPanel" class="slide-panel">
-        <div id="securityContent">
-            <button onclick="togglePanel('securityPanel', false)" class="mb-6 text-slate-400"><i class="fas fa-arrow-left text-xl"></i></button>
-            <h3 class="text-xl font-bold mb-6">Security Vault</h3>
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 mb-6">
-                <p class="text-[9px] text-slate-500 uppercase font-bold">Email Address</p>
-                <p id="recoveryEmail" class="text-blue-400 font-bold text-sm">---</p>
-            </div>
-            <button id="sendBtn" onclick="sendResetEmail()" class="w-full bg-blue-500 py-4 rounded-xl font-black uppercase text-[11px] tracking-widest">Send Reset Link</button>
-        </div>
-    </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house mb-1 text-lg"></i><span>Home</span></a>
@@ -207,6 +151,13 @@
         <a href="support.html" class="nav-item"><i class="fas fa-headset mb-1 text-lg"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item active"><i class="fas fa-user-gear mb-1 text-lg"></i><span>Profile</span></a>
     </nav>
+
+    <div id="securityPanel" class="slide-panel">
+        <button onclick="togglePanel('securityPanel', false)" class="mb-8 text-slate-400"><i class="fas fa-arrow-left text-xl"></i></button>
+        <h3 class="text-xl font-bold mb-4">Security</h3>
+        <p class="text-slate-400 text-sm mb-6">Password reset link will be sent to your email.</p>
+        <button onclick="sendResetEmail()" class="w-full bg-blue-600 py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Send Link</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -226,11 +177,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.togglePanel = (panelId, show) => {
-            const panel = document.getElementById(panelId);
-            const overlay = document.getElementById('overlay');
-            if (show) { panel.classList.add('active'); overlay.style.display = 'block'; }
-            else { panel.classList.remove('active'); overlay.style.display = 'none'; }
+        window.togglePanel = (id, show) => {
+            document.getElementById(id).classList.toggle('active', show);
+            document.getElementById('overlay').style.display = show ? 'block' : 'none';
         };
 
         window.closeAllPanels = () => {
@@ -241,22 +190,40 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
+                
+                // Set Real UID from Auth
+                document.getElementById('userIdDisplay').innerText = user.uid;
+
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
-                    const d = docSnap.data();
-                    document.getElementById('userName').innerText = d.fullName || "User";
-                    document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('userIdDisplay').innerText = user.uid.substring(0, 8).toUpperCase();
-                    document.getElementById('userPhoneDisplay').innerText = d.phone || "No Phone";
-                    document.getElementById('userTier').innerText = d.tier || "VIP 1";
-                    document.getElementById('recoveryEmail').innerText = user.email;
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=1e293b&color=3b82f6&bold=true`;
+                    const data = docSnap.data();
+                    
+                    // Display Data
+                    document.getElementById('userName').innerText = data.fullName || "Member";
+                    document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                    document.getElementById('userPhoneDisplay').innerText = data.phone || "Not Linked";
+                    
+                    // Tier Logic
+                    const tierBadge = document.getElementById('userTierBadge');
+                    if (data.tier && data.tier.trim() !== "") {
+                        tierBadge.innerText = data.tier;
+                        tierBadge.classList.replace('bg-blue-500/10', 'bg-blue-600/20');
+                        document.getElementById('progressBar').style.width = "100%";
+                    } else {
+                        tierBadge.innerText = "Not Active";
+                        tierBadge.classList.replace('text-blue-400', 'text-slate-500');
+                        tierBadge.classList.replace('bg-blue-500/10', 'bg-white/5');
+                        document.getElementById('statusText').innerText = "Inactive";
+                        document.getElementById('statusText').classList.replace('text-emerald-500', 'text-slate-500');
+                    }
+
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                 }
             } else { window.location.replace("login.html"); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate session?")) { signOut(auth).then(() => window.location.replace("login.html")); }
+            if (confirm("Terminate current session?")) { signOut(auth).then(() => window.location.replace("login.html")); }
         });
     </script>
 </body>
