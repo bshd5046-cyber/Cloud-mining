@@ -8,105 +8,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg-dark: #020617; 
-            --primary: #3b82f6; 
-            --accent: #6366f1;
-            --nav-bg: rgba(10, 15, 28, 0.98); 
-        }
-
-        body { 
-            background-color: var(--bg-dark); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #ffffff; 
-            overflow-x: hidden;
-            background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), #020617;
-            min-height: 100vh;
-        }
-
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .stat-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
-            border-radius: 24px;
-            padding: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 75px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 1000; padding-bottom: 10px; 
-        }
-
-        .invest-fab { 
-            width: 58px; height: 58px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -20px; 
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); 
-            border: 4px solid var(--bg-dark); 
-        }
-
+        :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.98); }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; overflow-x: hidden; background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), #020617; min-height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .stat-card { background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%); border-radius: 24px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 10px; }
+        .invest-fab { width: 58px; height: 58px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -20px; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); border: 4px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
-
-        .btn-glow {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
-        .pulse-dot::after {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background: inherit; border-radius: inherit;
-            animation: pulse-ring 1.5s infinite;
-        }
+        .btn-glow { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); transition: all 0.3s ease; }
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
+        .pulse-dot::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: pulse-ring 1.5s infinite; }
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-
-        /* مراحل الاستثمار */
-        .plan-card {
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.02);
-            filter: grayscale(1);
-            opacity: 0.4;
-        }
-
-        .plan-active {
-            filter: grayscale(0);
-            opacity: 1;
-            background: rgba(59, 130, 246, 0.08);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            transform: scale(1.02);
-        }
-
-        .plan-active::before {
-            content: "ACTIVE";
-            position: absolute;
-            top: 10px; right: -25px;
-            background: var(--primary);
-            color: white;
-            font-size: 8px; font-weight: 900;
-            padding: 2px 30px;
-            transform: rotate(45deg);
-        }
+        
+        .plan-card { border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); filter: grayscale(1); opacity: 0.4; }
+        .plan-active { filter: grayscale(0); opacity: 1; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); transform: scale(1.02); }
+        .plan-active::before { content: "ACTIVE"; position: absolute; top: 10px; right: -25px; background: var(--primary); color: white; font-size: 8px; font-weight: 900; padding: 2px 30px; transform: rotate(45deg); }
     </style>
 </head>
 <body class="pb-32">
@@ -126,41 +44,24 @@
         <div class="grid grid-cols-1 gap-4 mb-8">
             <div class="stat-card flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                        <i class="fas fa-user-tie text-blue-400"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"><i class="fas fa-user-tie text-blue-400"></i></div>
                     <div>
                         <p class="text-[9px] text-slate-500 font-black uppercase">Personal Yield</p>
                         <div class="flex gap-4">
-                            <div>
-                                <p class="text-[8px] text-slate-400 font-bold">Today</p>
-                                <p id="dailyPersonal" class="text-md font-black text-white">+$0.00</p>
-                            </div>
-                            <div class="border-l border-white/5 pl-4">
-                                <p class="text-[8px] text-slate-400 font-bold">Total</p>
-                                <p id="totalPersonal" class="text-md font-black text-blue-400">$0.00</p>
-                            </div>
+                            <div><p class="text-[8px] text-slate-400 font-bold">Today</p><p id="dailyPersonal" class="text-md font-black text-white">+$0.00</p></div>
+                            <div class="border-l border-white/5 pl-4"><p class="text-[8px] text-slate-400 font-bold">Total</p><p id="totalPersonal" class="text-md font-black text-blue-400">$0.00</p></div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="stat-card flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                        <i class="fas fa-users text-purple-400"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20"><i class="fas fa-users text-purple-400"></i></div>
                     <div>
                         <p class="text-[9px] text-slate-500 font-black uppercase">Affiliate Rewards</p>
                         <div class="flex gap-4">
-                            <div>
-                                <p class="text-[8px] text-slate-400 font-bold">Today</p>
-                                <p id="dailyTeam" class="text-md font-black text-white">+$0.00</p>
-                            </div>
-                            <div class="border-l border-white/5 pl-4">
-                                <p class="text-[8px] text-slate-400 font-bold">Total</p>
-                                <p id="totalTeam" class="text-md font-black text-purple-400">$0.00</p>
-                            </div>
+                            <div><p class="text-[8px] text-slate-400 font-bold">Today</p><p id="dailyTeam" class="text-md font-black text-white">+$0.00</p></div>
+                            <div class="border-l border-white/5 pl-4"><p class="text-[8px] text-slate-400 font-bold">Total</p><p id="totalTeam" class="text-md font-black text-purple-400">$0.00</p></div>
                         </div>
                     </div>
                 </div>
@@ -169,18 +70,11 @@
 
         <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
             <div class="flex justify-between items-center mb-5 px-2">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span>
-                </div>
+                <div class="flex items-center gap-3"><i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i><span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span></div>
                 <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Step 0/2</span>
             </div>
-            
             <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
-                <div id="btnContent" class="flex items-center gap-3">
-                    <i id="btnIcon" class="fas fa-bolt-lightning text-white"></i>
-                    <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start</span>
-                </div>
+                <div id="btnContent" class="flex items-center gap-3"><i id="btnIcon" class="fas fa-bolt-lightning text-white"></i><span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start</span></div>
                 <div id="loaderBar" class="absolute bottom-0 left-0 h-1 bg-white/40 transition-all duration-150" style="width: 0%"></div>
             </button>
             <p class="text-[9px] text-slate-600 mt-4 italic font-bold uppercase tracking-widest">Nodes synch required</p>
@@ -193,54 +87,50 @@
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-cube text-blue-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Silver</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$50 - $499</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Silver</h4><p class="text-[10px] text-slate-500 font-bold">$50 - $499</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">1.9%</p>
-                    <p class="text-[8px] text-blue-400 font-black uppercase">Daily</p>
-                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
         </div>
 
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-gem text-amber-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Gold</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$500 - $1,999</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Gold</h4><p class="text-[10px] text-slate-500 font-bold">$500 - $1,999</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">2.2%</p>
-                    <p class="text-[8px] text-slate-500 font-black uppercase">Daily</p>
-                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
 
         <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-microchip text-indigo-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Platinum</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Platinum</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p></div>
                 </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">2.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black uppercase">Daily</p>
+                <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-diamond" data-min="5000" data-max="14999">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-ring text-cyan-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Diamond</h4><p class="text-[10px] text-slate-500 font-bold">$5,000 - $14,999</p></div>
                 </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-elite" data-min="15000" data-max="1000000">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-yellow-500 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Elite</h4><p class="text-[10px] text-slate-500 font-bold">$15,000+</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
     </section>
@@ -248,9 +138,7 @@
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-xl text-white"></i></a>
-        </div>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-xl text-white"></i></a></div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -273,15 +161,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserId = null;
-        let userData = null;
-        let taps = 0;
-
-        const execBtn = document.getElementById('execBtn');
-        const execText = document.getElementById('execText');
-        const tapCount = document.getElementById('tapCount');
-        const loaderBar = document.getElementById('loaderBar');
-        const btnIcon = document.getElementById('btnIcon');
+        let currentUserId = null, userData = null, taps = 0;
+        const execBtn = document.getElementById('execBtn'), execText = document.getElementById('execText');
+        const tapCount = document.getElementById('tapCount'), loaderBar = document.getElementById('loaderBar'), btnIcon = document.getElementById('btnIcon');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -295,7 +177,6 @@
                         document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                         document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                         document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
-                        
                         updatePlanStatus(balance);
                         checkExecutionAvailability();
                     }
@@ -306,36 +187,20 @@
         function checkExecutionAvailability() {
             if (!userData.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
-            const ukTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now);
             const lastExecDate = userData.lastExecution.toDate();
             const lastExecUK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(lastExecDate);
             const currentUKDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(now);
+            const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now));
 
-            if (currentUKDay !== lastExecUK && parseInt(ukTime) >= 1) { resetButtonUI(); } 
-            else { lockButtonUI(); }
+            if (currentUKDay !== lastExecUK && ukHour >= 1) resetButtonUI();
+            else lockButtonUI();
         }
 
-        function resetButtonUI() {
-            execBtn.disabled = false;
-            execBtn.style.opacity = "1";
-            execBtn.style.background = "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)";
-            execText.innerText = "Start Sequence";
-            tapCount.innerText = "Ready 0/2";
-            loaderBar.style.width = "0%";
-            btnIcon.className = "fas fa-bolt-lightning text-white";
-            taps = 0;
-        }
-
-        function lockButtonUI() {
-            execBtn.disabled = true;
-            execBtn.style.opacity = "0.6";
-            execText.innerText = "Completed";
-            tapCount.innerText = "Locked";
-            loaderBar.style.width = "100%";
-            btnIcon.className = "fas fa-lock text-white";
-        }
+        function resetButtonUI() { execBtn.disabled = false; execBtn.style.opacity = "1"; execText.innerText = "Start Sequence"; tapCount.innerText = "Ready 0/2"; loaderBar.style.width = "0%"; btnIcon.className = "fas fa-bolt-lightning text-white"; taps = 0; }
+        function lockButtonUI() { execBtn.disabled = true; execBtn.style.opacity = "0.6"; execText.innerText = "Completed"; tapCount.innerText = "Locked"; loaderBar.style.width = "100%"; btnIcon.className = "fas fa-lock text-white"; }
 
         function calculateDailyROI(balance) {
+            if (balance >= 15000) return balance * 0.035;
             if (balance >= 5000) return balance * 0.030;
             if (balance >= 2000) return balance * 0.025;
             if (balance >= 500) return balance * 0.022;
@@ -346,36 +211,19 @@
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || taps >= 2) return;
             taps++;
-
             if (taps === 1) {
-                execBtn.disabled = true;
-                tapCount.innerText = "Syncing...";
+                execBtn.disabled = true; tapCount.innerText = "Syncing...";
                 let progress = 0;
                 const timer = setInterval(() => {
-                    progress += 5;
-                    loaderBar.style.width = `${progress}%`;
-                    execText.innerText = `Sync ${progress}%`;
-                    if (progress >= 100) {
-                        clearInterval(timer);
-                        execBtn.disabled = false;
-                        execText.innerText = "Confirm";
-                        tapCount.innerText = "Ready 2/2";
-                        btnIcon.className = "fas fa-check-circle text-white";
-                        execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
-                    }
+                    progress += 5; loaderBar.style.width = `${progress}%`; execText.innerText = `Sync ${progress}%`;
+                    if (progress >= 100) { clearInterval(timer); execBtn.disabled = false; execText.innerText = "Confirm"; tapCount.innerText = "Ready 2/2"; btnIcon.className = "fas fa-check-circle text-white"; }
                 }, 100);
             } else if (taps === 2) {
-                const currentBalance = parseFloat(userData.balance || 0);
-                const profit = calculateDailyROI(currentBalance);
-                if (currentBalance < 50) { alert("Min $50 required"); resetButtonUI(); return; }
-                
+                const bal = parseFloat(userData.balance || 0);
+                const profit = calculateDailyROI(bal);
+                if (bal < 50) { alert("Min $50 required"); resetButtonUI(); return; }
                 try {
-                    await updateDoc(doc(db, "users", currentUserId), {
-                        balance: increment(profit),
-                        dailyEarn: profit,
-                        totalEarned: increment(profit),
-                        lastExecution: serverTimestamp()
-                    });
+                    await updateDoc(doc(db, "users", currentUserId), { balance: increment(profit), dailyEarn: profit, totalEarned: increment(profit), lastExecution: serverTimestamp() });
                     alert(`Success! Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
                 } catch (e) { console.error(e); }
@@ -383,10 +231,8 @@
         });
 
         function updatePlanStatus(balance) {
-            const plans = document.querySelectorAll('.plan-card');
-            plans.forEach(plan => {
-                const min = parseFloat(plan.getAttribute('data-min'));
-                const max = parseFloat(plan.getAttribute('data-max'));
+            document.querySelectorAll('.plan-card').forEach(plan => {
+                const min = parseFloat(plan.getAttribute('data-min')), max = parseFloat(plan.getAttribute('data-max'));
                 if (balance >= min && balance <= max) plan.classList.add('plan-active');
                 else plan.classList.remove('plan-active');
             });
