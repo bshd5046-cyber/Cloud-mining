@@ -14,7 +14,6 @@
         body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 110px; }
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
         
-        /* كرت الـ QR */
         .qr-container {
             background: white;
             padding: 15px;
@@ -57,7 +56,8 @@
             </div>
             
             <div class="qr-container mb-6">
-                <div id="qrcode"></div> </div>
+                <div id="qrcode"></div> 
+            </div>
             
             <div class="space-y-2">
                 <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Unique Protocol ID</p>
@@ -98,7 +98,7 @@
     </nav>
 
     <script>
-        // 1. توليد كود فريد لا يتغير للمستخدم (محروق في المتصفح)
+        // 1. توليد كود فريد للمستخدم أو استعادته
         function getPersistentRefCode() {
             let code = localStorage.getItem('vertex_ref_code');
             if (!code) {
@@ -108,18 +108,18 @@
             return code;
         }
 
-        // 2. بناء الرابط الصحيح ديناميكياً
+        // 2. بناء الرابط ليوجه لصفحة signup.html
         const userCode = getPersistentRefCode();
-        // هذه الطريقة تأخذ رابط المجلد الحالي وتضيف عليه register.html
-        const currentFolder = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-        const refLink = currentFolder + "register.html?ref=" + userCode;
+        // الحصول على مسار المجلد الحالي (ديناميكي)
+        const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        const refLink = currentPath + "signup.html?ref=" + userCode;
 
-        // 3. عرض البيانات في الصفحة
+        // 3. تحديث الواجهة
         document.getElementById('refCodeDisplay').innerText = userCode;
         document.getElementById('refLinkInput').value = refLink;
 
-        // 4. توليد الـ QR Code بشكل تلقائي
-        document.getElementById("qrcode").innerHTML = ""; // مسح المحتوى القديم
+        // 4. توليد الـ QR Code للرابط الجديد
+        document.getElementById("qrcode").innerHTML = ""; 
         new QRCode(document.getElementById("qrcode"), {
             text: refLink,
             width: 160,
@@ -129,15 +129,14 @@
             correctLevel : QRCode.CorrectLevel.H
         });
 
-        // 5. وظيفة النسخ
+        // 5. دالة النسخ مع تنبيه
         function copyLink() {
             const copyText = document.getElementById("refLinkInput");
             copyText.select();
             copyText.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(copyText.value);
             
-            // تنبيه بسيط
-            alert("Referral protocol link copied!");
+            alert("Referral link copied successfully!");
         }
     </script>
 </body>
