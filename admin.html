@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Panel | AMANA</title>
+    <title>Master Panel | VERTEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -16,15 +16,20 @@
 <body>
 
     <div id="authOverlay">
-        <div class="text-center">
-            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Checking Admin Privileges...</p>
+        <div class="text-center w-full max-w-xs p-6">
+            <h1 class="text-xl font-black italic uppercase text-blue-500 mb-6">Vertex <span class="text-white">Admin</span></h1>
+            <div id="loginFields" class="space-y-4">
+                <input type="text" id="adminUser" placeholder="Admin Email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500">
+                <input type="password" id="adminPass" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500">
+                <button onclick="checkAccess()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-xs">Unlock System</button>
+            </div>
+            <p id="errorMsg" class="text-red-500 text-[10px] mt-4 hidden font-bold uppercase">Invalid Access Credentials</p>
         </div>
     </div>
 
     <header class="p-6 border-b border-white/5 bg-black/20 flex justify-between items-center">
-        <h1 class="text-xl font-black italic uppercase tracking-tighter text-blue-500">Amana <span class="text-white">Master</span></h1>
-        <button id="logoutBtn" class="text-[10px] font-black uppercase bg-red-500/10 text-red-500 px-4 py-2 rounded-lg active:scale-95 transition">Logout</button>
+        <h1 class="text-xl font-black italic uppercase tracking-tighter text-blue-500">Vertex <span class="text-white">Master</span></h1>
+        <button id="logoutBtn" class="text-[10px] font-black uppercase bg-red-500/10 text-red-500 px-4 py-2 rounded-lg active:scale-95 transition">Lock Panel</button>
     </header>
 
     <main class="p-6 space-y-8 max-w-4xl mx-auto">
@@ -70,7 +75,7 @@
                         </tr>
                     </thead>
                     <tbody id="requestTableBody" class="text-xs font-bold divide-y divide-white/5">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -78,8 +83,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -91,22 +95,22 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const ADMIN_EMAIL = "123adminvic321@admin.com";
         let currentUID = null;
 
-        // التحقق من هوية الأدمن عند الدخول
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.email === ADMIN_EMAIL) {
+        // دالة التحقق المؤقتة
+        window.checkAccess = () => {
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+
+            if(user === "admin.com" && pass === "admin123") {
                 document.getElementById('authOverlay').classList.add('hidden');
                 loadRequests('deposits');
             } else {
-                alert("Restricted Access!");
-                window.location.href = "login.html";
+                document.getElementById('errorMsg').classList.remove('hidden');
             }
-        });
+        };
 
         // البحث عن مستخدم
         document.getElementById('searchBtn').onclick = async () => {
@@ -145,7 +149,7 @@
             alert(isBanned ? "User Unbanned!" : "User Banned!");
         };
 
-        // جلب طلبات السحب والإيداع
+        // جلب الطلبات
         window.loadRequests = async (type) => {
             document.getElementById('tabDep').classList.toggle('active', type === 'deposits');
             document.getElementById('tabWith').classList.toggle('active', type === 'withdrawals');
@@ -170,7 +174,7 @@
             });
         };
 
-        // معالجة الطلب
+        // معالجة الطلبات
         window.processRequest = async (type, reqId, uId, amount) => {
             if(!confirm("Approve this transaction?")) return;
             if(type === 'deposits') {
@@ -183,7 +187,7 @@
             loadRequests(type);
         };
 
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        document.getElementById('logoutBtn').onclick = () => location.reload();
     </script>
 </body>
 </html>
