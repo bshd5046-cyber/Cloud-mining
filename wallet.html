@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wallet | AMANA</title>
+    <title>Wallet | VertexCloud</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
-        body { background-color: #050810; font-family: 'Inter', sans-serif; color: #ffffff; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #050810; font-family: 'Inter', sans-serif; color: #ffffff; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
-        /* تصميم الكارت المتطور */
         .crypto-card {
             background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -28,13 +27,17 @@
         @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
 
         .glass-panel { background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
-        .glass-panel:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
-
+        
         .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 6px solid #050810; }
         
         .skeleton { background: linear-gradient(90deg, #111827 25%, #1f2937 50%, #111827 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Slide Panels */
+        .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; }
+        .panel-content { width: 100%; background: #0a0f1c; border-radius: 3rem 3rem 0 0; padding: 2rem; border-top: 1px solid rgba(255,255,255,0.1); transform: translateY(100%); transition: 0.3s ease-out; }
+        .show-panel .panel-content { transform: translateY(0); }
     </style>
 </head>
 
@@ -61,25 +64,22 @@
                     <span class="text-[9px] font-black italic tracking-widest text-green-400">TRC20</span>
                 </div>
             </div>
-
             <div class="flex justify-between items-end">
                 <div>
                     <p class="text-blue-100 text-[10px] uppercase opacity-50 font-bold">Holder</p>
                     <p id="userName" class="text-sm font-black tracking-wide italic">--- ---</p>
                 </div>
-                <div class="text-right">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Tether_Logo.svg" class="w-8 h-8 ml-auto opacity-80" alt="USDT">
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Tether_Logo.svg" class="w-8 h-8 opacity-80" alt="USDT">
             </div>
         </div>
     </div>
 
     <div class="px-6 mt-8 flex gap-4">
-        <button onclick="location.href='deposit.html'" class="flex-1 bg-blue-600 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-900/40 active:scale-95 transition">
+        <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-900/40 active:scale-95 transition">
             <i class="fas fa-plus-circle"></i>
             <span class="font-black uppercase text-xs">Deposit</span>
         </button>
-        <button onclick="location.href='withdraw.html'" class="flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition">
+        <button onclick="openPanel('withdrawPanel')" class="flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition">
             <i class="fas fa-arrow-up-right-from-square"></i>
             <span class="font-black uppercase text-xs">Withdraw</span>
         </button>
@@ -93,30 +93,61 @@
                 <span class="text-[9px] font-black text-gray-400 uppercase">Live</span>
             </div>
         </div>
-
         <div id="assetsList" class="space-y-3">
             <div class="skeleton h-20 w-full rounded-2xl opacity-20"></div>
-            <div class="skeleton h-20 w-full rounded-2xl opacity-15"></div>
-            <div class="skeleton h-20 w-full rounded-2xl opacity-10"></div>
+        </div>
+    </div>
+
+    <div id="depositPanel" class="slide-panel">
+        <div class="panel-content">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6" onclick="closePanel('depositPanel')"></div>
+            <h3 class="text-xl font-black uppercase italic mb-6 text-blue-500">Deposit <span class="text-white text-sm opacity-50 block font-normal not-italic">USDT TRC-20 Only</span></h3>
+            
+            <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/5">
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-2">Our Wallet Address</p>
+                <div class="flex justify-between items-center">
+                    <p class="text-xs font-mono font-bold text-blue-400 truncate mr-4">TYG678sjdHksl927NSkw028NskLp12</p>
+                    <button class="text-xs font-black text-white bg-blue-600 px-3 py-1 rounded-lg">COPY</button>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <input type="number" id="depAmount" placeholder="Enter Amount ($)" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl font-bold outline-none focus:border-blue-500">
+                <p class="text-[9px] text-gray-500 uppercase font-black ml-2">Upload Transaction Proof</p>
+                <input type="file" id="depFile" class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-blue-600 file:text-white">
+                
+                <button id="confirmDeposit" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest mt-4">Confirm Deposit</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="withdrawPanel" class="slide-panel">
+        <div class="panel-content">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6" onclick="closePanel('withdrawPanel')"></div>
+            <h3 class="text-xl font-black uppercase italic mb-6 text-red-500">Withdraw <span class="text-white text-sm opacity-50 block font-normal not-italic">TRC-20 Protocol</span></h3>
+            
+            <div class="space-y-4">
+                <input type="number" id="withAmount" placeholder="Amount (Min $10)" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl font-bold outline-none focus:border-red-500">
+                <input type="text" id="withAddress" placeholder="Your TRC20 Wallet Address" class="w-full bg-white/5 border border-white/10 py-4 px-6 rounded-2xl font-bold outline-none focus:border-red-500">
+                
+                <button id="confirmWithdraw" class="w-full bg-red-600 py-5 rounded-2xl font-black uppercase tracking-widest mt-4 shadow-lg shadow-red-900/40">Request Withdrawal</button>
+            </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house mb-1 text-lg"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet mb-1 text-lg"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
-        </div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset mb-1 text-lg"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user mb-1 text-lg"></i><span>Profile</span></a>
+        <a href="index.html" class="flex flex-col items-center opacity-40"><i class="fas fa-house mb-1"></i><span class="text-[10px]">Home</span></a>
+        <a href="wallet.html" class="flex flex-col items-center text-blue-500"><i class="fas fa-wallet mb-1"></i><span class="text-[10px]">Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-white"></i></a></div>
+        <a href="support.html" class="flex flex-col items-center opacity-40"><i class="fas fa-headset mb-1"></i><span class="text-[10px]">Support</span></a>
+        <a href="profile.html" class="flex flex-col items-center opacity-40"><i class="fas fa-circle-user mb-1"></i><span class="text-[10px]">Profile</span></a>
     </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config (استخدم بياناتك الحقيقية هنا)
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -130,73 +161,107 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 1. مراقبة الرصيد من Firebase (بشكل حي)
+        let currentUser = null;
+        let userBalance = 0;
+
+        // Sync UI
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                currentUser = user;
                 onSnapshot(doc(db, "users", user.uid), (doc) => {
                     if (doc.exists()) {
                         const data = doc.data();
-                        document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        userBalance = data.balance || 0;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(userBalance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = data.fullName.toUpperCase();
                     }
                 });
-            } else {
-                window.location.href = 'login.html';
-            }
+            } else { window.location.href = 'login.html'; }
         });
 
-        // 2. جلب أسعار العملات الحقيقية
+        // Panel Logic
+        window.openPanel = (id) => {
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            setTimeout(() => el.classList.add('show-panel'), 10);
+        };
+
+        window.closePanel = (id) => {
+            const el = document.getElementById(id);
+            el.classList.remove('show-panel');
+            setTimeout(() => el.style.display = 'none', 300);
+        };
+
+        // Confirm Withdrawal
+        document.getElementById('confirmWithdraw').onclick = async () => {
+            const amount = parseFloat(document.getElementById('withAmount').value);
+            const address = document.getElementById('withAddress').value.trim();
+
+            if (amount < 10 || amount > userBalance) return alert("Invalid amount or insufficient balance!");
+            if (address.length < 10) return alert("Enter valid TRC20 address");
+
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: currentUser.uid,
+                    amount: amount,
+                    wallet: address,
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+                alert("Withdrawal request sent!");
+                closePanel('withdrawPanel');
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // Confirm Deposit (Simple Version)
+        document.getElementById('confirmDeposit').onclick = async () => {
+            const amount = parseFloat(document.getElementById('depAmount').value);
+            if (!amount || amount <= 0) return alert("Enter valid amount");
+
+            try {
+                await addDoc(collection(db, "deposits"), {
+                    userId: currentUser.uid,
+                    amount: amount,
+                    status: "pending",
+                    timestamp: serverTimestamp()
+                });
+                alert("Deposit request submitted. Please wait for confirmation.");
+                closePanel('depositPanel');
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // Market Data Fetch
         async function fetchMarketData() {
             try {
                 const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin&vs_currencies=usd&include_24hr_change=true');
                 const data = await response.json();
-                
                 const assets = [
                     { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', icon: 'fa-bitcoin', color: 'orange' },
-                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-ethereum', color: 'blue' },
-                    { id: 'binancecoin', name: 'BNB', symbol: 'BNB', icon: 'fa-coins', color: 'yellow' },
                     { id: 'tether', name: 'Tether', symbol: 'USDT', icon: 'fa-dollar-sign', color: 'green' }
                 ];
-
                 let html = '';
                 assets.forEach(asset => {
                     const price = data[asset.id].usd;
                     const change = data[asset.id].usd_24h_change || 0;
-                    const isPositive = change >= 0;
-
                     html += `
                         <div class="glass-panel p-5 rounded-[2rem] flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-${asset.color}-500/20 rounded-2xl flex items-center justify-center border border-${asset.color}-500/20">
-                                    <i class="fab ${asset.icon} text-${asset.color}-500 text-2xl"></i>
+                                <div class="w-10 h-10 bg-${asset.color}-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fab ${asset.icon} text-${asset.color}-500"></i>
                                 </div>
-                                <div>
-                                    <p class="font-black text-sm">${asset.name}</p>
-                                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">${asset.symbol} / USDT</p>
-                                </div>
+                                <div><p class="font-black text-sm">${asset.name}</p><p class="text-[8px] text-gray-500 uppercase font-black">${asset.symbol}</p></div>
                             </div>
                             <div class="text-right">
                                 <p class="font-black text-sm">$${price.toLocaleString()}</p>
-                                <p class="text-[10px] ${isPositive ? 'text-green-400' : 'text-red-400'} font-black italic">
-                                    ${isPositive ? '+' : ''}${change.toFixed(2)}%
-                                </p>
+                                <p class="text-[9px] ${change >= 0 ? 'text-green-400' : 'text-red-400'} font-black">${change.toFixed(2)}%</p>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-                
                 document.getElementById('assetsList').innerHTML = html;
-                document.getElementById('lastUpdate').innerText = `Last Update: ${new Date().toLocaleTimeString()}`;
-
-            } catch (error) {
-                console.error("Market API Error:", error);
-            }
+            } catch (e) { console.log(e); }
         }
-
-        // تحديث الأسعار كل 30 ثانية
         fetchMarketData();
         setInterval(fetchMarketData, 30000);
-
     </script>
 </body>
 </html>
