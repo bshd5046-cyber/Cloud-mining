@@ -29,7 +29,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* --- البار السفلي الموحد (نسخة Support Center) --- */
+        /* --- البار السفلي الموحد (نسخة Support Center المعتمدة) --- */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -70,7 +70,9 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 1500; }
     </style>
 </head>
-<body class="pb-32"> <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
+<body class="pb-32">
+
+    <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
 
     <main id="mainContent" class="opacity-0 transition-opacity duration-700">
         <div class="px-8 pt-10 pb-6 text-center">
@@ -164,12 +166,12 @@
         <button onclick="togglePanel('securityPanel', false)" class="mb-8 text-slate-400"><i class="fas fa-arrow-left text-xl"></i></button>
         <h3 class="text-xl font-bold mb-4">Security</h3>
         <p class="text-slate-400 text-sm mb-6">Password reset link will be sent to your email.</p>
-        <button onclick="sendResetEmail()" class="w-full bg-blue-600 py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Send Link</button>
+        <button id="resetEmailBtn" class="w-full bg-blue-600 py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Send Link</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -198,11 +200,16 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
-                document.getElementById('userIdDisplay').innerText = user.uid;
 
+                // جلب بيانات المستخدم من Firestore
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+
+                    // --- هنا التعديل: عرض الـ UID المختصر (5 خانات) ---
+                    // تأكد أن الحقل مخزن في فايربيس باسم referralId
+                    document.getElementById('userIdDisplay').innerText = data.referralId || "00000";
+
                     document.getElementById('userName').innerText = data.fullName || "Member";
                     document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userPhoneDisplay').innerText = data.phone || "Not Linked";
@@ -224,7 +231,18 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate current session?")) { signOut(auth).then(() => window.location.replace("login.html")); }
+            if (confirm("Terminate current session?")) { 
+                signOut(auth).then(() => window.location.replace("login.html")); 
+            }
+        });
+
+        document.getElementById('resetEmailBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user && user.email) {
+                sendPasswordResetEmail(auth, user.email)
+                    .then(() => alert("Reset link sent to your email!"))
+                    .catch((error) => alert(error.message));
+            }
         });
     </script>
 </body>
