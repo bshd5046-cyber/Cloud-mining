@@ -11,33 +11,38 @@
         .admin-card { background: rgba(17, 24, 39, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
         .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; opacity: 1; }
         #authOverlay { position: fixed; inset: 0; background: #02040a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        input { transition: 0.3s; }
+        input:focus { border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.05) !important; }
     </style>
 </head>
 <body>
 
     <div id="authOverlay">
         <div class="text-center w-full max-w-xs p-6">
-            <h1 class="text-xl font-black italic uppercase text-blue-500 mb-6">Vertex <span class="text-white">Admin</span></h1>
-            <div id="loginFields" class="space-y-4">
-                <input type="text" id="adminUser" placeholder="Admin Email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500">
-                <input type="password" id="adminPass" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500">
-                <button onclick="checkAccess()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-xs">Unlock System</button>
+            <div class="w-16 h-16 bg-blue-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                <i class="fas fa-user-shield text-2xl text-blue-500"></i>
             </div>
-            <p id="errorMsg" class="text-red-500 text-[10px] mt-4 hidden font-bold uppercase">Invalid Access Credentials</p>
+            <h1 class="text-xl font-black italic uppercase text-blue-500 mb-6">Vertex <span class="text-white">Admin</span></h1>
+            <div class="space-y-4">
+                <input type="text" id="adminUser" placeholder="Admin Email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none">
+                <input type="password" id="adminPass" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none">
+                <button id="unlockBtn" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-blue-700 transition active:scale-95">Unlock System</button>
+            </div>
+            <p id="errorMsg" class="text-red-500 text-[10px] mt-4 hidden font-black uppercase tracking-tighter">Access Denied: Invalid Credentials</p>
         </div>
     </div>
 
     <header class="p-6 border-b border-white/5 bg-black/20 flex justify-between items-center">
         <h1 class="text-xl font-black italic uppercase tracking-tighter text-blue-500">Vertex <span class="text-white">Master</span></h1>
-        <button id="logoutBtn" class="text-[10px] font-black uppercase bg-red-500/10 text-red-500 px-4 py-2 rounded-lg active:scale-95 transition">Lock Panel</button>
+        <button onclick="location.reload()" class="text-[10px] font-black uppercase bg-red-500/10 text-red-500 px-4 py-2 rounded-lg hover:bg-red-500/20 transition">Lock Panel</button>
     </header>
 
     <main class="p-6 space-y-8 max-w-4xl mx-auto">
         <section class="admin-card p-6 rounded-[2.5rem]">
             <h2 class="text-[10px] font-black uppercase mb-4 text-gray-500 tracking-widest">User Search Engine</h2>
             <div class="flex gap-2 mb-6">
-                <input type="text" id="userSearchInput" placeholder="Enter User UID..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-500 transition">
-                <button id="searchBtn" class="bg-blue-600 px-6 rounded-xl font-black uppercase text-[10px] active:scale-95 transition">Search</button>
+                <input type="text" id="userSearchInput" placeholder="Enter User UID..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none">
+                <button id="searchBtn" class="bg-blue-600 px-6 rounded-xl font-black uppercase text-[10px] hover:bg-blue-700 transition active:scale-95">Search</button>
             </div>
 
             <div id="searchResult" class="hidden p-6 border border-white/5 rounded-[2rem] bg-white/5">
@@ -48,21 +53,21 @@
                     </div>
                     <div class="text-right">
                         <p id="resBalance" class="text-2xl font-black text-blue-500">$0.00</p>
-                        <p id="resStatus" class="text-[9px] font-bold uppercase mt-1">Status: Active</p>
+                        <p id="resStatus" class="text-[9px] font-bold uppercase mt-1 text-green-500">Status: Active</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="adjustBalance(100)" class="py-4 bg-blue-600/10 hover:bg-blue-600/20 rounded-2xl text-[10px] font-black uppercase transition border border-blue-500/20">Add $100</button>
-                    <button onclick="adjustBalance(-100)" class="py-4 bg-orange-600/10 hover:bg-orange-600/20 rounded-2xl text-[10px] font-black uppercase transition border border-orange-500/20">Subtract $100</button>
-                    <button id="banUserBtn" class="col-span-2 py-4 bg-red-500/10 text-red-500 rounded-2xl text-[10px] font-black uppercase border border-red-500/20 active:scale-95 transition">Ban User From System</button>
+                    <button id="addMoney" class="py-4 bg-blue-600/10 hover:bg-blue-600/20 rounded-2xl text-[10px] font-black uppercase transition border border-blue-500/20">+ Add $100</button>
+                    <button id="subMoney" class="py-4 bg-orange-600/10 hover:bg-orange-600/20 rounded-2xl text-[10px] font-black uppercase transition border border-orange-500/20">- Subtract $100</button>
+                    <button id="banBtn" class="col-span-2 py-4 bg-red-500/10 text-red-500 rounded-2xl text-[10px] font-black uppercase border border-red-500/20 hover:bg-red-500/20 transition">Restrict Access (Ban)</button>
                 </div>
             </div>
         </section>
 
         <section>
             <div class="flex gap-6 mb-4 px-2">
-                <button onclick="loadRequests('deposits')" id="tabDep" class="tab-btn active text-[10px] font-black uppercase py-2 transition tracking-widest">Deposits</button>
-                <button onclick="loadRequests('withdrawals')" id="tabWith" class="tab-btn text-[10px] font-black uppercase py-2 transition tracking-widest opacity-40">Withdrawals</button>
+                <button id="tabDep" class="tab-btn active text-[10px] font-black uppercase py-2 transition tracking-widest">Deposits</button>
+                <button id="tabWith" class="tab-btn text-[10px] font-black uppercase py-2 transition tracking-widest opacity-40">Withdrawals</button>
             </div>
 
             <div class="admin-card rounded-[2.5rem] overflow-hidden">
@@ -71,7 +76,7 @@
                         <tr>
                             <th class="p-5">User ID</th>
                             <th class="p-5">Amount</th>
-                            <th class="p-5">Action</th>
+                            <th class="p-5">Status / Action</th>
                         </tr>
                     </thead>
                     <tbody id="requestTableBody" class="text-xs font-bold divide-y divide-white/5">
@@ -83,7 +88,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -96,23 +101,25 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         let currentUID = null;
 
-        // دالة التحقق المؤقتة
-        window.checkAccess = () => {
+        // دالة الدخول
+        const checkAccess = () => {
             const user = document.getElementById('adminUser').value;
             const pass = document.getElementById('adminPass').value;
-
             if(user === "admin.com" && pass === "admin123") {
-                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('authOverlay').style.display = 'none';
                 loadRequests('deposits');
             } else {
                 document.getElementById('errorMsg').classList.remove('hidden');
             }
         };
 
-        // البحث عن مستخدم
+        // تفعيل الزر والـ Enter
+        document.getElementById('unlockBtn').onclick = checkAccess;
+        document.addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAccess(); });
+
+        // البحث
         document.getElementById('searchBtn').onclick = async () => {
             const uid = document.getElementById('userSearchInput').value.trim();
             if(!uid) return;
@@ -124,13 +131,13 @@
                 document.getElementById('resName').innerText = d.fullName;
                 document.getElementById('resUID').innerText = "UID: " + uid;
                 document.getElementById('resBalance').innerText = `$${parseFloat(d.balance || 0).toFixed(2)}`;
-                document.getElementById('resStatus').innerText = d.isBanned ? "Status: Banned" : "Status: Active";
+                document.getElementById('resStatus').innerText = d.isBanned ? "Status: BANNED" : "Status: ACTIVE";
                 document.getElementById('resStatus').className = `text-[9px] font-bold uppercase mt-1 ${d.isBanned ? 'text-red-500' : 'text-green-500'}`;
-            } else { alert("User Not Found!"); }
+            } else { alert("User Not Found"); }
         };
 
         // تعديل الرصيد
-        window.adjustBalance = async (amount) => {
+        const adjustBalance = async (amount) => {
             if(!currentUID) return;
             const ref = doc(db, "users", currentUID);
             const snap = await getDoc(ref);
@@ -139,18 +146,22 @@
             document.getElementById('resBalance').innerText = `$${newBal.toFixed(2)}`;
         };
 
-        // حظر المستخدم
-        document.getElementById('banUserBtn').onclick = async () => {
+        document.getElementById('addMoney').onclick = () => adjustBalance(100);
+        document.getElementById('subMoney').onclick = () => adjustBalance(-100);
+
+        // حظر
+        document.getElementById('banBtn').onclick = async () => {
+            if(!currentUID) return;
             const ref = doc(db, "users", currentUID);
             const snap = await getDoc(ref);
             const isBanned = snap.data().isBanned || false;
             await updateDoc(ref, { isBanned: !isBanned });
+            alert(isBanned ? "User Unbanned" : "User Banned");
             document.getElementById('searchBtn').click();
-            alert(isBanned ? "User Unbanned!" : "User Banned!");
         };
 
-        // جلب الطلبات
-        window.loadRequests = async (type) => {
+        // الطلبات
+        async function loadRequests(type) {
             document.getElementById('tabDep').classList.toggle('active', type === 'deposits');
             document.getElementById('tabWith').classList.toggle('active', type === 'withdrawals');
             document.getElementById('tabDep').style.opacity = type === 'deposits' ? '1' : '0.4';
@@ -161,33 +172,39 @@
             tbody.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="p-5 text-gray-400 font-mono">${d.id.substring(0,10)}..</td>
-                        <td class="p-5 text-blue-500">$${data.amount}</td>
-                        <td class="p-5">
-                            ${data.status === 'pending' ? 
-                            `<button onclick="processRequest('${type}','${d.id}','${data.userId}',${data.amount})" class="bg-blue-600 px-3 py-1 rounded text-[8px] uppercase">Approve</button>` : 
-                            '<span class="text-gray-600">Completed</span>'}
-                        </td>
-                    </tr>`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-5 text-gray-500 font-mono">${d.id.substring(0,8)}...</td>
+                    <td class="p-5 text-blue-500 font-black">$${data.amount}</td>
+                    <td class="p-5">
+                        ${data.status === 'pending' ? 
+                        `<button class="approve-btn bg-blue-600 px-4 py-2 rounded-lg text-[8px] uppercase tracking-widest hover:bg-blue-700 transition" data-id="${d.id}" data-uid="${data.userId}" data-amount="${data.amount}">Approve</button>` : 
+                        '<span class="text-gray-600 uppercase text-[8px] tracking-widest">Completed</span>'}
+                    </td>`;
+                tbody.appendChild(row);
             });
-        };
 
-        // معالجة الطلبات
-        window.processRequest = async (type, reqId, uId, amount) => {
-            if(!confirm("Approve this transaction?")) return;
-            if(type === 'deposits') {
-                const uRef = doc(db, "users", uId);
-                const uSnap = await getDoc(uRef);
-                await updateDoc(uRef, { balance: (uSnap.data().balance || 0) + amount });
-            }
-            await updateDoc(doc(db, type, reqId), { status: 'completed' });
-            alert("Success!");
-            loadRequests(type);
-        };
+            // ربط أزرار الموافقة
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.onclick = async () => {
+                    const { id, uid, amount } = btn.dataset;
+                    if(!confirm(`Approve $${amount}?`)) return;
+                    
+                    if(type === 'deposits') {
+                        const uRef = doc(db, "users", uid);
+                        const uSnap = await getDoc(uRef);
+                        await updateDoc(uRef, { balance: (uSnap.data().balance || 0) + parseFloat(amount) });
+                    }
+                    await updateDoc(doc(db, type, id), { status: 'completed' });
+                    alert("Transaction Confirmed");
+                    loadRequests(type);
+                };
+            });
+        }
 
-        document.getElementById('logoutBtn').onclick = () => location.reload();
+        document.getElementById('tabDep').onclick = () => loadRequests('deposits');
+        document.getElementById('tabWith').onclick = () => loadRequests('withdrawals');
+
     </script>
 </body>
 </html>
