@@ -2,20 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VERTEX | Secure Digital Asset Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        :root { --bg: #020617; --brand: #3b82f6; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 90px; }
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e40af 0%, #020617 80%); }
         .glass-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 32px; transition: 0.4s; }
-        .glass-card:hover { border-color: #3b82f6; transform: translateY(-10px); }
         .text-gradient { background: linear-gradient(to right, #60a5fa, #3b82f6, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        
+        /* Bottom Navigation Style */
+        .bottom-nav { 
+            background: rgba(10, 15, 28, 0.95); 
+            backdrop-filter: blur(15px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            height: 75px; 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 1000; 
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; transition: 0.3s; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .nav-item.active { color: var(--brand); }
+        
+        .invest-fab { 
+            width: 60px; height: 60px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -20px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); 
+            border: 4px solid var(--bg); 
+        }
+
         .float-anim { animation: float 6s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         html { scroll-behavior: smooth; }
     </style>
 </head>
@@ -23,21 +51,15 @@
 
     <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto sticky top-0 z-50 backdrop-blur-md">
         <div class="text-2xl font-black italic tracking-tighter text-blue-500">VERTEX<span class="text-white">CLOUD</span></div>
-        <div class="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-            <a href="#" class="hover:text-blue-500 transition">Home</a>
-            <a href="#plans" class="hover:text-blue-500 transition">Investment Plans</a>
-            <a href="#security" class="hover:text-blue-500 transition">Security</a>
-        </div>
-        <div class="flex gap-4">
-            <a href="login.html" class="text-xs font-bold uppercase tracking-widest px-6 py-2">Login</a>
-            <a href="register.html" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest btn-glow hover:bg-blue-700 transition">Join Now</a>
-        </div>
+        <a href="login.html" class="bg-blue-600/10 border border-blue-500/20 px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-400 hover:bg-blue-600 hover:text-white transition">
+            Enter App <i class="fas fa-arrow-right ml-2"></i>
+        </a>
     </nav>
 
-    <section class="hero-gradient min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
+    <section class="hero-gradient min-h-screen flex flex-col items-center justify-center text-center px-6">
         <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-full mb-8">
             <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Military-Grade Encryption Verified</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Military-Grade Encryption</span>
         </div>
         
         <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tighter leading-tight">
@@ -45,91 +67,86 @@
         </h1>
         
         <p class="max-w-2xl text-gray-400 text-sm md:text-lg leading-relaxed mb-12">
-            Welcome to <span class="text-white font-bold tracking-wider">VERTEX</span>. A premier digital asset ecosystem providing institutional-grade investment boxes, full capital protection, and high-frequency returns for the modern investor.
+            Professional digital asset ecosystem providing secure investment boxes with capital protection and high-frequency returns.
         </p>
 
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="register.html" class="bg-white text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition">Get Started</a>
-            <a href="#plans" class="bg-white/5 border border-white/10 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 transition">Explore Plans</a>
-        </div>
-
-        <div class="mt-24 max-w-5xl mx-auto float-anim px-4">
+        <div class="mt-12 max-w-4xl mx-auto float-anim px-4">
             <div class="p-2 glass-card rounded-[2.5rem] shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200" class="rounded-[2rem] opacity-90 border border-white/10" alt="Platform Preview">
+                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200" class="rounded-[2rem] opacity-90 border border-white/10" alt="Platform">
             </div>
         </div>
     </section>
 
-    <section id="security" class="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
-        <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-shield-halved"></i></div>
-            <h3 class="text-xl font-black italic uppercase">Ultimate Security</h3>
-            <p class="text-gray-500 text-xs leading-loose">We utilize cold-storage protocols and multi-layer encryption to ensure your assets remain impenetrable.</p>
-        </div>
-        <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-bolt-lightning"></i></div>
-            <h3 class="text-xl font-black italic uppercase">Rapid Execution</h3>
-            <p class="text-gray-500 text-xs leading-loose">Our support and transaction engines operate 24/7 with zero-latency response times for all users.</p>
-        </div>
-        <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-chart-line"></i></div>
-            <h3 class="text-xl font-black italic uppercase">Future Focused</h3>
-            <p class="text-gray-500 text-xs leading-loose">Continuous algorithm updates ensure your portfolio benefits from the latest market evolution and AI insights.</p>
-        </div>
-    </section>
-
-    <section id="plans" class="py-24 px-6 bg-blue-600/5">
+    <section id="plans" class="py-24 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-black uppercase italic tracking-tighter">Investment <span class="text-blue-500">Boxes</span></h2>
-                <p class="text-gray-500 text-sm mt-2 font-bold uppercase tracking-widest">Select your strategic growth path</p>
+                <p class="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-2">Guaranteed Strategic Growth</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="glass-card p-10 flex flex-col items-center">
+                <div class="glass-card p-8 flex flex-col items-center">
                     <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Starter Box</span>
                     <h4 class="text-4xl font-black italic mb-6">5.0% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
                     <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 7 Days</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $100</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Instant Withdrawals</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> 7 Days Term</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> Min $100</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Get Started</a>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Select Plan</a>
                 </div>
 
-                <div class="glass-card p-10 flex flex-col items-center border-blue-500 scale-105 bg-blue-500/5 relative">
-                    <div class="absolute -top-4 bg-blue-600 px-4 py-1 rounded-full text-[8px] font-black uppercase">Most Popular</div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Professional Box</span>
+                <div class="glass-card p-8 flex flex-col items-center border-blue-500 bg-blue-500/5 relative scale-105">
+                    <div class="absolute -top-4 bg-blue-600 px-4 py-1 rounded-full text-[8px] font-black uppercase italic">Recommended</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Professional</span>
                     <h4 class="text-4xl font-black italic mb-6">12.5% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
                     <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 15 Days</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $500</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Full Capital Protection</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> 15 Days Term</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> Min $500</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] text-center btn-glow">Invest Now</a>
+                    <a href="register.html" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] text-center shadow-lg shadow-blue-500/20">Invest Now</a>
                 </div>
 
-                <div class="glass-card p-10 flex flex-col items-center">
+                <div class="glass-card p-8 flex flex-col items-center">
                     <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Whale Box</span>
                     <h4 class="text-4xl font-black italic mb-6">25.0% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
                     <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 30 Days</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $2,500</li>
-                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> VIP Priority Support</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> 30 Days Term</li>
+                        <li><i class="fas fa-check-circle text-blue-500 mr-2"></i> Min $2,500</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Get Started</a>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Select Plan</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-20 px-6 text-center border-t border-white/5">
-        <div class="text-2xl font-black italic tracking-tighter text-blue-500 mb-6">VERTEX<span class="text-white">CLOUD</span></div>
-        <p class="text-[10px] text-gray-600 font-black uppercase tracking-[0.4em] leading-relaxed">
-            © 2026 VertexCloud Digital Assets Management. <br> 
-            Moving forward, scaling higher.
-        </p>
+    <footer class="py-20 px-6 text-center opacity-50">
+        <div class="text-xl font-black italic text-blue-500 mb-2">VERTEX</div>
+        <p class="text-[8px] font-black uppercase tracking-[0.4em]">© 2026 VERTEXCLOUD DIGITAL ASSETS</p>
     </footer>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab">
+                <i class="fas fa-bolt-lightning text-xl text-white"></i>
+            </a>
+        </div>
+        <a href="support.html" class="nav-item">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user-gear"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 
 </body>
 </html>
