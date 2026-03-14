@@ -32,7 +32,7 @@
 
         .copy-btn {
             background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            transition: 0.3s;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .copy-btn:active { transform: scale(0.95); opacity: 0.8; }
 
@@ -45,8 +45,8 @@
 <body class="hero-gradient min-h-screen">
 
     <header class="p-6 pt-12 text-center">
-        <h1 class="text-2xl font-black italic tracking-tighter mb-2">NETWORK EXPANSION</h1>
-        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">Invite & Scale Your Yield</p>
+        <h1 class="text-2xl font-black italic tracking-tighter mb-2 text-white">NETWORK EXPANSION</h1>
+        <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.3em]">Invite & Scale Your Yield</p>
     </header>
 
     <main class="px-6 space-y-6">
@@ -60,26 +60,30 @@
                 <div id="qrcode"></div> </div>
             
             <div class="space-y-2">
-                <p class="text-[10px] text-gray-500 font-black uppercase">Your Unique ID</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Unique Protocol ID</p>
                 <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white">------</h3>
             </div>
         </div>
 
         <div class="glass-card p-5">
-            <p class="text-[10px] text-gray-500 font-black uppercase mb-3">Referral Link</p>
-            <div class="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                <input id="refLinkInput" type="text" readonly class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" value="">
-                <button onclick="copyLink()" class="copy-btn px-4 py-2 rounded-lg text-[10px] font-black uppercase">Copy</button>
+            <p class="text-[10px] text-gray-500 font-black uppercase mb-3 px-1">Referral Link</p>
+            <div class="flex items-center gap-3 bg-black/40 p-2 pl-4 rounded-2xl border border-white/5">
+                <input id="refLinkInput" type="text" readonly 
+                       class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" 
+                       value="Loading Link...">
+                <button onclick="copyLink()" class="copy-btn px-6 py-3 rounded-xl text-[10px] font-black uppercase text-white shadow-lg">
+                    Copy
+                </button>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-            <div class="glass-card p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase">Active Refs</p>
+            <div class="glass-card p-5">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Active Nodes</p>
                 <p class="text-xl font-black text-white">0</p>
             </div>
-            <div class="glass-card p-4">
-                <p class="text-[8px] text-gray-500 font-bold uppercase">Team Bonus</p>
+            <div class="glass-card p-5">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Team Bonus</p>
                 <p class="text-xl font-black text-emerald-400">+0.00%</p>
             </div>
         </div>
@@ -94,26 +98,28 @@
     </nav>
 
     <script>
-        // دالة لتوليد كود فريد لا يتغير للمستخدم
+        // 1. توليد كود فريد لا يتغير للمستخدم (محروق في المتصفح)
         function getPersistentRefCode() {
             let code = localStorage.getItem('vertex_ref_code');
-            
             if (!code) {
-                // توليد كود عشوائي من 6 أرقام
                 code = Math.floor(100000 + Math.random() * 900000);
                 localStorage.setItem('vertex_ref_code', code);
             }
             return code;
         }
 
+        // 2. بناء الرابط الصحيح ديناميكياً
         const userCode = getPersistentRefCode();
-        const refLink = "https://vertex.trade/register?ref=" + userCode;
+        // هذه الطريقة تأخذ رابط المجلد الحالي وتضيف عليه register.html
+        const currentFolder = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        const refLink = currentFolder + "register.html?ref=" + userCode;
 
-        // عرض الكود واللينك في الصفحة
+        // 3. عرض البيانات في الصفحة
         document.getElementById('refCodeDisplay').innerText = userCode;
         document.getElementById('refLinkInput').value = refLink;
 
-        // توليد الـ QR Code
+        // 4. توليد الـ QR Code بشكل تلقائي
+        document.getElementById("qrcode").innerHTML = ""; // مسح المحتوى القديم
         new QRCode(document.getElementById("qrcode"), {
             text: refLink,
             width: 160,
@@ -123,14 +129,15 @@
             correctLevel : QRCode.CorrectLevel.H
         });
 
-        // دالة النسخ
+        // 5. وظيفة النسخ
         function copyLink() {
             const copyText = document.getElementById("refLinkInput");
             copyText.select();
             copyText.setSelectionRange(0, 99999); 
             navigator.clipboard.writeText(copyText.value);
             
-            alert("Referral Link Copied: " + copyText.value);
+            // تنبيه بسيط
+            alert("Referral protocol link copied!");
         }
     </script>
 </body>
