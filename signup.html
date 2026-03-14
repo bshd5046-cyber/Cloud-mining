@@ -1,133 +1,178 @@
-<script type="module">
-    // 1. استيراد مكتبات Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VERTEX | Create Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #020617; font-family: 'Inter', sans-serif; color: white; overflow-x: hidden; }
+        .input-field { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s; }
+        .input-field:focus-within { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+        .gradient-btn { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); }
+        #alertBox { transform: translateY(-100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #alertBox.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
 
-    // 2. إعدادات Firebase الخاصة بك
-    const firebaseConfig = {
-        apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
-        authDomain: "cloud-mining-6f190.firebaseapp.com",
-        projectId: "cloud-mining-6f190",
-        storageBucket: "cloud-mining-6f190.firebasestorage.app",
-        messagingSenderId: "144227180849",
-        appId: "1:144227180849:web:ccbda447d074efbbddd010"
-    };
+    <div id="alertBox" class="fixed top-4 left-4 right-4 z-[200] hidden">
+        <div id="alertBg" class="p-4 rounded-2xl border flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-black/80">
+            <i id="alertIcon" class="fas"></i>
+            <p id="alertMsg" class="text-xs font-bold uppercase tracking-wide"></p>
+        </div>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    <div class="w-full max-w-md space-y-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-black italic tracking-tighter uppercase text-white">VERTEX <span class="text-blue-500">NODES</span></h1>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-2">Initialize Your Network Account</p>
+        </div>
 
-    // --- وظيفة جلب كود الدعوة من الرابط تلقائياً عند فتح الصفحة ---
-    window.addEventListener('load', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const refFromUrl = urlParams.get('ref');
-        const inviteInput = document.getElementById('inviteCode');
+        <div class="space-y-3">
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-user text-gray-500 mr-4 w-5 text-center"></i>
+                <input type="text" id="fullName" placeholder="Full Name" class="bg-transparent border-none outline-none w-full text-sm font-medium text-white">
+            </div>
 
-        if (refFromUrl && inviteInput) {
-            inviteInput.value = refFromUrl;
-            // قفل الحقل لضمان عدم تغيير كود الشخص الذي دعا المستخدم
-            inviteInput.readOnly = true;
-            inviteInput.classList.add('opacity-70'); // تظليل خفيف لبيان أنه مقفل
-            console.log("Protocol: Referral code injected - " + refFromUrl);
-        }
-    });
+            <div class="flex gap-2">
+                <div class="input-field rounded-2xl flex items-center px-3 py-4 w-32">
+                    <select id="countryCode" class="bg-transparent border-none outline-none w-full text-xs font-bold text-blue-400">
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+20">🇪🇬 +20</option>
+                        <option value="+964">🇮🇶 +964</option>
+                    </select>
+                </div>
+                <div class="input-field rounded-2xl flex-1 flex items-center p-4">
+                    <input type="tel" id="phone" placeholder="Phone Number" class="bg-transparent border-none outline-none w-full text-sm font-medium text-white">
+                </div>
+            </div>
 
-    // --- وظيفة إظهار التنبيهات الجمالية ---
-    function showAlert(message, type = "error") {
-        const box = document.getElementById('alertBox');
-        const bg = document.getElementById('alertBg');
-        const icon = document.getElementById('alertIcon');
-        const msg = document.getElementById('alertMsg');
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-envelope text-gray-500 mr-4 w-5 text-center"></i>
+                <input type="email" id="email" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium text-white">
+            </div>
 
-        box.classList.remove('hidden');
-        setTimeout(() => box.classList.add('show'), 10);
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-lock text-gray-500 mr-4 w-5 text-center"></i>
+                <input type="password" id="password" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-medium text-white">
+            </div>
 
-        if(type === "error") {
-            bg.className = "p-4 rounded-2xl border border-red-500/50 flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-red-500/10";
-            icon.className = "fas fa-circle-exclamation text-red-500 text-lg";
-            msg.className = "text-xs font-bold uppercase tracking-wide text-red-200";
-        } else {
-            bg.className = "p-4 rounded-2xl border border-green-500/50 flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-green-500/10";
-            icon.className = "fas fa-circle-check text-green-500 text-lg";
-            msg.className = "text-xs font-bold uppercase tracking-wide text-green-200";
-        }
+            <div class="input-field rounded-2xl flex items-center p-4">
+                <i class="fas fa-check-double text-gray-500 mr-4 w-5 text-center"></i>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="bg-transparent border-none outline-none w-full text-sm font-medium text-white">
+            </div>
 
-        msg.innerText = message;
-        setTimeout(() => {
-            box.classList.remove('show');
-            setTimeout(() => box.classList.add('hidden'), 400);
-        }, 3000);
-    }
+            <div class="input-field rounded-2xl flex items-center p-4 border-dashed border-blue-500/30">
+                <i class="fas fa-ticket-alt text-blue-500 mr-4 w-5 text-center"></i>
+                <input type="text" id="inviteCode" placeholder="Invite Code (Required)" class="bg-transparent border-none outline-none w-full text-sm font-bold text-blue-400">
+            </div>
 
-    // --- معالجة عملية إنشاء الحساب ---
-    document.getElementById('signupBtn').addEventListener('click', async () => {
-        const name = document.getElementById('fullName').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const confirmPass = document.getElementById('confirmPassword').value;
-        const invite = document.getElementById('inviteCode').value.trim();
+            <button id="signupBtn" class="gradient-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition text-white">
+                Create Account
+            </button>
+        </div>
 
-        // التحقق من أن جميع الحقول ممتلئة (كود الدعوة إجباري الآن)
-        if (!name || !phone || !email || !password || !invite) {
-            showAlert("Access Denied! All fields including Invite Code are required.");
-            return;
-        }
+        <p class="text-center text-gray-500 text-xs font-bold uppercase">
+            Already a member? <a href="login.html" class="text-blue-500 ml-1">Log In</a>
+        </p>
+    </div>
 
-        if (password !== confirmPass) {
-            showAlert("Identity Conflict! Passwords do not match.");
-            return;
-        }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        if (password.length < 6) {
-            showAlert("Security Breach! Password must be at least 6 characters.");
-            return;
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
 
-        const btn = document.getElementById('signupBtn');
-        const originalText = btn.innerText;
-        btn.innerText = "AUTHENTICATING...";
-        btn.disabled = true;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        try {
-            // خطوة 1: إنشاء الحساب في Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // خطوة 2: حفظ بيانات المستخدم الإضافية في Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                fullName: name,
-                phoneNumber: document.getElementById('countryCode').value + phone,
-                email: email,
-                inviteCode: invite, // حفظ كود الشخص الذي دعاه
-                balance: 0,
-                status: "active",
-                createdAt: new Date().toISOString()
-            });
-
-            showAlert("Node Created! Redirecting to Terminal...", "success");
-            
-            // توجيه المستخدم لصفحة البداية بعد ثانية ونصف
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 1500);
-
-        } catch (error) {
-            btn.innerText = originalText;
-            btn.disabled = false;
-            
-            let userMsg = "Connection Error: " + error.message;
-            if (error.code === 'auth/email-already-in-use') {
-                userMsg = "Email already linked to another active node!";
-            } else if (error.code === 'auth/invalid-email') {
-                userMsg = "Invalid Email format!";
-            } else if (error.code === 'auth/weak-password') {
-                userMsg = "Password is too weak!";
+        // جلب الكود تلقائياً
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refFromUrl = urlParams.get('ref');
+            const inviteInput = document.getElementById('inviteCode');
+            if (refFromUrl && inviteInput) {
+                inviteInput.value = refFromUrl;
+                inviteInput.readOnly = true;
+                inviteInput.classList.add('opacity-60');
             }
-            
-            showAlert(userMsg);
-            console.error("Firebase Error:", error.code);
+        });
+
+        function showAlert(message, type = "error") {
+            const box = document.getElementById('alertBox');
+            const bg = document.getElementById('alertBg');
+            const icon = document.getElementById('alertIcon');
+            const msg = document.getElementById('alertMsg');
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('show'), 10);
+            if(type === "error") {
+                bg.className = "p-4 rounded-2xl border border-red-500/50 flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-red-500/10";
+                icon.className = "fas fa-circle-exclamation text-red-500 text-lg";
+                msg.className = "text-xs font-bold uppercase tracking-wide text-red-200";
+            } else {
+                bg.className = "p-4 rounded-2xl border border-green-500/50 flex items-center gap-3 shadow-2xl backdrop-blur-xl bg-green-500/10";
+                icon.className = "fas fa-circle-check text-green-500 text-lg";
+                msg.className = "text-xs font-bold uppercase tracking-wide text-green-200";
+            }
+            msg.innerText = message;
+            setTimeout(() => {
+                box.classList.remove('show');
+                setTimeout(() => box.classList.add('hidden'), 400);
+            }, 3000);
         }
-    });
-</script>
+
+        document.getElementById('signupBtn').addEventListener('click', async () => {
+            const name = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            const invite = document.getElementById('inviteCode').value.trim();
+
+            if (!name || !phone || !email || !password || !invite) {
+                showAlert("All fields are required!");
+                return;
+            }
+            if (password !== confirmPass) {
+                showAlert("Passwords do not match!");
+                return;
+            }
+
+            const btn = document.getElementById('signupBtn');
+            btn.innerText = "VERIFYING...";
+            btn.disabled = true;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: name,
+                    phoneNumber: document.getElementById('countryCode').value + phone,
+                    email: email,
+                    inviteCode: invite,
+                    balance: 0,
+                    createdAt: new Date().toISOString()
+                });
+                showAlert("Account Created!", "success");
+                setTimeout(() => window.location.href = "index.html", 1500);
+            } catch (error) {
+                btn.innerText = "CREATE ACCOUNT";
+                btn.disabled = false;
+                showAlert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>
