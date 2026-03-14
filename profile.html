@@ -11,14 +11,21 @@
         body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
         #mainProfile { display: none; }
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* تأثير التوهج للزر الجديد */
+        .expansion-glow { position: relative; }
+        .expansion-glow::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); border-radius: inherit; pointer-events: none;
+        }
+
         #securitySection {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
         }
         #securitySection.open { right: 0; }
-        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; font-size: 14px; color: white; }
-        .input-dark:focus { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+        
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 80px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 10px; }
         .invest-fab { width: 65px; height: 65px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -25px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 5px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
@@ -51,11 +58,26 @@
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Security Hub</h3>
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Protocol Settings</h3>
+            
             <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
+                
+                <a href="invite.html" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition expansion-glow">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-400 shadow-inner shadow-blue-500/20">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Expansion Program</p>
+                            <p class="text-[9px] text-blue-500/70 font-black uppercase">Invite & Unlock Tiers</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xs text-gray-700"></i>
+                </a>
+
                 <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition text-left">
                     <div class="flex items-center gap-4">
-                        <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fas fa-shield-halved"></i></div>
+                        <div class="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400"><i class="fas fa-shield-halved"></i></div>
                         <div>
                             <p class="text-sm font-bold">Authentication Settings</p>
                             <p class="text-[9px] text-gray-500 uppercase">Manage Password & Email</p>
@@ -79,14 +101,13 @@
             </button>
             <h2 class="text-xl font-black italic uppercase">Security Center</h2>
         </div>
-
         <div class="space-y-6">
             <div class="glass-card p-6 rounded-[2rem] space-y-4 text-center border-t-2 border-blue-500/20">
                 <div class="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-500">
                     <i class="fas fa-envelope-open-text text-xl"></i>
                 </div>
                 <h4 class="text-white font-black text-xs uppercase italic">Request Password Reset</h4>
-                <p class="text-[10px] text-gray-500 px-2 leading-relaxed">A secure reset link will be dispatched to your registered email address via <b>Vertex Cloud Support</b>.</p>
+                <p class="text-[10px] text-gray-500 px-2 leading-relaxed">A secure reset link will be dispatched to your email.</p>
                 <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">Send Reset Link</button>
             </div>
         </div>
@@ -105,7 +126,6 @@
         import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Config (Your project)
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -154,7 +174,6 @@
             try {
                 btn.disabled = true;
                 btn.innerText = "PROCESSING...";
-                // سيرسل الإيميل بالدومين الجديد الخاص بك تلقائياً لأننا فعلناه في Firebase Console
                 await sendPasswordResetEmail(auth, auth.currentUser.email);
                 btn.classList.replace('bg-blue-600', 'bg-green-600');
                 btn.innerText = "EMAIL DISPATCHED ✓";
