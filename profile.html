@@ -12,20 +12,7 @@
         #mainProfile { display: none; }
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* تأثير التوهج للزر الجديد */
-        .expansion-glow { position: relative; }
-        .expansion-glow::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); border-radius: inherit; pointer-events: none;
-        }
-
-        #securitySection {
-            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
-            background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto;
-        }
-        #securitySection.open { right: 0; }
-        
+        /* Bottom Nav */
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 80px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 10px; }
         .invest-fab { width: 65px; height: 65px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -25px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 5px solid var(--bg-dark); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
@@ -36,88 +23,63 @@
 </head>
 <body class="pb-28">
 
-    <main id="mainProfile" class="h-screen overflow-y-auto">
-        <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
-            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4 overflow-hidden shadow-2xl shadow-blue-500/10">
+    <main id="mainProfile">
+        <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/10 to-transparent">
+            <div class="w-20 h-20 rounded-full border-2 border-blue-500 p-1 mx-auto mb-3 overflow-hidden">
                 <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover">
             </div>
-            <h1 class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-1">Vertex Protocol Node</h1>
-            <h2 id="userName" class="text-2xl font-black italic tracking-tight uppercase">Loading...</h2>
-            <p id="userEmailDisplay" class="text-gray-500 text-[10px] mt-1 font-bold uppercase tracking-widest">---</p>
-            
-            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition cursor-pointer" onclick="copyUID()">
-                <span class="text-[9px] font-black uppercase tracking-widest text-gray-500">Node ID:</span>
-                <span id="userInviteCode" class="text-sm font-black text-blue-400 tracking-tighter">-----</span>
-                <i class="far fa-copy text-[10px] text-blue-500/50"></i>
-            </div>
+            <h2 id="userName" class="text-xl font-bold uppercase tracking-tight">Loading...</h2>
+            <p id="userEmailDisplay" class="text-gray-500 text-xs mt-1">---</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 px-6 mb-8">
-            <div class="glass-card p-5 rounded-[2rem]">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Equity Balance</p>
-                <p id="userBalance" class="text-xl font-black text-white">$0.00</p>
+            <div class="glass-card p-4 rounded-2xl">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Balance</p>
+                <p id="userBalance" class="text-lg font-black text-white">$0.00</p>
             </div>
-            <div class="glass-card p-5 rounded-[2rem]">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Verified Phone</p>
-                <p id="userPhone" class="text-xs font-bold text-blue-400">---</p>
+            <div class="glass-card p-4 rounded-2xl">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">My ID</p>
+                <p id="userInviteCode" class="text-lg font-black text-blue-400">-----</p>
             </div>
         </div>
 
-        <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2">Protocol Settings</h3>
+        <div class="px-6 space-y-3">
             
-            <div class="glass-card rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
-                
-                <a href="invite.html" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition expansion-glow">
-                    <div class="flex items-center gap-4">
-                        <div class="w-11 h-11 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-400 shadow-inner shadow-blue-500/20">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-white">Expansion Program</p>
-                            <p class="text-[9px] text-blue-500/70 font-black uppercase">Invite & Unlock Tiers</p>
-                        </div>
+            <a href="invite.html" class="glass-card flex items-center justify-between p-5 rounded-2xl active:scale-95 transition-transform">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-500">
+                        <i class="fas fa-users text-lg"></i>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-700"></i>
-                </a>
-
-                <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition text-left">
-                    <div class="flex items-center gap-4">
-                        <div class="w-11 h-11 rounded-2xl bg-white/5 flex items-center justify-center text-gray-400"><i class="fas fa-shield-halved"></i></div>
-                        <div>
-                            <p class="text-sm font-bold">Authentication Settings</p>
-                            <p class="text-[9px] text-gray-500 uppercase">Manage Password & Email</p>
-                        </div>
+                    <div>
+                        <p class="text-sm font-bold">Invite Friends</p>
+                        <p class="text-[10px] text-gray-500">Earn up to 34% commission</p>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-gray-700"></i>
-                </button>
+                </div>
+                <i class="fas fa-chevron-right text-xs text-gray-600"></i>
+            </a>
 
-                <button id="logoutBtn" class="w-full flex items-center gap-4 p-6 active:bg-red-500/10 transition group text-left">
-                    <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></div>
-                    <span class="text-sm font-bold text-red-500">Terminate Session</span>
-                </button>
-            </div>
+            <button onclick="requestPasswordReset()" class="w-full glass-card flex items-center justify-between p-5 rounded-2xl active:scale-95 transition-transform text-left">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-gray-500/10 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-lock text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold">Change Password</p>
+                        <p class="text-[10px] text-gray-500">Receive reset link via email</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-xs text-gray-600"></i>
+            </button>
+
+            <button id="logoutBtn" class="w-full glass-card flex items-center gap-4 p-5 rounded-2xl active:bg-red-500/10 text-red-500 transition-colors text-left">
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </div>
+                <p class="text-sm font-bold">Logout</p>
+            </button>
+
         </div>
     </main>
-
-    <section id="securitySection" class="p-6">
-        <div class="flex items-center gap-4 mb-8 pt-6">
-            <button onclick="toggleSecurity(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                <i class="fas fa-arrow-left text-sm"></i>
-            </button>
-            <h2 class="text-xl font-black italic uppercase">Security Center</h2>
-        </div>
-        <div class="space-y-6">
-            <div class="glass-card p-6 rounded-[2rem] space-y-4 text-center border-t-2 border-blue-500/20">
-                <div class="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-2 text-blue-500">
-                    <i class="fas fa-envelope-open-text text-xl"></i>
-                </div>
-                <h4 class="text-white font-black text-xs uppercase italic">Request Password Reset</h4>
-                <p class="text-[10px] text-gray-500 px-2 leading-relaxed">A secure reset link will be dispatched to your email.</p>
-                <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">Send Reset Link</button>
-            </div>
-        </div>
-    </section>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -145,73 +107,39 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // وظيفة النسخ
-        window.copyUID = () => {
-            const code = document.getElementById('userInviteCode').innerText;
-            if(code !== "-----") {
-                navigator.clipboard.writeText(code);
-                const originalText = document.getElementById('userInviteCode').innerText;
-                document.getElementById('userInviteCode').innerText = "COPIED!";
-                setTimeout(() => {
-                    document.getElementById('userInviteCode').innerText = originalText;
-                }, 1000);
+        // وظيفة تغيير كلمة السر البسيطة
+        window.requestPasswordReset = async () => {
+            const email = auth.currentUser.email;
+            if (confirm("Send password reset link to: " + email + "?")) {
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    alert("Reset link sent! Please check your email.");
+                } catch (e) {
+                    alert("Error: " + e.message);
+                }
             }
-        };
-
-        window.toggleSecurity = (open) => {
-            const sec = document.getElementById('securitySection');
-            open ? sec.classList.add('open') : sec.classList.remove('open');
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainProfile').style.display = 'block';
-                try {
-                    const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
-                        const d = docSnap.data();
-                        
-                        // عرض البيانات
-                        document.getElementById('userName').innerText = d.fullName;
-                        document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString()}`;
-                        document.getElementById('userPhone').innerText = d.phoneNumber || "NOT LINKED";
-                        document.getElementById('userEmailDisplay').innerText = user.email;
-                        
-                        // جلب كود الدعوة (myReferralCode) الذي خزنناه في Signup
-                        const displayCode = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
-                        document.getElementById('userInviteCode').innerText = displayCode;
-
-                        document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff&bold=true&size=128`;
-                    }
-                } catch (e) { console.error(e); }
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                if (docSnap.exists()) {
+                    const d = docSnap.data();
+                    document.getElementById('userName').innerText = d.fullName;
+                    document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString()}`;
+                    document.getElementById('userEmailDisplay').innerText = user.email;
+                    document.getElementById('userInviteCode').innerText = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff&bold=true`;
+                }
             } else {
                 window.location.replace("login.html");
             }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate secure session?")) {
+            if (confirm("Are you sure you want to logout?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
-            }
-        });
-
-        document.getElementById('sendResetBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('sendResetBtn');
-            try {
-                btn.disabled = true;
-                btn.innerText = "PROCESSING...";
-                await sendPasswordResetEmail(auth, auth.currentUser.email);
-                btn.classList.replace('bg-blue-600', 'bg-green-600');
-                btn.innerText = "EMAIL DISPATCHED ✓";
-                setTimeout(() => {
-                    btn.innerText = "Send Reset Link";
-                    btn.classList.replace('bg-green-600', 'bg-blue-600');
-                    btn.disabled = false;
-                }, 3000);
-            } catch (e) { 
-                alert("Error: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "RETRY REQUEST";
             }
         });
     </script>
