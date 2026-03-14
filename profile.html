@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
-        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
+        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow-x: hidden; }
         #mainProfile { display: none; }
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
@@ -38,12 +38,18 @@
 
     <main id="mainProfile" class="h-screen overflow-y-auto">
         <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
-            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4 overflow-hidden">
-                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover shadow-lg shadow-blue-500/20">
+            <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4 overflow-hidden shadow-2xl shadow-blue-500/10">
+                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover">
             </div>
-            <h1 class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-1">Vertex Account</h1>
+            <h1 class="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em] mb-1">Vertex Protocol Node</h1>
             <h2 id="userName" class="text-2xl font-black italic tracking-tight uppercase">Loading...</h2>
             <p id="userEmailDisplay" class="text-gray-500 text-[10px] mt-1 font-bold uppercase tracking-widest">---</p>
+            
+            <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 active:scale-95 transition cursor-pointer" onclick="copyUID()">
+                <span class="text-[9px] font-black uppercase tracking-widest text-gray-500">Node ID:</span>
+                <span id="userInviteCode" class="text-sm font-black text-blue-400 tracking-tighter">-----</span>
+                <i class="far fa-copy text-[10px] text-blue-500/50"></i>
+            </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 px-6 mb-8">
@@ -139,6 +145,19 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // وظيفة النسخ
+        window.copyUID = () => {
+            const code = document.getElementById('userInviteCode').innerText;
+            if(code !== "-----") {
+                navigator.clipboard.writeText(code);
+                const originalText = document.getElementById('userInviteCode').innerText;
+                document.getElementById('userInviteCode').innerText = "COPIED!";
+                setTimeout(() => {
+                    document.getElementById('userInviteCode').innerText = originalText;
+                }, 1000);
+            }
+        };
+
         window.toggleSecurity = (open) => {
             const sec = document.getElementById('securitySection');
             open ? sec.classList.add('open') : sec.classList.remove('open');
@@ -151,10 +170,17 @@
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
                         const d = docSnap.data();
+                        
+                        // عرض البيانات
                         document.getElementById('userName').innerText = d.fullName;
                         document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString()}`;
                         document.getElementById('userPhone').innerText = d.phoneNumber || "NOT LINKED";
                         document.getElementById('userEmailDisplay').innerText = user.email;
+                        
+                        // جلب كود الدعوة (myReferralCode) الذي خزنناه في Signup
+                        const displayCode = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
+                        document.getElementById('userInviteCode').innerText = displayCode;
+
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff&bold=true&size=128`;
                     }
                 } catch (e) { console.error(e); }
