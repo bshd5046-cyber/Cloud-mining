@@ -16,109 +16,119 @@
         .btn-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
         .float-anim { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        html { scroll-behavior: smooth; }
     </style>
 </head>
 <body>
 
     <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto sticky top-0 z-50 backdrop-blur-md">
         <div class="text-2xl font-black italic tracking-tighter text-blue-500">VERTEX<span class="text-white">CLOUD</span></div>
+        <div class="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+            <a href="#" class="hover:text-blue-500 transition">Home</a>
+            <a href="#plans" class="hover:text-blue-500 transition">Investment Plans</a>
+            <a href="#security" class="hover:text-blue-500 transition">Security</a>
+        </div>
         <div class="flex gap-4">
             <a href="login.html" class="text-xs font-bold uppercase tracking-widest px-6 py-2">Login</a>
-            <a href="register.html" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest btn-glow hover:bg-blue-700 transition">Get Started</a>
+            <a href="register.html" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest btn-glow hover:bg-blue-700 transition">Join Now</a>
         </div>
     </nav>
 
     <section class="hero-gradient min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
         <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-full mb-8">
             <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Military-Grade Security Verified</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Military-Grade Encryption Verified</span>
         </div>
         
         <h1 class="text-5xl md:text-8xl font-extrabold mb-6 tracking-tighter leading-tight">
-            Invest Smarter. <br> <span class="text-gradient">Grow Faster.</span>
+            Invest Smarter. <br> <span class="text-gradient">Scale Faster.</span>
         </h1>
         
         <p class="max-w-2xl text-gray-400 text-sm md:text-lg leading-relaxed mb-12">
-            مرحباً بكم في <span class="text-white font-bold tracking-wider">VERTEX</span>. منصة استثمارية ذكية تتيح لك الوصول إلى صناديق استثمارية متنوعة، آمنة بالكامل، ومصممة لتحقيق أقصى درجات الربحية بضمان استدامة رأس المال.
+            Welcome to <span class="text-white font-bold tracking-wider">VERTEX</span>. A premier digital asset ecosystem providing institutional-grade investment boxes, full capital protection, and high-frequency returns for the modern investor.
         </p>
 
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="register.html" class="bg-white text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition">ابدأ الآن</a>
-            <a href="#plans" class="bg-white/5 border border-white/10 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 transition">استكشف الصناديق</a>
+            <a href="register.html" class="bg-white text-black px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition">Get Started</a>
+            <a href="#plans" class="bg-white/5 border border-white/10 px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/10 transition">Explore Plans</a>
         </div>
 
         <div class="mt-24 max-w-5xl mx-auto float-anim px-4">
             <div class="p-2 glass-card rounded-[2.5rem] shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200" class="rounded-[2rem] opacity-90 border border-white/10">
+                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200" class="rounded-[2rem] opacity-90 border border-white/10" alt="Platform Preview">
             </div>
         </div>
     </section>
 
-    <section class="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
+    <section id="security" class="py-32 px-6 max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
         <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-lock-shield"></i></div>
-            <h3 class="text-xl font-black italic uppercase">أمان مطلق</h3>
-            <p class="text-gray-500 text-xs leading-loose">نستخدم تقنيات التشفير البارد (Cold Storage) لحماية أصولك من أي مخاطر خارجية.</p>
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-shield-halved"></i></div>
+            <h3 class="text-xl font-black italic uppercase">Ultimate Security</h3>
+            <p class="text-gray-500 text-xs leading-loose">We utilize cold-storage protocols and multi-layer encryption to ensure your assets remain impenetrable.</p>
         </div>
         <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-headset"></i></div>
-            <h3 class="text-xl font-black italic uppercase">دعم فني فوري</h3>
-            <p class="text-gray-500 text-xs leading-loose">فريق مختص متاح على مدار الساعة للإجابة على كافة استفساراتكم بكل سرعة واحترافية.</p>
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-bolt-lightning"></i></div>
+            <h3 class="text-xl font-black italic uppercase">Rapid Execution</h3>
+            <p class="text-gray-500 text-xs leading-loose">Our support and transaction engines operate 24/7 with zero-latency response times for all users.</p>
         </div>
         <div class="space-y-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-rocket"></i></div>
-            <h3 class="text-xl font-black italic uppercase">تطور مستمر</h3>
-            <p class="text-gray-500 text-xs leading-loose">نحدث أنظمتنا دورياً لنواكب أحدث تقنيات الاستثمار في الأسواق العالمية.</p>
+            <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto text-blue-500 text-2xl"><i class="fas fa-chart-line"></i></div>
+            <h3 class="text-xl font-black italic uppercase">Future Focused</h3>
+            <p class="text-gray-500 text-xs leading-loose">Continuous algorithm updates ensure your portfolio benefits from the latest market evolution and AI insights.</p>
         </div>
     </section>
 
     <section id="plans" class="py-24 px-6 bg-blue-600/5">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-black uppercase italic tracking-tighter">صناديق <span class="text-blue-500">الاستثمار</span></h2>
-                <p class="text-gray-500 text-sm mt-2 font-bold">كل صندوق مصمم بعناية ليناسب تطلعاتك</p>
+                <h2 class="text-3xl font-black uppercase italic tracking-tighter">Investment <span class="text-blue-500">Boxes</span></h2>
+                <p class="text-gray-500 text-sm mt-2 font-bold uppercase tracking-widest">Select your strategic growth path</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="glass-card p-10 flex flex-col items-center">
-                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Basic Box</span>
-                    <h4 class="text-4xl font-black italic mb-6">5% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
-                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 7 أيام</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $100</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> سحب فوري للأرباح</li>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Starter Box</span>
+                    <h4 class="text-4xl font-black italic mb-6">5.0% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 7 Days</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $100</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Instant Withdrawals</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">ابدأ الآن</a>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Get Started</a>
                 </div>
 
                 <div class="glass-card p-10 flex flex-col items-center border-blue-500 scale-105 bg-blue-500/5 relative">
                     <div class="absolute -top-4 bg-blue-600 px-4 py-1 rounded-full text-[8px] font-black uppercase">Most Popular</div>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Pro Box</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Professional Box</span>
                     <h4 class="text-4xl font-black italic mb-6">12.5% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
-                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 15 يوم</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $500</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> حماية رأس مال كاملة</li>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 15 Days</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $500</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Full Capital Protection</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] text-center btn-glow">استثمر الآن</a>
+                    <a href="register.html" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] text-center btn-glow">Invest Now</a>
                 </div>
 
                 <div class="glass-card p-10 flex flex-col items-center">
                     <span class="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-4 italic">Whale Box</span>
-                    <h4 class="text-4xl font-black italic mb-6">25% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
-                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center">
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> المدة: 30 يوم</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> الحد الأدنى: $2,500</li>
-                        <li><i class="fas fa-check text-blue-500 mr-2"></i> مدير حساب شخصي</li>
+                    <h4 class="text-4xl font-black italic mb-6">25.0% <span class="text-sm font-normal text-gray-500 italic">Daily</span></h4>
+                    <ul class="text-xs text-gray-400 space-y-4 mb-8 text-center uppercase font-bold tracking-tight">
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Duration: 30 Days</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> Min Deposit: $2,500</li>
+                        <li><i class="fas fa-circle-check text-blue-500 mr-2"></i> VIP Priority Support</li>
                     </ul>
-                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">ابدأ الآن</a>
+                    <a href="register.html" class="w-full bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[10px] text-center hover:bg-blue-600 transition">Get Started</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-12 px-6 text-center border-t border-white/5">
-        <p class="text-[10px] text-gray-600 font-black uppercase tracking-widest">© 2026 VertexCloud Digital Assets. <br> التطور نحو القمة لا يتوقف.</p>
+    <footer class="py-20 px-6 text-center border-t border-white/5">
+        <div class="text-2xl font-black italic tracking-tighter text-blue-500 mb-6">VERTEX<span class="text-white">CLOUD</span></div>
+        <p class="text-[10px] text-gray-600 font-black uppercase tracking-[0.4em] leading-relaxed">
+            © 2026 VertexCloud Digital Assets Management. <br> 
+            Moving forward, scaling higher.
+        </p>
     </footer>
 
 </body>
