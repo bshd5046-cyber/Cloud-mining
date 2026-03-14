@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-dark: #050810; 
+            --bg-dark: #020617; 
             --primary: #3b82f6; 
             --accent: #6366f1;
-            --nav-bg: rgba(10, 15, 28, 0.96); 
+            --nav-bg: rgba(7, 10, 22, 0.98); 
         }
 
         body { 
@@ -20,23 +20,27 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #050810 100%);
+            /* الخلفية الموحدة مع باقي الصفحات */
+            background: 
+                radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                #020617;
             min-height: 100vh;
         }
 
         /* Glassmorphism Panels */
         .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        /* المنيو السفلي الموحد - مطابق 1000% */
+        /* المنيو السفلي الموحد */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(255, 255, 255, 0.05); 
             height: 85px; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
@@ -49,116 +53,134 @@
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
             position: relative; top: -28px; 
-            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
-            border: 6px solid var(--bg-dark); 
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
+            border: 6px solid #020617; 
         }
 
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .nav-item.active { color: var(--primary); }
 
-        /* Invest Specific Styles */
+        /* Invest Specific */
         .btn-glow {
             background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-glow:active { transform: scale(0.96); }
+        .btn-glow:active { transform: scale(0.94); }
 
         .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
         .pulse-dot::after {
             content: ''; position: absolute; width: 100%; height: 100%;
             background: inherit; border-radius: inherit;
-            animation: pulse-ring 1.5s infinite;
+            animation: pulse-ring 1.8s infinite;
         }
-        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(3.5); opacity: 0; } }
 
-        .tier-card { border-radius: 2.5rem; transition: 0.3s ease; }
-        .tier-active { border: 2px solid var(--primary); background: rgba(59, 130, 246, 0.05); }
+        .tier-card { border-radius: 2.5rem; transition: 0.4s; position: relative; overflow: hidden; }
+        .tier-active { border: 1px solid rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.08); }
+        
+        .glow-overlay {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="pb-32">
 
-    <section class="p-6 pt-16">
-        <div class="flex justify-between items-end mb-8">
+    <section class="p-8 pt-16">
+        <div class="flex justify-between items-end mb-10">
             <div>
-                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Trading Capital</p>
-                <h2 class="text-4xl font-black italic tracking-tighter text-white leading-none">$<span id="displayBalance">0.00</span></h2>
+                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Operational Capital</p>
+                <h2 class="text-5xl font-black italic tracking-tighter text-white leading-none">$<span id="displayBalance">0.00</span></h2>
             </div>
             <div class="text-right">
-                <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-4 py-2 rounded-full border border-blue-500/20 tracking-widest uppercase shadow-lg">Node Active</span>
+                <span class="bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-4 py-2 rounded-xl border border-emerald-500/20 tracking-widest uppercase">Live Node</span>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Personal</p>
-                <p class="text-xl font-black text-emerald-400">+$0.00</p>
+        <div class="grid grid-cols-2 gap-5 mb-8">
+            <div class="glass-panel p-6 rounded-[2.2rem]">
+                <p class="text-[9px] text-slate-500 font-black uppercase mb-2 tracking-widest">Daily Yield</p>
+                <p class="text-2xl font-black text-emerald-400">+$0.00</p>
             </div>
-            <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">Daily Team</p>
-                <p class="text-xl font-black text-blue-400">+$0.00</p>
+            <div class="glass-panel p-6 rounded-[2.2rem]">
+                <p class="text-[9px] text-slate-500 font-black uppercase mb-2 tracking-widest">Network</p>
+                <p class="text-2xl font-black text-blue-400">+$0.00</p>
             </div>
         </div>
 
-        <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
-            <div class="flex justify-between items-center mb-5 px-2">
+        <div class="glass-panel p-8 rounded-[3rem] text-center relative overflow-hidden">
+            <div class="glow-overlay"></div>
+            <div class="flex justify-between items-center mb-8 px-2">
                 <div class="flex items-center gap-3">
                     <div class="pulse-dot"></div>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantum Engine</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Quantum Sync</span>
                 </div>
-                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full">Ready 0/2</span>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/10 px-4 py-1.5 rounded-full border border-blue-500/10">Status: Ready 0/2</span>
             </div>
             
-            <button id="execBtn" onclick="handleExecution()" class="btn-glow w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3">
-                <i class="fas fa-microchip text-white text-lg"></i>
-                <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Execute Sequence</span>
+            <button id="execBtn" onclick="handleExecution()" class="btn-glow w-full py-6 rounded-[2rem] flex items-center justify-center gap-4 group">
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center group-active:rotate-180 transition-transform">
+                    <i class="fas fa-microchip text-white"></i>
+                </div>
+                <span id="execText" class="text-sm font-black uppercase tracking-[0.2em] text-white">Execute Protocol</span>
             </button>
             
-            <p class="text-[9px] text-slate-600 mt-4 italic font-bold leading-relaxed">* Synchronization required twice daily for full yield allocation</p>
+            <p class="text-[10px] text-slate-600 mt-6 font-bold leading-relaxed uppercase tracking-tighter">
+                * Authorization required twice daily for full yield allocation
+            </p>
         </div>
     </section>
 
-    <section class="px-6 space-y-5 pb-10">
-        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4">Institutional Tiers</h3>
+    <section class="px-8 space-y-6 pb-10">
+        <h3 class="text-[11px] font-black uppercase tracking-[0.4em] text-slate-600 ml-4">Mining Tiers</h3>
 
-        <div class="glass-panel tier-card tier-active p-6">
-            <div class="flex justify-between items-start mb-4">
+        <div class="glass-panel tier-card tier-active p-7">
+            <div class="flex justify-between items-start mb-6">
                 <div>
-                    <h4 class="text-[15px] font-black italic tracking-tight text-white uppercase">Silver Discovery</h4>
-                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1">Operational Protocol</p>
+                    <h4 class="text-lg font-black italic tracking-tight text-white uppercase">Silver Protocol</h4>
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1 tracking-widest">Current Active Node</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-2xl font-black text-white leading-none">1.9%</p>
-                    <p class="text-[8px] text-slate-500 font-black">DAILY ROI</p>
+                    <p class="text-3xl font-black text-white leading-none tracking-tighter">1.9%</p>
+                    <p class="text-[9px] text-slate-500 font-black uppercase">Daily ROI</p>
                 </div>
             </div>
-            <div class="flex justify-between text-[10px] text-slate-400 font-bold border-t border-white/5 pt-4">
-                <span class="flex items-center gap-2"><i class="fas fa-wallet text-blue-500"></i> $50 - $500</span>
-                <span class="flex items-center gap-2"><i class="fas fa-users text-blue-500"></i> 0 Refs</span>
-            </div>
-        </div>
-
-        <div class="glass-panel tier-card p-6 opacity-70 border-l-4 border-amber-500/50">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h4 class="text-sm font-black italic text-slate-200 uppercase">Golden Catalyst</h4>
-                    <p class="text-[10px] text-amber-500 font-black">2.2% DAILY</p>
-                </div>
-                <div class="text-[9px] text-slate-500 font-black text-right uppercase">
-                    $500 - $2,000<br>5 Referrals
-                </div>
+            <div class="flex justify-between text-[11px] text-slate-400 font-black border-t border-white/5 pt-5 uppercase tracking-tighter">
+                <span class="flex items-center gap-2 text-slate-300"><i class="fas fa-vault text-blue-500"></i> $50 - $500</span>
+                <span class="flex items-center gap-2 text-slate-300"><i class="fas fa-microchip text-blue-500"></i> Auto</span>
             </div>
         </div>
 
-        <div class="glass-panel tier-card p-6 opacity-50 border-l-4 border-slate-500/50">
+        <div class="glass-panel tier-card p-7 opacity-60 border-l-4 border-amber-500/40">
             <div class="flex justify-between items-center">
                 <div>
-                    <h4 class="text-sm font-black italic text-slate-400 uppercase">Platinum Nexus</h4>
-                    <p class="text-[10px] text-slate-400 font-black">2.4% DAILY</p>
+                    <h4 class="text-base font-black italic text-slate-300 uppercase tracking-tight">Golden Catalyst</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <i class="fas fa-lock text-[10px] text-amber-500/50"></i>
+                        <p class="text-[10px] text-amber-500 font-black uppercase">2.2% Daily Yield</p>
+                    </div>
                 </div>
-                <div class="text-[9px] text-slate-500 font-black text-right uppercase">
-                    $2,000 - $6,000<br>10 Referrals
+                <div class="text-[10px] text-slate-500 font-black text-right uppercase tracking-tighter leading-tight">
+                    Requirement:<br>$500 Capital
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel tier-card p-7 opacity-40 border-l-4 border-indigo-500/40">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="text-base font-black italic text-slate-400 uppercase tracking-tight">Platinum Nexus</h4>
+                    <div class="flex items-center gap-2 mt-1">
+                        <i class="fas fa-lock text-[10px] text-indigo-500/50"></i>
+                        <p class="text-[10px] text-indigo-400 font-black uppercase">2.4% Daily Yield</p>
+                    </div>
+                </div>
+                <div class="text-[10px] text-slate-600 font-black text-right uppercase tracking-tighter leading-tight">
+                    Requirement:<br>$2,000 Capital
                 </div>
             </div>
         </div>
@@ -167,7 +189,9 @@
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab active-glow"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
+        </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -182,16 +206,20 @@
             
             if(taps === 1) {
                 text.innerText = "Syncing Node...";
-                count.innerText = "Syncing 1/2";
+                count.innerText = "Status: Syncing 1/2";
                 count.classList.replace('text-blue-500', 'text-amber-500');
                 btn.style.background = "linear-gradient(135deg, #065f46 0%, #10b981 100%)";
+                btn.style.boxShadow = "0 15px 35px rgba(16, 185, 129, 0.3)";
             } else if(taps === 2) {
-                text.innerText = "Sequence Locked";
-                count.innerText = "Complete 2/2";
+                text.innerText = "Protocol Locked";
+                count.innerText = "Status: Complete 2/2";
                 count.classList.replace('text-amber-500', 'text-emerald-500');
                 btn.disabled = true;
-                btn.style.opacity = "0.6";
-                btn.style.filter = "grayscale(0.5)";
+                btn.style.opacity = "0.5";
+                btn.style.filter = "grayscale(1)";
+                
+                // إضافة تأثير اهتزاز خفيف عند النجاح
+                navigator.vibrate ? navigator.vibrate(50) : null;
                 alert("Protocol yield successfully synchronized to your main account.");
             }
         }
