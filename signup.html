@@ -98,7 +98,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // جلب الكود تلقائياً
+        // جلب كود الشخص الذي دعا المستخدم من الرابط
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const refFromUrl = urlParams.get('ref');
@@ -142,7 +142,7 @@
             const invite = document.getElementById('inviteCode').value.trim();
 
             if (!name || !phone || !email || !password || !invite) {
-                showAlert("All fields are required!");
+                showAlert("All fields including Invite Code are required!");
                 return;
             }
             if (password !== confirmPass) {
@@ -151,26 +151,36 @@
             }
 
             const btn = document.getElementById('signupBtn');
-            btn.innerText = "VERIFYING...";
+            btn.innerText = "INITIALIZING NODE...";
             btn.disabled = true;
 
             try {
+                // 1. إنشاء الحساب
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+
+                // 2. توليد كود دعوة فريد للمستخدم الجديد من الـ UID (5 خانات)
+                const myPersonalCode = user.uid.substring(0, 5).toUpperCase();
+
+                // 3. حفظ البيانات في Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     phoneNumber: document.getElementById('countryCode').value + phone,
                     email: email,
-                    inviteCode: invite,
+                    inviteCode: invite, // كود الشخص الذي دعاه
+                    myReferralCode: myPersonalCode, // كود الدعوة الخاص بهذا المستخدم
                     balance: 0,
                     createdAt: new Date().toISOString()
                 });
-                showAlert("Account Created!", "success");
+
+                showAlert("Node Created Successfully!", "success");
                 setTimeout(() => window.location.href = "index.html", 1500);
             } catch (error) {
                 btn.innerText = "CREATE ACCOUNT";
                 btn.disabled = false;
-                showAlert(error.message);
+                let errorMsg = error.message;
+                if(error.code === 'auth/email-already-in-use') errorMsg = "Email already registered!";
+                showAlert(errorMsg);
             }
         });
     </script>
