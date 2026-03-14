@@ -31,7 +31,6 @@
         
         #mainContent { display: none; }
 
-        /* Crypto Card - Premium Glass Design */
         .crypto-card {
             background: linear-gradient(135deg, rgba(30, 64, 175, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
             backdrop-filter: blur(20px);
@@ -41,23 +40,12 @@
             border-radius: 2.5rem;
         }
 
-        .crypto-card::before {
-            content: '';
-            position: absolute;
-            top: -20%; right: -10%;
-            width: 200px; height: 200px;
-            background: var(--primary);
-            filter: blur(100px);
-            opacity: 0.2;
-        }
-
         .glass-panel { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(25px); 
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        /* Navigation */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -82,15 +70,11 @@
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        /* Sliding Panels */
         .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: flex-end; }
         .panel-content { width: 100%; background: #070b16; border-radius: 3.5rem 3.5rem 0 0; padding: 2.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
         .show-panel .panel-content { transform: translateY(0); }
         
-        /* Market Row Animation */
         .market-row { transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .market-row:active { background: rgba(255,255,255,0.03); }
-
         .skeleton { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
@@ -177,14 +161,14 @@
             <div class="glass-panel p-7 rounded-[2.2rem] mb-8 border-blue-500/10">
                 <p class="text-[9px] text-slate-600 uppercase font-black mb-4 tracking-[0.2em]">Personal Node Address</p>
                 <div class="flex justify-between items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">
-                    <p class="text-[11px] font-mono font-bold text-blue-400 truncate">TYG678sjdHksl927NSkw028NskLp12</p>
-                    <button class="bg-blue-600 p-2 rounded-lg text-xs"><i class="fas fa-copy"></i></button>
+                    <p id="walletAddrDisplay" class="text-[11px] font-mono font-bold text-blue-400 truncate tracking-tighter text-white">Fetching address...</p>
+                    <button id="copyBtn" class="bg-blue-600 p-2 rounded-lg text-xs text-white active:scale-90 transition-all"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
 
             <div class="space-y-4">
                 <input type="number" id="depAmount" placeholder="0.00" class="w-full bg-slate-900/50 border border-white/5 py-6 px-8 rounded-[2rem] font-black outline-none focus:border-blue-500/50 transition-all text-white text-xl">
-                <button class="w-full bg-blue-600 py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/40">Confirm Protocol</button>
+                <button id="confirmDepositBtn" class="w-full bg-blue-600 py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/40 text-white active:scale-95 transition-all">Confirm Protocol</button>
             </div>
         </div>
     </div>
@@ -202,7 +186,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -217,18 +201,72 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let currentUserId = null;
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                currentUserId = user.uid;
                 document.getElementById('mainContent').style.display = 'block';
+                
+                // الاستماع المباشر لبيانات المستخدم
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
+                        
+                        // تحديث الرصيد والاسم
                         const balance = data.balance || 0;
                         document.getElementById('userBalance').innerText = `$${parseFloat(balance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = data.fullName || "PREMIER AGENT";
+                        
+                        // تحديث عنوان المحفظة داخل الـ Panel
+                        const walletAddr = data.walletAddress || "No Address Assigned";
+                        document.getElementById('walletAddrDisplay').innerText = walletAddr;
                     }
                 });
             } else { window.location.replace('login.html'); }
+        });
+
+        // زر النسخ
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const addr = document.getElementById('walletAddrDisplay').innerText;
+            if(addr && addr !== "Fetching address...") {
+                navigator.clipboard.writeText(addr);
+                const btn = document.getElementById('copyBtn');
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+            }
+        });
+
+        // تأكيد الإيداع
+        document.getElementById('confirmDepositBtn').addEventListener('click', async () => {
+            const amount = document.getElementById('depAmount').value;
+            if(!amount || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
+            const btn = document.getElementById('confirmDepositBtn');
+            btn.disabled = true;
+            btn.innerText = "PROCESSING...";
+
+            try {
+                // حفظ العملية في Firebase لمراجعة الأدمن
+                await addDoc(collection(db, "users", currentUserId, "deposits"), {
+                    amount: parseFloat(amount),
+                    status: "pending",
+                    timestamp: new Date().toISOString(),
+                    type: "USDT.TRC20"
+                });
+                
+                alert("Deposit request submitted! Please send the exact amount to the address shown.");
+                closePanel('depositPanel');
+                document.getElementById('depAmount').value = "";
+            } catch (e) {
+                alert("Error submitting request.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Confirm Protocol";
+            }
         });
 
         window.openPanel = (id) => {
@@ -243,6 +281,7 @@
             setTimeout(() => el.style.display = 'none', 400);
         };
 
+        // دالة جلب أسعار العملات
         async function fetchMarketData() {
             try {
                 const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin&vs_currencies=usd&include_24hr_change=true');
