@@ -8,103 +8,170 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
+        :root { 
+            --bg-dark: #050810; 
+            --primary: #3b82f6; 
+            --accent: #6366f1;
+            --nav-bg: rgba(10, 15, 28, 0.96); 
+        }
+
         body { 
             background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
             background: radial-gradient(circle at 50% 0%, #1e293b 0%, #050810 100%);
+            min-height: 100vh;
         }
+
         #mainProfile { display: none; }
-        
+
+        /* Glassmorphism Panels */
         .glass-panel { 
             background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(16px); 
+            backdrop-filter: blur(20px); 
             border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         .profile-ring {
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             padding: 3px;
             border-radius: 9999px;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
         }
 
-        /* المنيو السفلي الموحد */
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 80px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 10px; }
-        .invest-fab { width: 65px; height: 65px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -25px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 5px solid var(--bg-dark); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--primary); }
+        /* المنيو السفلي الموحد - 1000% مقاسات ثابتة */
+        .bottom-nav { 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(20px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            height: 85px; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 1000; 
+            padding-bottom: 15px; 
+        }
+
+        .invest-fab { 
+            width: 68px; 
+            height: 68px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            top: -28px; 
+            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
+            border: 6px solid var(--bg-dark); 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .invest-fab:active { transform: scale(0.9) rotate(5deg); }
+
+        .nav-item { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #64748b; 
+            text-decoration: none; 
+            font-size: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        
+        /* Typography & Utility */
+        .glow-text { text-shadow: 0 0 20px rgba(255,255,255,0.2); }
     </style>
 </head>
 <body class="pb-32">
 
-    <main id="mainProfile">
-        <div class="px-8 pt-16 pb-10 text-center relative">
-            <div class="profile-ring inline-block mb-6 shadow-xl">
-                <div class="w-24 h-24 rounded-full bg-slate-900 overflow-hidden border-4 border-slate-950">
+    <main id="mainProfile" class="animate-fadeIn">
+        <div class="px-8 pt-12 pb-10 text-center relative">
+            <div class="profile-ring inline-block mb-6 relative">
+                <div class="w-28 h-28 rounded-full bg-slate-900 overflow-hidden border-4 border-slate-950">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
+                <div class="absolute bottom-1 right-1 w-7 h-7 bg-emerald-500 border-4 border-slate-950 rounded-full shadow-lg shadow-emerald-500/50"></div>
             </div>
-            <h2 id="userName" class="text-2xl font-extrabold tracking-tight text-white mb-1 uppercase italic">Loading...</h2>
-            <p id="userEmailDisplay" class="text-slate-400 text-xs font-medium tracking-wide">---</p>
+            
+            <h2 id="userName" class="text-3xl font-black tracking-tighter text-white mb-1 uppercase italic glow-text">---</h2>
+            <div class="flex items-center justify-center gap-2">
+                <p id="userEmailDisplay" class="text-slate-400 text-sm font-semibold opacity-80 tracking-wide">---</p>
+            </div>
         </div>
 
-        <div class="px-6 space-y-4 mb-8">
-            <div class="glass-panel p-6 rounded-[2rem] flex items-center justify-between border-t border-white/10">
-                <div>
-                    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Equity</p>
-                    <p id="userBalance" class="text-3xl font-black text-white tracking-tighter">$0.00</p>
-                </div>
-                <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-inner">
-                    <i class="fas fa-wallet text-xl"></i>
+        <div class="px-6 space-y-5 mb-8">
+            <div class="glass-panel p-7 rounded-[2.5rem] relative overflow-hidden group">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -z-10 group-hover:bg-primary/10 transition-colors"></div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[11px] text-slate-500 uppercase font-black tracking-[0.2em] mb-2">Portfolio Value</p>
+                        <p id="userBalance" class="text-4xl font-black text-white tracking-tighter">$0.00</p>
+                    </div>
+                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div class="glass-panel p-5 rounded-[2rem] border-l-2 border-blue-500">
-                    <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Phone Number</p>
-                    <p id="userPhone" class="text-sm font-bold text-slate-200">---</p>
+                <div class="glass-panel p-5 rounded-[2rem] border-l-4 border-blue-500/50">
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Phone Link</p>
+                    <p id="userPhone" class="text-sm font-extrabold text-slate-200 tracking-wider">---</p>
                 </div>
-                <div class="glass-panel p-5 rounded-[2rem] border-l-2 border-indigo-500">
-                    <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Node ID</p>
+                <div class="glass-panel p-5 rounded-[2rem] border-l-4 border-indigo-500/50">
+                    <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Access ID</p>
                     <p id="userInviteCode" class="text-sm font-black text-blue-400">---</p>
                 </div>
             </div>
         </div>
 
-        <div class="px-6 space-y-3">
-            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2 mb-2">Protocol Controls</h3>
+        <div class="px-6 space-y-4">
+            <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] ml-4">System Protocols</h3>
             
-            <a href="invite.html" class="glass-panel flex items-center justify-between p-6 rounded-[2rem] active:scale-95 transition-all">
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400"><i class="fas fa-crown"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-white">Expansion Program</p>
-                        <p class="text-[10px] text-slate-500">Invite & Earn Commissions</p>
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden border border-white/5">
+                <a href="invite.html" class="flex items-center justify-between p-6 active:bg-white/5 transition-all border-b border-white/5">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shadow-inner">
+                            <i class="fas fa-crown text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[15px] font-extrabold text-white">Elite Rewards</p>
+                            <p class="text-xs text-slate-500 font-medium">Affiliate protocol status</p>
+                        </div>
                     </div>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-slate-700"></i>
-            </a>
+                    <i class="fas fa-chevron-right text-xs text-slate-700 mr-2"></i>
+                </a>
 
-            <button onclick="requestPasswordReset()" class="w-full glass-panel flex items-center justify-between p-6 rounded-[2rem] active:scale-95 transition-all text-left">
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400"><i class="fas fa-key"></i></div>
-                    <div>
-                        <p class="text-sm font-bold text-white">Security Keys</p>
-                        <p class="text-[10px] text-slate-500">Update Access Password</p>
+                <button onclick="requestPasswordReset()" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition-all border-b border-white/5 text-left">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400 shadow-inner">
+                            <i class="fas fa-shield-halved text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[15px] font-extrabold text-white">Security Encryption</p>
+                            <p class="text-xs text-slate-500 font-medium">Update vault password</p>
+                        </div>
                     </div>
-                </div>
-                <i class="fas fa-chevron-right text-xs text-slate-700"></i>
-            </button>
+                    <i class="fas fa-chevron-right text-xs text-slate-700 mr-2"></i>
+                </button>
 
-            <button id="logoutBtn" class="w-full glass-panel flex items-center gap-4 p-6 rounded-[2rem] active:bg-red-500/10 transition-all text-left text-red-500">
-                <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center"><i class="fas fa-power-off"></i></div>
-                <p class="text-sm font-bold">Terminate Session</p>
-            </button>
+                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 active:bg-red-500/10 transition-all text-left group">
+                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 group-active:scale-90 transition-transform">
+                        <i class="fas fa-power-off text-xl"></i>
+                    </div>
+                    <p class="text-[15px] font-extrabold text-red-500">Terminate Protocol</p>
+                </button>
+            </div>
         </div>
     </main>
 
@@ -134,37 +201,34 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // وظيفة تغيير كلمة السر
         window.requestPasswordReset = async () => {
-            const email = auth.currentUser.email;
-            if (confirm("Send password reset link to: " + email + "?")) {
+            const email = auth.currentUser?.email;
+            if (email && confirm("Send security link to: " + email + "?")) {
                 try {
                     await sendPasswordResetEmail(auth, email);
-                    alert("Security link sent to your inbox.");
-                } catch (e) { alert("System Error: " + e.message); }
+                    alert("A secure link has been dispatched.");
+                } catch (e) { alert("Error: " + e.message); }
             }
         };
 
-        // جلب البيانات من Firebase
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainProfile').style.display = 'block';
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const d = docSnap.data();
-                    document.getElementById('userName').innerText = d.fullName || "User";
+                    document.getElementById('userName').innerText = d.fullName || "AGENT";
                     document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userEmailDisplay').innerText = user.email;
-                    document.getElementById('userPhone').innerText = d.phoneNumber || "NOT SET";
+                    document.getElementById('userPhone').innerText = d.phoneNumber || "UNLINKED";
                     document.getElementById('userInviteCode').innerText = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
                     document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=0f172a&color=3b82f6&bold=true&size=256`;
                 }
             } else { window.location.replace("login.html"); }
         });
 
-        // تسجيل الخروج
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Are you sure you want to terminate session?")) {
+            if (confirm("Terminate secure connection?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
