@@ -29,7 +29,7 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* --- البار السفلي الموحد (نسخة Support Center المعتمدة) --- */
+        /* --- البار السفلي الموحد --- */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -53,7 +53,6 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
-        /* ---------------------------------------------- */
 
         .profile-ring {
             background: linear-gradient(135deg, var(--primary), var(--accent));
@@ -201,18 +200,22 @@
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
 
-                // جلب بيانات المستخدم من Firestore
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
 
-                    // --- هنا التعديل: عرض الـ UID المختصر (5 خانات) ---
-                    // تأكد أن الحقل مخزن في فايربيس باسم referralId
+                    // عرض UID المختصر
                     document.getElementById('userIdDisplay').innerText = data.referralId || "00000";
 
+                    // عرض اسم المستخدم
                     document.getElementById('userName').innerText = data.fullName || "Member";
+                    
+                    // عرض الرصيد
                     document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                    document.getElementById('userPhoneDisplay').innerText = data.phone || "Not Linked";
+                    
+                    // --- التعديل هنا: قراءة رقم الهاتف ---
+                    // جربنا قراءة phoneNumber (الاسم المستخدم في كود التسجيل) أو phone كاحتياط
+                    document.getElementById('userPhoneDisplay').innerText = data.phoneNumber || data.phone || "Not Linked";
                     
                     const tierBadge = document.getElementById('userTierBadge');
                     if (data.tier && data.tier.trim() !== "") {
