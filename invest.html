@@ -71,36 +71,22 @@
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
 
         .plan-card {
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.02);
-            filter: grayscale(1);
-            opacity: 0.4;
+            border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem;
+            transition: all 0.4s ease; position: relative; overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02);
+            filter: grayscale(1); opacity: 0.4;
         }
 
         .plan-active {
-            filter: grayscale(0);
-            opacity: 1;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-            transform: scale(1.02);
+            filter: grayscale(0); opacity: 1;
+            background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); transform: scale(1.02);
         }
 
         .plan-active::before {
-            content: "ACTIVE";
-            position: absolute;
-            top: 10px; right: -25px;
-            background: var(--primary);
-            color: white;
-            font-size: 8px; font-weight: 900;
-            padding: 2px 30px;
-            transform: rotate(45deg);
+            content: "ACTIVE"; position: absolute; top: 10px; right: -25px;
+            background: var(--primary); color: white; font-size: 8px; font-weight: 900;
+            padding: 2px 30px; transform: rotate(45deg);
         }
     </style>
 </head>
@@ -134,7 +120,7 @@
                     <div class="pulse-dot"></div>
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantum Engine</span>
                 </div>
-                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full">Ready 0/2</span>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full text-blue-500">Ready 0/2</span>
             </div>
             
             <button id="execBtn" class="btn-glow w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3">
@@ -147,9 +133,8 @@
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Available Protocols</h3>
-
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center text-left">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
                         <i class="fas fa-cube text-blue-400 text-xl"></i>
@@ -161,11 +146,10 @@
                 </div>
                 <div class="text-right">
                     <p class="text-xl font-black text-white">1.9%</p>
-                    <p class="text-[8px] text-blue-400 font-black tracking-tighter">DAILY ROI</p>
+                    <p class="text-[8px] text-blue-400 font-black tracking-tighter uppercase">Daily ROI</p>
                 </div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -179,60 +163,6 @@
                 </div>
                 <div class="text-right">
                     <p class="text-xl font-black text-white">2.2%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-microchip text-indigo-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Platinum Nexus</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$2,000.00 - $4,999.00</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">2.5%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="plan-card" id="plan-diamond" data-min="5000" data-max="9999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-atom text-cyan-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Diamond Core</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$5,000.00 - $9,999.00</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.0%</p>
-                    <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="plan-card" id="plan-infinite" data-min="10000" data-max="9999999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10">
-                        <i class="fas fa-crown text-purple-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black uppercase italic">Vertex Infinite</h4>
-                        <p class="text-[10px] text-slate-500 font-bold">$10,000.00+</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-xl font-black text-white">3.5%</p>
                     <p class="text-[8px] text-slate-500 font-black tracking-tighter">DAILY ROI</p>
                 </div>
             </div>
@@ -284,11 +214,9 @@
                     if (docSnap.exists()) {
                         userData = docSnap.data();
                         const balance = parseFloat(userData.balance || 0);
-                        
                         document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
                         document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                         document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
-                        
                         updatePlanStatus(balance);
                         checkExecutionAvailability();
                     }
@@ -302,38 +230,52 @@
                 return;
             }
 
-            // توقيت لندن الحالي (UK Time 1 AM Reset)
             const now = new Date();
-            const ukDateString = now.toLocaleDateString('en-GB', { timeZone: 'Europe/London' });
-            
+            // توقيت لندن الحالي
+            const ukTime = new Intl.DateTimeFormat('en-GB', { 
+                timeZone: 'Europe/London', 
+                year: 'numeric', month: 'numeric', day: 'numeric', 
+                hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false 
+            }).format(now);
+
             const lastExecDate = userData.lastExecution.toDate();
-            const lastExecUKDateString = lastExecDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London' });
+            const lastExecUK = new Intl.DateTimeFormat('en-GB', { 
+                timeZone: 'Europe/London', 
+                year: 'numeric', month: 'numeric', day: 'numeric' 
+            }).format(lastExecDate);
 
-            const ukHours = parseInt(now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour12: false, hour: '2-digit' }));
+            const [datePart, timePart] = ukTime.split(', ');
+            const currentUKHour = parseInt(timePart.split(':')[0]);
 
-            // إذا كان تاريخ لندن اليوم يختلف عن تاريخ آخر تنفيذ، وكان الوقت قد تجاوز الـ 1 صباحاً
-            if (ukDateString !== lastExecUKDateString && ukHours >= 1) {
+            // القاعدة: إذا كان تاريخ اليوم في لندن يختلف عن تاريخ آخر تنفيذ، وكان الوقت الحالي >= 1 صباحاً
+            if (datePart !== lastExecUK && currentUKHour >= 1) {
                 resetButtonUI();
-            } else {
+            } else if (datePart === lastExecUK) {
+                // إذا كان قد نفذ العملية اليوم بالفعل
                 lockButtonUI();
+            } else {
+                // إذا كان يوم جديد ولكن لم تصل الساعة 1 صباحاً بعد
+                lockButtonUI();
+                execText.innerText = "Opens at 01:00 AM";
             }
         }
 
         function resetButtonUI() {
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
+            execBtn.style.background = "linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)";
             execText.innerText = "Execute Sequence";
             tapCount.innerText = "Ready 0/2";
-            tapCount.classList.replace('text-emerald-500', 'text-blue-500');
+            tapCount.className = "text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full";
             taps = 0;
         }
 
         function lockButtonUI() {
             execBtn.disabled = true;
-            execBtn.style.opacity = "0.6";
+            execBtn.style.opacity = "0.5";
             execText.innerText = "Locked Until 01:00 AM";
             tapCount.innerText = "Completed";
-            tapCount.classList.replace('text-blue-500', 'text-emerald-500');
+            tapCount.className = "text-[10px] font-black text-emerald-500 uppercase bg-emerald-500/5 px-3 py-1 rounded-full";
         }
 
         function calculateDailyROI(balance) {
@@ -347,7 +289,6 @@
 
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || taps >= 2) return;
-
             taps++;
             
             if (taps === 1) {
@@ -366,13 +307,12 @@
                         execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
                     }
                 }, 1000);
-
             } else if (taps === 2) {
                 const currentBalance = parseFloat(userData.balance || 0);
                 const profit = calculateDailyROI(currentBalance);
 
                 if (currentBalance < 50) {
-                    alert("Insufficient Trading Capital. Minimum $50 required.");
+                    alert("Minimum $50 required to trade.");
                     resetButtonUI();
                     return;
                 }
@@ -382,28 +322,19 @@
                         balance: increment(profit),
                         dailyEarn: profit,
                         totalEarned: increment(profit),
-                        lastExecution: serverTimestamp(),
-                        executionStatus: "completed"
+                        lastExecution: serverTimestamp()
                     });
-                    
-                    alert(`Sequence successful. Daily Yield: $${profit.toFixed(2)} added.`);
+                    alert(`Success! Profit of $${profit.toFixed(2)} added.`);
                     lockButtonUI();
-                } catch (error) {
-                    console.error("Sync Error:", error);
-                }
+                } catch (e) { console.error(e); }
             }
         });
 
         function updatePlanStatus(balance) {
-            const plans = document.querySelectorAll('.plan-card');
-            plans.forEach(plan => {
-                const min = parseFloat(plan.getAttribute('data-min'));
-                const max = parseFloat(plan.getAttribute('data-max'));
-                if (balance >= min && balance <= max) {
-                    plan.classList.add('plan-active');
-                } else {
-                    plan.classList.remove('plan-active');
-                }
+            document.querySelectorAll('.plan-card').forEach(plan => {
+                const min = parseFloat(plan.dataset.min);
+                const max = parseFloat(plan.dataset.max);
+                plan.classList.toggle('plan-active', balance >= min && balance <= max);
             });
         }
     </script>
