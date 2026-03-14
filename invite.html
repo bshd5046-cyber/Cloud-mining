@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VERTEX | Referral Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root { --bg: #020617; --brand: #3b82f6; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 110px; }
+        .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
+        
+        /* كرت الـ QR */
+        .qr-container {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            display: inline-block;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            transition: 0.3s;
+        }
+        .copy-btn:active { transform: scale(0.95); opacity: 0.8; }
+
+        .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
+        .nav-item span { font-size: 10px; font-weight: 700; }
+        .nav-item.active { color: var(--brand); }
+    </style>
+</head>
+<body class="hero-gradient min-h-screen">
+
+    <header class="p-6 pt-12 text-center">
+        <h1 class="text-2xl font-black italic tracking-tighter mb-2">NETWORK EXPANSION</h1>
+        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em]">Invite & Scale Your Yield</p>
+    </header>
+
+    <main class="px-6 space-y-6">
+        
+        <div class="glass-card p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="fas fa-network-wired text-6xl"></i>
+            </div>
+            
+            <div class="qr-container mb-6">
+                <div id="qrcode"></div> </div>
+            
+            <div class="space-y-2">
+                <p class="text-[10px] text-gray-500 font-black uppercase">Your Unique ID</p>
+                <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white">------</h3>
+            </div>
+        </div>
+
+        <div class="glass-card p-5">
+            <p class="text-[10px] text-gray-500 font-black uppercase mb-3">Referral Link</p>
+            <div class="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                <input id="refLinkInput" type="text" readonly class="bg-transparent border-none text-[11px] text-blue-400 font-bold w-full focus:outline-none" value="">
+                <button onclick="copyLink()" class="copy-btn px-4 py-2 rounded-lg text-[10px] font-black uppercase">Copy</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="glass-card p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase">Active Refs</p>
+                <p class="text-xl font-black text-white">0</p>
+            </div>
+            <div class="glass-card p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase">Team Bonus</p>
+                <p class="text-xl font-black text-emerald-400">+0.00%</p>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="strategy.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Strategy</span></a>
+        <a href="invite.html" class="nav-item active"><i class="fas fa-user-plus"></i><span>Invite</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script>
+        // دالة لتوليد كود فريد لا يتغير للمستخدم
+        function getPersistentRefCode() {
+            let code = localStorage.getItem('vertex_ref_code');
+            
+            if (!code) {
+                // توليد كود عشوائي من 6 أرقام
+                code = Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('vertex_ref_code', code);
+            }
+            return code;
+        }
+
+        const userCode = getPersistentRefCode();
+        const refLink = "https://vertex.trade/register?ref=" + userCode;
+
+        // عرض الكود واللينك في الصفحة
+        document.getElementById('refCodeDisplay').innerText = userCode;
+        document.getElementById('refLinkInput').value = refLink;
+
+        // توليد الـ QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: refLink,
+            width: 160,
+            height: 160,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        // دالة النسخ
+        function copyLink() {
+            const copyText = document.getElementById("refLinkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            
+            alert("Referral Link Copied: " + copyText.value);
+        }
+    </script>
+</body>
+</html>
