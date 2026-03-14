@@ -254,7 +254,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -270,29 +270,127 @@
         const db = getFirestore(app);
 
         let currentUserId = null;
+        let userData = null;
+        let taps = 0;
+
+        const execBtn = document.getElementById('execBtn');
+        const execText = document.getElementById('execText');
+        const tapCount = document.getElementById('tapCount');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
-                // استخدام onSnapshot لجعل القراءة حية ومباشرة
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const balance = parseFloat(data.balance || 0);
+                        userData = docSnap.data();
+                        const balance = parseFloat(userData.balance || 0);
                         
-                        // تحديث الرصيد والأرباح في الصفحة
                         document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
-                        document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(data.dailyEarn || 0).toFixed(2);
-                        document.getElementById('dailyTeam').innerText = "+$" + parseFloat(data.teamEarn || 0).toFixed(2);
+                        document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
+                        document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                         
-                        // تحديث حالة الخطط (Active/Inactive) بناءً على الرصيد
                         updatePlanStatus(balance);
+                        checkExecutionAvailability();
                     }
-                }, (error) => {
-                    console.error("Error reading data:", error);
                 });
-            } else { 
-                window.location.replace('login.html'); 
+            } else { window.location.replace('login.html'); }
+        });
+
+        function checkExecutionAvailability() {
+            if (!userData.lastExecution) {
+                resetButtonUI();
+                return;
+            }
+
+            // توقيت لندن الحالي (UK Time 1 AM Reset)
+            const now = new Date();
+            const ukDateString = now.toLocaleDateString('en-GB', { timeZone: 'Europe/London' });
+            
+            const lastExecDate = userData.lastExecution.toDate();
+            const lastExecUKDateString = lastExecDate.toLocaleDateString('en-GB', { timeZone: 'Europe/London' });
+
+            const ukHours = parseInt(now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour12: false, hour: '2-digit' }));
+
+            // إذا كان تاريخ لندن اليوم يختلف عن تاريخ آخر تنفيذ، وكان الوقت قد تجاوز الـ 1 صباحاً
+            if (ukDateString !== lastExecUKDateString && ukHours >= 1) {
+                resetButtonUI();
+            } else {
+                lockButtonUI();
+            }
+        }
+
+        function resetButtonUI() {
+            execBtn.disabled = false;
+            execBtn.style.opacity = "1";
+            execText.innerText = "Execute Sequence";
+            tapCount.innerText = "Ready 0/2";
+            tapCount.classList.replace('text-emerald-500', 'text-blue-500');
+            taps = 0;
+        }
+
+        function lockButtonUI() {
+            execBtn.disabled = true;
+            execBtn.style.opacity = "0.6";
+            execText.innerText = "Locked Until 01:00 AM";
+            tapCount.innerText = "Completed";
+            tapCount.classList.replace('text-blue-500', 'text-emerald-500');
+        }
+
+        function calculateDailyROI(balance) {
+            if (balance >= 10000) return balance * 0.035;
+            if (balance >= 5000) return balance * 0.030;
+            if (balance >= 2000) return balance * 0.025;
+            if (balance >= 500) return balance * 0.022;
+            if (balance >= 50) return balance * 0.019;
+            return 0;
+        }
+
+        execBtn.addEventListener('click', async () => {
+            if (!currentUserId || taps >= 2) return;
+
+            taps++;
+            
+            if (taps === 1) {
+                execBtn.disabled = true;
+                let timeLeft = 10;
+                tapCount.innerText = "Syncing 1/2";
+                
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    execText.innerText = `Synchronizing (${timeLeft}s)`;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        execBtn.disabled = false;
+                        execText.innerText = "Finalize Sequence";
+                        tapCount.innerText = "Ready 2/2";
+                        execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
+                    }
+                }, 1000);
+
+            } else if (taps === 2) {
+                const currentBalance = parseFloat(userData.balance || 0);
+                const profit = calculateDailyROI(currentBalance);
+
+                if (currentBalance < 50) {
+                    alert("Insufficient Trading Capital. Minimum $50 required.");
+                    resetButtonUI();
+                    return;
+                }
+
+                try {
+                    await updateDoc(doc(db, "users", currentUserId), {
+                        balance: increment(profit),
+                        dailyEarn: profit,
+                        totalEarned: increment(profit),
+                        lastExecution: serverTimestamp(),
+                        executionStatus: "completed"
+                    });
+                    
+                    alert(`Sequence successful. Daily Yield: $${profit.toFixed(2)} added.`);
+                    lockButtonUI();
+                } catch (error) {
+                    console.error("Sync Error:", error);
+                }
             }
         });
 
@@ -308,40 +406,6 @@
                 }
             });
         }
-
-        let taps = 0;
-        const execBtn = document.getElementById('execBtn');
-        
-        execBtn.addEventListener('click', async () => {
-            if (!currentUserId) return;
-            
-            taps++;
-            const text = document.getElementById('execText');
-            const count = document.getElementById('tapCount');
-            
-            if(taps === 1) {
-                text.innerText = "Syncing Node...";
-                count.innerText = "Syncing 1/2";
-                count.classList.replace('text-blue-500', 'text-amber-500');
-                execBtn.style.background = "linear-gradient(135deg, #059669 0%, #10b981 100%)";
-            } else if(taps === 2) {
-                text.innerText = "Sequence Locked";
-                count.innerText = "Complete 2/2";
-                count.classList.replace('text-amber-500', 'text-emerald-500');
-                execBtn.disabled = true;
-                execBtn.style.opacity = "0.6";
-
-                try {
-                    await updateDoc(doc(db, "users", currentUserId), {
-                        lastExecution: serverTimestamp(),
-                        executionStatus: "completed"
-                    });
-                    alert("Protocol yield successfully synchronized to your main account.");
-                } catch (e) {
-                    console.error("Error updating execution:", e);
-                }
-            }
-        });
     </script>
 </body>
 </html>
