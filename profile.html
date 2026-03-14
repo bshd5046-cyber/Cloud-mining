@@ -38,13 +38,14 @@
             bottom: -100%;
             left: 0;
             right: 0;
-            height: 80vh;
+            height: 85vh;
             background: var(--bg-dark);
             z-index: 2000;
             transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             border-top: 1px solid rgba(59, 130, 246, 0.3);
             border-radius: 3rem 3rem 0 0;
             padding: 2rem;
+            box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
         }
 
         #securityPanel.active { bottom: 0; }
@@ -52,8 +53,8 @@
         .overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
             display: none;
             z-index: 1500;
         }
@@ -65,7 +66,6 @@
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
         }
 
-        /* Bottom Nav */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -94,6 +94,14 @@
             background: linear-gradient(135deg, var(--primary), var(--accent));
             transition: all 0.3s ease;
         }
+        
+        .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        @keyframes successPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .success-anim { animation: successPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     </style>
 </head>
 <body class="pb-32">
@@ -174,31 +182,48 @@
     </main>
 
     <div id="securityPanel">
-        <div class="flex items-center justify-between mb-10">
-            <button onclick="toggleSecurity(false)" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                <i class="fas fa-arrow-left text-white"></i>
-            </button>
-            <h4 class="text-lg font-black italic tracking-tighter">SECURITY<span class="text-blue-500">VAULT</span></h4>
-            <div class="w-12"></div> </div>
-
-        <div class="text-center mb-12">
-            <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
-                <i class="fas fa-lock-open text-3xl text-blue-500"></i>
+        <div id="securityContent">
+            <div class="flex items-center justify-between mb-10">
+                <button onclick="toggleSecurity(false)" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 active:scale-90 transition-transform">
+                    <i class="fas fa-arrow-left text-white"></i>
+                </button>
+                <h4 class="text-lg font-black italic tracking-tighter">SECURITY<span class="text-blue-500">VAULT</span></h4>
+                <div class="w-12"></div> 
             </div>
-            <h3 class="text-2xl font-black mb-3">Password Recovery</h3>
-            <p class="text-slate-400 text-sm leading-relaxed px-4">
-                We will send a secure encryption link to your registered email address to reset your access credentials.
+
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                    <i class="fas fa-lock-open text-3xl text-blue-500"></i>
+                </div>
+                <h3 class="text-2xl font-black mb-3">Password Recovery</h3>
+                <p class="text-slate-400 text-sm leading-relaxed px-4">
+                    A secure encryption link will be dispatched to your registered email to reset your credentials.
+                </p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-3xl border-blue-500/20 mb-10">
+                <p class="text-[10px] font-black text-slate-500 uppercase mb-2 tracking-widest">Destination Email</p>
+                <p id="recoveryEmail" class="text-blue-400 font-bold tracking-wide">---</p>
+            </div>
+
+            <button id="sendBtn" onclick="sendResetEmail()" class="w-full btn-action py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[12px] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-95">
+                <span>Request Secure Link</span>
+                <i class="fas fa-paper-plane text-[10px]"></i>
+            </button>
+        </div>
+
+        <div id="successState" class="hidden flex flex-col items-center justify-center h-full text-center pb-20 success-anim">
+            <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mb-8">
+                <i class="fas fa-check-double text-4xl text-emerald-500"></i>
+            </div>
+            <h3 class="text-3xl font-black mb-4 tracking-tighter uppercase italic">Link Sent!</h3>
+            <p class="text-slate-400 leading-relaxed mb-10 px-6 text-sm font-medium">
+                The recovery link is on its way. Please check your <span class="text-white font-bold underline">Inbox</span> or <span class="text-white font-bold underline">Spam</span> folder to proceed.
             </p>
+            <button onclick="toggleSecurity(false)" class="bg-blue-500 text-white px-12 py-5 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg shadow-blue-500/30">
+                Got it, Thanks
+            </button>
         </div>
-
-        <div class="glass-panel p-6 rounded-3xl border-blue-500/20 mb-10">
-            <p class="text-[10px] font-black text-slate-500 uppercase mb-2">Registered Email</p>
-            <p id="recoveryEmail" class="text-blue-400 font-bold tracking-wide">---</p>
-        </div>
-
-        <button onclick="sendResetEmail()" class="w-full btn-action py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[12px] shadow-xl shadow-blue-500/20">
-            Request Secure Link <i class="fas fa-paper-plane ml-2"></i>
-        </button>
     </div>
 
     <nav class="bottom-nav">
@@ -227,30 +252,52 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // UI Helpers
+        // Security Panel Logic
         window.toggleSecurity = (show) => {
             const panel = document.getElementById('securityPanel');
             const overlay = document.getElementById('overlay');
+            const content = document.getElementById('securityContent');
+            const success = document.getElementById('successState');
+            
             if (show) {
                 panel.classList.add('active');
                 overlay.style.display = 'block';
             } else {
                 panel.classList.remove('active');
                 overlay.style.display = 'none';
+                // Reset states after slide-down animation
+                setTimeout(() => {
+                    content.classList.remove('hidden');
+                    success.classList.add('hidden');
+                }, 500);
             }
         };
 
         window.sendResetEmail = async () => {
             const email = auth.currentUser?.email;
+            const btn = document.getElementById('sendBtn');
+            const content = document.getElementById('securityContent');
+            const success = document.getElementById('successState');
+
             if (email) {
                 try {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="fas fa-spinner animate-spin"></i> Dispatching...`;
+
                     await sendPasswordResetEmail(auth, email);
-                    alert("Security link sent successfully! Check your inbox.");
-                    toggleSecurity(false);
-                } catch (e) { alert("Error: " + e.message); }
+                    
+                    // Show Success State
+                    content.classList.add('hidden');
+                    success.classList.remove('hidden');
+                } catch (e) { 
+                    alert("System Error: " + e.message); 
+                    btn.disabled = false;
+                    btn.innerHTML = `Request Secure Link <i class="fas fa-paper-plane ml-2"></i>`;
+                }
             }
         };
 
+        // Auth & Data Handling
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
