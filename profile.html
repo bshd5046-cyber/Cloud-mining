@@ -9,9 +9,12 @@
     <style>
         :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
         body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow: hidden; }
+        
+        /* إخفاء المحتوى حتى التأكد من الهوية */
+        #mainProfile { display: none; }
+
         .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* قسم الأمان الداخلي */
         #securitySection {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: var(--bg-dark); z-index: 250; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -19,23 +22,45 @@
         }
         #securitySection.open { right: 0; }
 
-        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; font-size: 14px; }
+        .input-dark { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.2rem; padding: 1rem; width: 100%; outline: none; transition: 0.3s; font-size: 14px; color: white; }
         .input-dark:focus { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
 
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -32px; left: 50%; transform: translateX(-50%); border: 6px solid var(--bg-dark); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; }
+        /* Unified Navigation Style */
+        .bottom-nav { 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(15px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            height: 80px; 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 100;
+            padding-bottom: 10px;
+        }
+        .invest-fab { 
+            width: 65px; height: 65px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -25px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); 
+            border: 5px solid var(--bg-dark); 
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--primary); }
     </style>
 </head>
-<body>
+<body class="pb-28">
 
-    <main id="mainProfile" class="h-screen overflow-y-auto pb-32">
+    <main id="mainProfile" class="h-screen overflow-y-auto">
         <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/20 to-transparent">
             <div class="w-24 h-24 rounded-full border-2 border-blue-500/50 p-1 mx-auto mb-4">
                 <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" class="w-full h-full rounded-full object-cover">
             </div>
-            <h2 id="userName" class="text-2xl font-black italic tracking-tight">Loading...</h2>
+            <h2 id="userName" class="text-2xl font-black italic tracking-tight uppercase">Loading...</h2>
             <p id="userEmailDisplay" class="text-gray-500 text-[10px] mt-1 font-bold uppercase tracking-widest">---</p>
         </div>
 
@@ -87,26 +112,40 @@
                     <i class="fas fa-key text-xl"></i>
                 </div>
                 <h4 class="text-white font-black text-xs uppercase italic">Change Password</h4>
-                <p class="text-[10px] text-gray-500 px-2">We will send a secure password reset link to your email.</p>
-                <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition">Send Reset Link</button>
+                <p class="text-[10px] text-gray-500 px-2">We will send a reset link to your email.</p>
+                <button id="sendResetBtn" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest">Send Reset Link</button>
             </div>
 
             <div class="glass-card p-6 rounded-[2rem] space-y-4">
                 <h4 class="text-purple-500 font-black text-xs uppercase italic">Update Email</h4>
                 <input type="email" id="newEmail" placeholder="New Email Address" class="input-dark">
-                <button id="saveEmailBtn" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition">Update Email</button>
+                <button id="saveEmailBtn" class="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest">Update Email</button>
             </div>
         </div>
     </section>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
         <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
+            <a href="invest.html" class="invest-fab">
+                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
+            </a>
         </div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        <a href="support.html" class="nav-item">
+            <i class="fas fa-headset"></i>
+            <span>Support</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <i class="fas fa-circle-user"></i>
+            <span>Profile</span>
+        </a>
     </nav>
 
     <script type="module">
@@ -127,15 +166,16 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // فتح وإغلاق قسم الأمان
+        // Security Toggle
         window.toggleSecurity = (open) => {
             const sec = document.getElementById('securitySection');
             open ? sec.classList.add('open') : sec.classList.remove('open');
         };
 
-        // جلب بيانات المستخدم
+        // Auth Guard and Data Fetch
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                document.getElementById('mainProfile').style.display = 'block';
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
@@ -146,47 +186,41 @@
                         document.getElementById('userEmailDisplay').innerText = user.email;
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff`;
                     }
-                } catch (e) { console.error("Error loading data:", e); }
-            } else { window.location.href = "login.html"; }
+                } catch (e) { console.error(e); }
+            } else {
+                window.location.replace("login.html");
+            }
         });
 
-        // 1. وظيفة إرسال رابط تغيير كلمة السر
+        // Logout Function
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm("Are you sure you want to logout?")) {
+                signOut(auth).then(() => window.location.replace("login.html"));
+            }
+        });
+
+        // Password Reset
         document.getElementById('sendResetBtn').addEventListener('click', async () => {
             const btn = document.getElementById('sendResetBtn');
             try {
-                btn.disabled = true;
                 btn.innerText = "SENDING...";
                 await sendPasswordResetEmail(auth, auth.currentUser.email);
-                alert("A secure reset link has been sent to: " + auth.currentUser.email);
+                alert("Reset link sent to your email!");
                 btn.innerText = "LINK SENT ✓";
-                btn.classList.replace('bg-blue-600', 'bg-green-600');
-            } catch (e) {
-                alert("Error: " + e.message);
-                btn.disabled = false;
-                btn.innerText = "Send Reset Link";
-            }
+            } catch (e) { alert(e.message); }
         });
 
-        // 2. وظيفة تحديث الإيميل
+        // Email Update
         document.getElementById('saveEmailBtn').addEventListener('click', async () => {
             const emailInput = document.getElementById('newEmail').value;
-            if (!emailInput) return alert("Please enter a new email!");
-
+            if (!emailInput) return alert("Enter email!");
             try {
                 await updateEmail(auth.currentUser, emailInput);
-                // تحديث الإيميل في قاعدة البيانات أيضاً
                 await updateDoc(doc(db, "users", auth.currentUser.uid), { email: emailInput });
-                alert("Email updated successfully!");
+                alert("Email updated!");
                 location.reload();
             } catch (e) {
-                alert("Security: Please logout and login again to change your email.");
-            }
-        });
-
-        // 3. وظيفة تسجيل الخروج
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Logout from AMANA?")) {
-                signOut(auth).then(() => window.location.href = "login.html");
+                alert("Please logout and login again to verify your identity before changing email.");
             }
         });
     </script>
