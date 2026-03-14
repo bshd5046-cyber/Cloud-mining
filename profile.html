@@ -20,32 +20,28 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), 
-                        radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 40%), 
-                        #050810;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #050810;
             min-height: 100vh;
         }
 
         .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(25px); 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Generic Slide-up Panel */
         .slide-panel {
             position: fixed;
             bottom: -100%;
             left: 0;
             right: 0;
-            height: 85vh;
-            background: var(--bg-dark);
+            height: 80vh;
+            background: #0a0f1c;
             z-index: 2000;
             transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-top: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 3rem 3rem 0 0;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 2.5rem 2.5rem 0 0;
             padding: 2rem;
-            box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
             overflow-y: auto;
         }
 
@@ -54,128 +50,125 @@
         .overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
             display: none;
             z-index: 1500;
         }
 
         .profile-ring {
             background: linear-gradient(135deg, var(--primary), var(--accent));
-            padding: 4px;
+            padding: 3px;
             border-radius: 9999px;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
         }
 
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 85px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.05); 
+            height: 80px; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
-            z-index: 1000; padding-bottom: 15px; 
+            z-index: 1000; padding-bottom: 12px; 
         }
 
         .invest-fab { 
-            width: 68px; height: 68px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            width: 60px; height: 60px; 
+            background: linear-gradient(135deg, #2563eb, #7c3aed); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -28px; 
-            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
-            border: 6px solid var(--bg-dark); 
+            position: relative; top: -20px; 
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); 
+            border: 4px solid var(--bg-dark); 
         }
 
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 600; }
         .nav-item.active { color: var(--primary); }
 
-        .btn-action {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            transition: all 0.3s ease;
-        }
-
-        .os-badge {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 20px;
+        .btn-action { background: linear-gradient(135deg, var(--primary), var(--accent)); }
+        
+        .os-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 1.5rem;
+            padding: 1.25rem;
         }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-24">
 
     <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
 
-    <main id="mainContent" class="opacity-0 transition-opacity duration-500">
-        <div class="px-8 pt-16 pb-10 text-center">
-            <div class="profile-ring inline-block mb-6 relative">
-                <div class="w-24 h-24 rounded-full bg-slate-900 overflow-hidden border-4 border-[#050810]">
+    <main id="mainContent" class="opacity-0 transition-opacity duration-700">
+        <div class="px-8 pt-12 pb-8 text-center">
+            <div class="profile-ring inline-block mb-4">
+                <div class="w-20 h-20 rounded-full bg-slate-900 overflow-hidden border-2 border-[#050810]">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
-                <div class="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-4 border-[#050810] rounded-full shadow-lg"></div>
             </div>
-            <h2 id="userName" class="text-3xl font-black tracking-tighter text-white mb-1 uppercase italic">---</h2>
-            <p id="userEmailDisplay" class="text-slate-500 text-xs font-bold tracking-[0.1em]">---</p>
+            <h2 id="userName" class="text-xl font-extrabold tracking-tight text-white mb-1 uppercase">---</h2>
+            <p id="userEmailDisplay" class="text-slate-500 text-[11px] font-medium tracking-wider">---</p>
         </div>
 
-        <div class="px-6 mb-8">
-            <div class="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
-                <p class="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-2">Total Asset Value</p>
-                <div class="flex items-baseline gap-2">
-                    <span id="userBalance" class="text-5xl font-black text-white tracking-tighter">$0.00</span>
-                    <span class="text-emerald-500 text-[10px] font-bold">+2.4% Today</span>
+        <div class="px-6 mb-10">
+            <div class="glass-panel p-6 rounded-[2rem] text-center border-white/10">
+                <p class="text-[10px] text-slate-500 uppercase font-bold tracking-[0.15em] mb-1">Available Assets</p>
+                <h1 id="userBalance" class="text-3xl font-black text-white mb-2">$0.00</h1>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    <span class="text-emerald-500 text-[10px] font-bold">+2.45% Yield</span>
                 </div>
             </div>
-        </div>
-
-        <div class="px-6 mb-8">
-            <button onclick="togglePanel('downloadPanel', true)" class="w-full glass-panel p-6 rounded-[2.5rem] flex items-center justify-between border-blue-500/30 bg-blue-500/5 relative overflow-hidden group">
-                <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20 group-active:scale-90 transition-transform">
-                        <i class="fas fa-cloud-arrow-down text-2xl"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-[16px] font-black text-white italic">APP TERMINAL</p>
-                        <p class="text-[11px] text-blue-400 font-bold uppercase tracking-widest">Install on iOS & Android</p>
-                    </div>
-                </div>
-                <div class="absolute right-[-10px] opacity-10">
-                    <i class="fas fa-mobile-screen text-6xl rotate-12"></i>
-                </div>
-                <i class="fas fa-arrow-right text-slate-500"></i>
-            </button>
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Account Terminal</h3>
-            <div class="glass-panel rounded-[2.5rem] overflow-hidden">
-                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-6 border-b border-white/5 hover:bg-white/5 transition-all">
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fas fa-shield-halved text-xl"></i></div>
+            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Terminal Configuration</h3>
+            
+            <div class="glass-panel rounded-[2rem] overflow-hidden">
+                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
                         <div class="text-left">
-                            <p class="text-[15px] font-extrabold text-white">Security Vault</p>
-                            <p class="text-[11px] text-slate-500 font-medium">Password & Recovery</p>
+                            <p class="text-[14px] font-bold text-white">Security Vault</p>
+                            <p class="text-[10px] text-slate-500">Credentials & Recovery</p>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right text-slate-700 text-sm"></i>
+                    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </button>
 
-                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 hover:bg-white/5 transition-all">
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400"><i class="fas fa-share-nodes text-xl"></i></div>
+                <a href="invite.html" class="flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg">
+                            <i class="fas fa-share-nodes"></i>
+                        </div>
                         <div class="text-left">
-                            <p class="text-[15px] font-extrabold text-white">Referral Hub</p>
-                            <p class="text-[11px] text-slate-500 font-medium">Earn 10% Commission</p>
+                            <p class="text-[14px] font-bold text-white">Referral Hub</p>
+                            <p class="text-[10px] text-slate-500">Affiliate Commissions</p>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right text-slate-700 text-sm"></i>
+                    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </a>
 
-                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 text-left active:bg-red-500/5 transition-all">
-                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fas fa-power-off text-xl"></i></div>
-                    <p class="text-[15px] font-extrabold text-red-500">Terminate Session</p>
+                <button onclick="togglePanel('downloadPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fas fa-mobile-screen-button"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[14px] font-bold text-white">Download App</p>
+                            <p class="text-[10px] text-slate-500">iOS & Android Terminal</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
+                </button>
+
+                <button id="logoutBtn" class="w-full flex items-center gap-4 p-5 active:bg-red-500/5">
+                    <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 text-lg">
+                        <i class="fas fa-power-off"></i>
+                    </div>
+                    <p class="text-[14px] font-bold text-red-500">Terminate Session</p>
                 </button>
             </div>
         </div>
@@ -183,46 +176,49 @@
 
     <div id="downloadPanel" class="slide-panel">
         <div class="flex items-center justify-between mb-8">
-            <button onclick="togglePanel('downloadPanel', false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10"><i class="fas fa-xmark"></i></button>
-            <h4 class="text-lg font-black italic tracking-tighter">VERTEX<span class="text-blue-500">MOBILE</span></h4>
-            <div class="w-10"></div>
+            <button onclick="togglePanel('downloadPanel', false)" class="text-slate-400"><i class="fas fa-xmark text-xl"></i></button>
+            <h4 class="text-sm font-black tracking-widest uppercase">App <span class="text-blue-500">Installer</span></h4>
+            <div class="w-6"></div>
         </div>
 
-        <div class="space-y-6">
-            <div class="os-badge">
+        <div class="space-y-4">
+            <div class="os-card">
                 <div class="flex items-center gap-4 mb-4">
-                    <i class="fab fa-android text-3xl text-emerald-500"></i>
+                    <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 text-2xl">
+                        <i class="fab fa-android"></i>
+                    </div>
                     <div>
-                        <h5 class="font-black text-white">Android Terminal</h5>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">APK Package v2.1.0</p>
+                        <h5 class="font-bold text-white text-sm">Android Version</h5>
+                        <p class="text-[10px] text-slate-500">Direct APK Installation</p>
                     </div>
                 </div>
-                <button onclick="window.location.href='#'" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[11px] tracking-widest active:scale-95 transition-transform">
+                <button class="w-full bg-white text-black py-3.5 rounded-xl font-black text-[11px] uppercase tracking-wider active:scale-95 transition-transform">
                     Download APK
                 </button>
             </div>
 
-            <div class="os-badge bg-white/5 border-blue-500/20">
+            <div class="os-card border-blue-500/20">
                 <div class="flex items-center gap-4 mb-4">
-                    <i class="fab fa-apple text-3xl text-white"></i>
+                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white text-2xl">
+                        <i class="fab fa-apple"></i>
+                    </div>
                     <div>
-                        <h5 class="font-black text-white">iOS / iPhone Guide</h5>
-                        <p class="text-[10px] text-blue-400 uppercase tracking-widest font-bold">Progressive Web App</p>
+                        <h5 class="font-bold text-white text-sm">iOS (iPhone/iPad)</h5>
+                        <p class="text-[10px] text-blue-400">PWA Setup Guide</p>
                     </div>
                 </div>
-                
-                <div class="space-y-4 mt-4">
-                    <div class="flex items-center gap-4 text-sm bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-black">1</span>
-                        <p class="text-slate-300">Open in <span class="text-white font-bold">Safari</span> Browser</p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 text-[11px] text-slate-300">
+                        <span class="w-5 h-5 flex-shrink-0 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center font-bold">1</span>
+                        <p>Open this site in <span class="text-white font-bold">Safari</span> browser</p>
                     </div>
-                    <div class="flex items-center gap-4 text-sm bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-black">2</span>
-                        <p class="text-slate-300">Tap the <span class="inline-block px-2 py-1 bg-white/10 rounded"><i class="fas fa-share-square"></i> Share</span> button</p>
+                    <div class="flex items-center gap-3 text-[11px] text-slate-300">
+                        <span class="w-5 h-5 flex-shrink-0 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center font-bold">2</span>
+                        <p>Tap the <i class="fas fa-share-square mx-1"></i> <span class="text-white font-bold">Share</span> button below</p>
                     </div>
-                    <div class="flex items-center gap-4 text-sm bg-black/40 p-3 rounded-xl border border-white/5">
-                        <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-black">3</span>
-                        <p class="text-slate-300">Select <span class="text-white font-bold">"Add to Home Screen"</span></p>
+                    <div class="flex items-center gap-3 text-[11px] text-slate-300">
+                        <span class="w-5 h-5 flex-shrink-0 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center font-bold">3</span>
+                        <p>Select <span class="text-white font-bold">Add to Home Screen</span></p>
                     </div>
                 </div>
             </div>
@@ -231,40 +227,42 @@
 
     <div id="securityPanel" class="slide-panel">
         <div id="securityContent">
-            <div class="flex items-center justify-between mb-10">
-                <button onclick="togglePanel('securityPanel', false)" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10"><i class="fas fa-arrow-left text-white"></i></button>
-                <h4 class="text-lg font-black italic tracking-tighter">SECURITY<span class="text-blue-500">VAULT</span></h4>
-                <div class="w-12"></div> 
+            <div class="flex items-center justify-between mb-8">
+                <button onclick="togglePanel('securityPanel', false)" class="text-slate-400"><i class="fas fa-arrow-left text-xl"></i></button>
+                <h4 class="text-sm font-black tracking-widest">SECURITY <span class="text-blue-500">VAULT</span></h4>
+                <div class="w-6"></div>
             </div>
-            <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
-                    <i class="fas fa-lock-open text-3xl text-blue-500"></i>
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 text-blue-500 text-2xl">
+                    <i class="fas fa-lock"></i>
                 </div>
-                <h3 class="text-2xl font-black mb-3 text-white">Password Recovery</h3>
-                <p class="text-slate-400 text-sm leading-relaxed px-4">A secure encryption link will be dispatched to your email.</p>
+                <h3 class="text-xl font-bold mb-2">Password Reset</h3>
+                <p class="text-slate-400 text-xs px-6">We will send a secure link to your verified email address.</p>
             </div>
-            <div class="glass-panel p-6 rounded-3xl border-blue-500/20 mb-10">
-                <p class="text-[10px] font-black text-slate-500 uppercase mb-2">Destination Email</p>
-                <p id="recoveryEmail" class="text-blue-400 font-bold tracking-wide">---</p>
+            <div class="bg-white/5 p-5 rounded-2xl border border-white/5 mb-8">
+                <p class="text-[9px] font-bold text-slate-500 uppercase mb-1">Registered Email</p>
+                <p id="recoveryEmail" class="text-blue-400 font-bold text-sm">---</p>
             </div>
-            <button id="sendBtn" onclick="sendResetEmail()" class="w-full btn-action py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[12px] shadow-xl shadow-blue-500/20 flex items-center justify-center gap-3 active:scale-95">
-                <span>Request Secure Link</span><i class="fas fa-paper-plane text-[10px]"></i>
+            <button id="sendBtn" onclick="sendResetEmail()" class="w-full btn-action py-4 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg active:scale-95 transition-all">
+                Request Reset Link
             </button>
         </div>
-        <div id="successState" class="hidden flex flex-col items-center justify-center h-full text-center pb-20 success-anim">
-            <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mb-8"><i class="fas fa-check-double text-4xl text-emerald-500"></i></div>
-            <h3 class="text-3xl font-black mb-4 tracking-tighter uppercase italic">Link Sent!</h3>
-            <p class="text-slate-400 leading-relaxed mb-10 px-6 text-sm">Check your Inbox or Spam folder.</p>
-            <button onclick="togglePanel('securityPanel', false)" class="bg-blue-500 text-white px-12 py-5 rounded-2xl font-black uppercase text-[11px] tracking-widest">Got it, Thanks</button>
+        <div id="successState" class="hidden flex flex-col items-center justify-center h-full text-center pb-12">
+            <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 text-emerald-500 text-3xl">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <h3 class="text-2xl font-black mb-2 italic">LINK DISPATCHED</h3>
+            <p class="text-slate-400 text-xs px-8 mb-8">Please verify your inbox and follow instructions.</p>
+            <button onclick="togglePanel('securityPanel', false)" class="bg-blue-500 px-10 py-4 rounded-xl font-bold uppercase text-[10px]">Close Vault</button>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        <a href="index.html" class="nav-item"><i class="fas fa-house mb-1 text-lg"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet mb-1 text-lg"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt text-xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset mb-1 text-lg"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-gear mb-1 text-lg"></i><span>Profile</span></a>
     </nav>
 
     <script type="module">
@@ -285,7 +283,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // UI Logic
         window.togglePanel = (panelId, show) => {
             const panel = document.getElementById(panelId);
             const overlay = document.getElementById('overlay');
@@ -295,12 +292,6 @@
             } else {
                 panel.classList.remove('active');
                 overlay.style.display = 'none';
-                if(panelId === 'securityPanel') {
-                    setTimeout(() => {
-                        document.getElementById('securityContent').classList.remove('hidden');
-                        document.getElementById('successState').classList.add('hidden');
-                    }, 500);
-                }
             }
         };
 
@@ -315,11 +306,11 @@
             if (email) {
                 try {
                     btn.disabled = true;
-                    btn.innerHTML = `<i class="fas fa-spinner animate-spin"></i> Dispatching...`;
+                    btn.innerText = "Processing...";
                     await sendPasswordResetEmail(auth, email);
                     document.getElementById('securityContent').classList.add('hidden');
                     document.getElementById('successState').classList.remove('hidden');
-                } catch (e) { alert(e.message); btn.disabled = false; }
+                } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Request Reset Link"; }
             }
         };
 
@@ -329,18 +320,17 @@
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const d = docSnap.data();
-                    document.getElementById('userName').innerText = d.fullName || "USER";
+                    document.getElementById('userName').innerText = d.fullName || "User";
                     document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userEmailDisplay').innerText = user.email;
                     document.getElementById('recoveryEmail').innerText = user.email;
-                    document.getElementById('userInviteCode').innerText = d.myReferralCode || "VER-" + user.uid.substring(0, 5).toUpperCase();
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=050810&color=3b82f6&bold=true&size=256`;
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=1e293b&color=3b82f6&bold=true`;
                 }
             } else { window.location.replace("login.html"); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate session?")) {
+            if (confirm("Logout from current device?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
