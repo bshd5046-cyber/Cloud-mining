@@ -1,8 +1,10 @@
 <script type="module">
+    // 1. استيراد مكتبات Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // 2. إعدادات Firebase الخاصة بك
     const firebaseConfig = {
         apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
         authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -16,18 +18,22 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- وظيفة جلب الكود من الرابط تلقائياً ---
-    window.onload = () => {
+    // --- وظيفة جلب كود الدعوة من الرابط تلقائياً عند فتح الصفحة ---
+    window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const refFromUrl = urlParams.get('ref');
-        if (refFromUrl) {
-            const inviteInput = document.getElementById('inviteCode');
-            inviteInput.value = refFromUrl;
-            // اختياري: جعل الحقل للقراءة فقط إذا جاء من رابط لمنع الخطأ
-            // inviteInput.readOnly = true; 
-        }
-    };
+        const inviteInput = document.getElementById('inviteCode');
 
+        if (refFromUrl && inviteInput) {
+            inviteInput.value = refFromUrl;
+            // قفل الحقل لضمان عدم تغيير كود الشخص الذي دعا المستخدم
+            inviteInput.readOnly = true;
+            inviteInput.classList.add('opacity-70'); // تظليل خفيف لبيان أنه مقفل
+            console.log("Protocol: Referral code injected - " + refFromUrl);
+        }
+    });
+
+    // --- وظيفة إظهار التنبيهات الجمالية ---
     function showAlert(message, type = "error") {
         const box = document.getElementById('alertBox');
         const bg = document.getElementById('alertBg');
@@ -54,6 +60,7 @@
         }, 3000);
     }
 
+    // --- معالجة عملية إنشاء الحساب ---
     document.getElementById('signupBtn').addEventListener('click', async () => {
         const name = document.getElementById('fullName').value.trim();
         const phone = document.getElementById('phone').value.trim();
@@ -62,43 +69,65 @@
         const confirmPass = document.getElementById('confirmPassword').value;
         const invite = document.getElementById('inviteCode').value.trim();
 
-        // التعديل: التحقق من كود الدعوة (إجباري)
+        // التحقق من أن جميع الحقول ممتلئة (كود الدعوة إجباري الآن)
         if (!name || !phone || !email || !password || !invite) {
-            showAlert("Access Denied! Invite code and all fields are required.");
+            showAlert("Access Denied! All fields including Invite Code are required.");
             return;
         }
 
         if (password !== confirmPass) {
-            showAlert("Passwords do not match!");
+            showAlert("Identity Conflict! Passwords do not match.");
+            return;
+        }
+
+        if (password.length < 6) {
+            showAlert("Security Breach! Password must be at least 6 characters.");
             return;
         }
 
         const btn = document.getElementById('signupBtn');
+        const originalText = btn.innerText;
         btn.innerText = "AUTHENTICATING...";
         btn.disabled = true;
 
         try {
+            // خطوة 1: إنشاء الحساب في Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
+            // خطوة 2: حفظ بيانات المستخدم الإضافية في Firestore
             await setDoc(doc(db, "users", user.uid), {
                 fullName: name,
                 phoneNumber: document.getElementById('countryCode').value + phone,
                 email: email,
-                inviteCode: invite, // يتم تخزينه هنا
+                inviteCode: invite, // حفظ كود الشخص الذي دعاه
                 balance: 0,
+                status: "active",
                 createdAt: new Date().toISOString()
             });
 
-            showAlert("Node Created! Redirecting...", "success");
-            setTimeout(() => window.location.href = "index.html", 1500);
+            showAlert("Node Created! Redirecting to Terminal...", "success");
+            
+            // توجيه المستخدم لصفحة البداية بعد ثانية ونصف
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1500);
 
         } catch (error) {
-            btn.innerText = "CREATE ACCOUNT";
+            btn.innerText = originalText;
             btn.disabled = false;
-            let userMsg = error.message;
-            if (error.code === 'auth/email-already-in-use') userMsg = "Email already linked to another node!";
+            
+            let userMsg = "Connection Error: " + error.message;
+            if (error.code === 'auth/email-already-in-use') {
+                userMsg = "Email already linked to another active node!";
+            } else if (error.code === 'auth/invalid-email') {
+                userMsg = "Invalid Email format!";
+            } else if (error.code === 'auth/weak-password') {
+                userMsg = "Password is too weak!";
+            }
+            
             showAlert(userMsg);
+            console.error("Firebase Error:", error.code);
         }
     });
 </script>
