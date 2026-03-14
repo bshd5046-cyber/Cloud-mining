@@ -9,52 +9,57 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-dark: #050810; 
+            --bg-dark: #020617; 
             --primary: #3b82f6; 
             --accent: #8b5cf6;
-            --nav-bg: rgba(10, 15, 28, 0.96); 
+            --nav-bg: rgba(7, 10, 22, 0.98); 
         }
 
         body { 
             background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
-            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #050810;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617;
             min-height: 100vh;
         }
 
         .glass-panel { 
-            background: rgba(255, 255, 255, 0.02); 
-            backdrop-filter: blur(20px); 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(25px); 
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
+        /* --- البار السفلي الموحد (نسخة Support Center) --- */
+        .bottom-nav { 
+            background: var(--nav-bg); 
+            backdrop-filter: blur(20px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.05); 
+            height: 85px; 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 1000; padding-bottom: 15px; 
+        }
+
+        .invest-fab { 
+            width: 68px; height: 68px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -28px; 
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
+            border: 6px solid #020617; 
+        }
+
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); }
+        /* ---------------------------------------------- */
 
         .profile-ring {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             padding: 3px;
             border-radius: 9999px;
         }
-
-        /* --- البار السفلي الموحد (Back to Original) --- */
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.05); 
-            height: 80px; position: fixed; bottom: 0; left: 0; right: 0; 
-            display: flex; justify-content: space-around; align-items: center; z-index: 1000; 
-        }
-
-        .invest-fab { 
-            width: 60px; height: 60px; 
-            background: linear-gradient(135deg, #2563eb, #7c3aed); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -20px; border: 4px solid var(--bg-dark); 
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; font-size: 10px; font-weight: 600; text-decoration: none; }
-        .nav-item.active { color: var(--primary); }
-        /* ------------------------------------------ */
 
         .slide-panel {
             position: fixed; bottom: -100%; left: 0; right: 0; height: 80vh;
@@ -65,14 +70,12 @@
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; z-index: 1500; }
     </style>
 </head>
-<body class="pb-24">
-
-    <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
+<body class="pb-32"> <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
 
     <main id="mainContent" class="opacity-0 transition-opacity duration-700">
         <div class="px-8 pt-10 pb-6 text-center">
             <div class="profile-ring inline-block mb-4">
-                <div class="w-20 h-20 rounded-full bg-slate-900 overflow-hidden border-2 border-[#050810]">
+                <div class="w-20 h-20 rounded-full bg-slate-900 overflow-hidden border-2 border-[#020617]">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
             </div>
@@ -115,44 +118,46 @@
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] ml-2">Terminal Access</h3>
-            <div class="glass-panel rounded-[2rem] overflow-hidden">
-                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Access</h3>
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden">
+                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg"><i class="fas fa-shield-halved"></i></div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl"><i class="fas fa-shield-halved"></i></div>
                         <div class="text-left">
-                            <p class="text-[14px] font-bold text-white">Security Vault</p>
-                            <p class="text-[10px] text-slate-500">Credentials Management</p>
+                            <p class="text-[15px] font-bold text-white">Security Vault</p>
+                            <p class="text-[11px] text-slate-500">Credentials Management</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </button>
 
-                <a href="invite.html" class="flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 text-decoration-none">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg"><i class="fas fa-users"></i></div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl"><i class="fas fa-users"></i></div>
                         <div class="text-left">
-                            <p class="text-[14px] font-bold text-white">Affiliate Program</p>
-                            <p class="text-[10px] text-slate-500">Referral Commissions</p>
+                            <p class="text-[15px] font-bold text-white">Affiliate Program</p>
+                            <p class="text-[11px] text-slate-500">Referral Commissions</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </a>
 
-                <button id="logoutBtn" class="w-full flex items-center gap-4 p-5 active:bg-red-500/5">
-                    <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 text-lg"><i class="fas fa-power-off"></i></div>
-                    <p class="text-[14px] font-bold text-red-500">Terminate Session</p>
+                <button id="logoutBtn" class="w-full flex items-center gap-4 p-6 active:bg-red-500/5">
+                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 text-xl"><i class="fas fa-power-off"></i></div>
+                    <p class="text-[15px] font-bold text-red-500">Terminate Session</p>
                 </button>
             </div>
         </div>
     </main>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house mb-1 text-lg"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet mb-1 text-lg"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt text-xl text-white"></i></a></div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset mb-1 text-lg"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-user-gear mb-1 text-lg"></i><span>Profile</span></a>
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
+        </div>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
     <div id="securityPanel" class="slide-panel">
