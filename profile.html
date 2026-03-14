@@ -3,90 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Profile | VERTEX</title>
+    <title>Profile | VERTEX PREMIER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #050810; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.95); }
-        body { background-color: var(--bg-dark); font-family: 'Inter', sans-serif; color: #ffffff; overflow-x: hidden; }
+        :root { --bg-dark: #020617; --primary: #3b82f6; --accent: #6366f1; }
+        body { 
+            background-color: var(--bg-dark); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #ffffff; 
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 100%);
+        }
         #mainProfile { display: none; }
-        .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-ring {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 3px;
+            border-radius: 9999px;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--primary);
+        }
+
         /* Bottom Nav */
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(15px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 80px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 10px; }
-        .invest-fab { width: 65px; height: 65px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -25px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); border: 5px solid var(--bg-dark); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 700; }
+        .bottom-nav { 
+            background: rgba(10, 15, 28, 0.8); 
+            backdrop-filter: blur(20px); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            height: 85px; position: fixed; bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; z-index: 100; padding-bottom: 12px; 
+        }
+        .invest-fab { 
+            width: 60px; height: 60px; 
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
+            border-radius: 20px; display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -20px; transform: rotate(45deg);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4);
+        }
+        .invest-fab i { transform: rotate(-45deg); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; }
         .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 10px; font-weight: 800; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
-<body class="pb-28">
+<body class="pb-32">
 
-    <main id="mainProfile">
-        <div class="px-6 pt-12 pb-8 text-center bg-gradient-to-b from-blue-900/10 to-transparent">
-            <div class="w-20 h-20 rounded-full border-2 border-blue-500 p-1 mx-auto mb-3 overflow-hidden">
-                <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover">
-            </div>
-            <h2 id="userName" class="text-xl font-bold uppercase tracking-tight">Loading...</h2>
-            <p id="userEmailDisplay" class="text-gray-500 text-xs mt-1">---</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 px-6 mb-8">
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Balance</p>
-                <p id="userBalance" class="text-lg font-black text-white">$0.00</p>
-            </div>
-            <div class="glass-card p-4 rounded-2xl">
-                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">My ID</p>
-                <p id="userInviteCode" class="text-lg font-black text-blue-400">-----</p>
-            </div>
-        </div>
-
-        <div class="px-6 space-y-3">
+    <main id="mainProfile" class="animate-fadeIn">
+        <div class="px-8 pt-16 pb-10 text-center relative">
+            <div class="absolute top-0 left-0 w-full h-32 bg-blue-600/10 blur-[100px] -z-10"></div>
             
-            <a href="invite.html" class="glass-card flex items-center justify-between p-5 rounded-2xl active:scale-95 transition-transform">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-500">
-                        <i class="fas fa-users text-lg"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold">Invite Friends</p>
-                        <p class="text-[10px] text-gray-500">Earn up to 34% commission</p>
-                    </div>
+            <div class="profile-ring inline-block mb-6">
+                <div class="w-24 h-24 rounded-full bg-slate-900 overflow-hidden border-4 border-slate-950">
+                    <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-600"></i>
-            </a>
+            </div>
+            
+            <h2 id="userName" class="text-2xl font-extrabold tracking-tight text-white mb-1">---</h2>
+            <div class="flex items-center justify-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <p id="userEmailDisplay" class="text-slate-400 text-xs font-medium">---</p>
+            </div>
+        </div>
 
-            <button onclick="requestPasswordReset()" class="w-full glass-card flex items-center justify-between p-5 rounded-2xl active:scale-95 transition-transform text-left">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-gray-500/10 flex items-center justify-center text-gray-400">
-                        <i class="fas fa-lock text-lg"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold">Change Password</p>
-                        <p class="text-[10px] text-gray-500">Receive reset link via email</p>
-                    </div>
+        <div class="px-6 grid grid-cols-1 gap-4 mb-8">
+            <div class="glass-panel p-6 rounded-[2rem] flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Equity</p>
+                    <p id="userBalance" class="text-3xl font-black text-white">$0.00</p>
                 </div>
-                <i class="fas fa-chevron-right text-xs text-gray-600"></i>
-            </button>
-
-            <button id="logoutBtn" class="w-full glass-card flex items-center gap-4 p-5 rounded-2xl active:bg-red-500/10 text-red-500 transition-colors text-left">
-                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <i class="fas fa-sign-out-alt text-lg"></i>
+                <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
+                    <i class="fas fa-wallet text-xl"></i>
                 </div>
-                <p class="text-sm font-bold">Logout</p>
-            </button>
+            </div>
 
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-panel p-5 rounded-[2rem]">
+                    <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Phone Number</p>
+                    <p id="userPhone" class="text-sm font-bold text-slate-200 tracking-wide">---</p>
+                </div>
+                <div class="glass-panel p-5 rounded-[2rem]">
+                    <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Account ID</p>
+                    <p id="userInviteCode" class="text-sm font-black text-blue-400">---</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 space-y-4">
+            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Personal Security</h3>
+            
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden">
+                <a href="invite.html" class="flex items-center justify-between p-6 hover:bg-white/5 transition-all border-b border-white/5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <i class="fas fa-crown text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Expansion Program</p>
+                            <p class="text-[10px] text-slate-500">Tier 1-3 Reward Protocols</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right text-[10px] text-slate-600"></i>
+                </a>
+
+                <button onclick="requestPasswordReset()" class="w-full flex items-center justify-between p-6 hover:bg-white/5 transition-all border-b border-white/5 text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400">
+                            <i class="fas fa-fingerprint text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Security Keys</p>
+                            <p class="text-[10px] text-slate-500">Update Access Password</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right text-[10px] text-slate-600"></i>
+                </button>
+
+                <button id="logoutBtn" class="w-full flex items-center justify-between p-6 hover:bg-red-500/5 transition-all text-left">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
+                            <i class="fas fa-power-off text-lg"></i>
+                        </div>
+                        <p class="text-sm font-bold text-red-500">Terminate Session</p>
+                    </div>
+                </button>
+            </div>
         </div>
     </main>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
-        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
-        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        <a href="index.html" class="nav-item"><i class="fas fa-th-large"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-chart-pie"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-plus text-xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-shield"></i><span>Vault</span></a>
     </nav>
 
     <script type="module">
@@ -107,15 +168,14 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // وظيفة تغيير كلمة السر البسيطة
         window.requestPasswordReset = async () => {
             const email = auth.currentUser.email;
             if (confirm("Send password reset link to: " + email + "?")) {
                 try {
                     await sendPasswordResetEmail(auth, email);
-                    alert("Reset link sent! Please check your email.");
+                    alert("A secure link has been dispatched to your email address.");
                 } catch (e) {
-                    alert("Error: " + e.message);
+                    alert("System error: " + e.message);
                 }
             }
         };
@@ -126,11 +186,12 @@
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const d = docSnap.data();
-                    document.getElementById('userName').innerText = d.fullName;
-                    document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString()}`;
+                    document.getElementById('userName').innerText = d.fullName || "User Name";
+                    document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userEmailDisplay').innerText = user.email;
+                    document.getElementById('userPhone').innerText = d.phoneNumber || "Not Set";
                     document.getElementById('userInviteCode').innerText = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=2563eb&color=fff&bold=true`;
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=0f172a&color=3b82f6&bold=true&size=256`;
                 }
             } else {
                 window.location.replace("login.html");
@@ -138,7 +199,7 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Are you sure you want to logout?")) {
+            if (confirm("Terminate secure connection?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
