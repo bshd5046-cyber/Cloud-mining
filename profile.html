@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-dark: #050810; 
+            --bg-dark: #020617; 
             --primary: #3b82f6; 
-            --accent: #6366f1;
-            --nav-bg: rgba(10, 15, 28, 0.96); 
+            --accent: #8b5cf6;
+            --nav-bg: rgba(7, 10, 22, 0.98); 
         }
 
         body { 
@@ -20,156 +20,149 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #050810 100%);
+            /* خلفية استثمارية احترافية بتدرج شعاعي */
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 35%),
+                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 35%),
+                #020617;
             min-height: 100vh;
         }
 
         #mainProfile { display: none; }
 
-        /* Glassmorphism Panels */
+        /* Panels Styles */
         .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .profile-ring {
             background: linear-gradient(135deg, var(--primary), var(--accent));
-            padding: 3px;
+            padding: 4px;
             border-radius: 9999px;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
         }
 
-        /* المنيو السفلي الموحد - 1000% مقاسات ثابتة */
+        /* المنيو السفلي الموحد */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.08); 
+            border-top: 1px solid rgba(255, 255, 255, 0.05); 
             height: 85px; 
             position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 1000; 
-            padding-bottom: 15px; 
+            bottom: 0; left: 0; right: 0; 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 1000; padding-bottom: 15px; 
         }
 
         .invest-fab { 
-            width: 68px; 
-            height: 68px; 
+            width: 68px; height: 68px; 
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            top: -28px; 
-            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
-            border: 6px solid var(--bg-dark); 
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -28px; 
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
+            border: 6px solid #020617; 
         }
-        .invest-fab:active { transform: scale(0.9) rotate(5deg); }
 
-        .nav-item { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            color: #64748b; 
-            text-decoration: none; 
-            font-size: 10px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
-        .nav-item.active { color: var(--primary); text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-        
-        /* Typography & Utility */
-        .glow-text { text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .nav-item.active { color: var(--primary); }
+
+        /* العناصر الجمالية */
+        .glow-dot {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: var(--primary);
+            filter: blur(100px);
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .stat-card {
+            border-bottom: 2px solid rgba(255,255,255,0.02);
+            transition: 0.3s;
+        }
+        .stat-card:active { background: rgba(255,255,255,0.03); }
     </style>
 </head>
 <body class="pb-32">
 
-    <main id="mainProfile" class="animate-fadeIn">
-        <div class="px-8 pt-12 pb-10 text-center relative">
+    <div class="glow-dot" style="top: 10%; left: -20px;"></div>
+    <div class="glow-dot" style="bottom: 20%; right: -20px; background: var(--accent);"></div>
+
+    <main id="mainProfile">
+        <div class="px-8 pt-16 pb-12 text-center relative">
             <div class="profile-ring inline-block mb-6 relative">
-                <div class="w-28 h-28 rounded-full bg-slate-900 overflow-hidden border-4 border-slate-950">
+                <div class="w-28 h-28 rounded-full bg-slate-900 overflow-hidden border-4 border-[#020617]">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
-                <div class="absolute bottom-1 right-1 w-7 h-7 bg-emerald-500 border-4 border-slate-950 rounded-full shadow-lg shadow-emerald-500/50"></div>
+                <div class="absolute bottom-1 right-1 w-7 h-7 bg-emerald-500 border-4 border-[#020617] rounded-full shadow-lg"></div>
             </div>
             
-            <h2 id="userName" class="text-3xl font-black tracking-tighter text-white mb-1 uppercase italic glow-text">---</h2>
-            <div class="flex items-center justify-center gap-2">
-                <p id="userEmailDisplay" class="text-slate-400 text-sm font-semibold opacity-80 tracking-wide">---</p>
+            <h2 id="userName" class="text-3xl font-black tracking-tighter text-white mb-1 uppercase italic">---</h2>
+            <p id="userEmailDisplay" class="text-slate-500 text-sm font-bold tracking-wide">---</p>
+        </div>
+
+        <div class="px-6 mb-10">
+            <div class="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl"></div>
+                <p class="text-[11px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Total Portfolio Value</p>
+                <div class="flex items-baseline gap-2">
+                    <span id="userBalance" class="text-5xl font-black text-white tracking-tighter">$0.00</span>
+                    <span class="text-emerald-500 text-xs font-bold font-mono">+0.00%</span>
+                </div>
             </div>
         </div>
 
-        <div class="px-6 space-y-5 mb-8">
-            <div class="glass-panel p-7 rounded-[2.5rem] relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -z-10 group-hover:bg-primary/10 transition-colors"></div>
-                <div class="flex justify-between items-start">
-                    <div>
-                        <p class="text-[11px] text-slate-500 uppercase font-black tracking-[0.2em] mb-2">Portfolio Value</p>
-                        <p id="userBalance" class="text-4xl font-black text-white tracking-tighter">$0.00</p>
-                    </div>
-                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
-                        <i class="fas fa-chart-line text-2xl"></i>
-                    </div>
-                </div>
+        <div class="px-6 grid grid-cols-2 gap-4 mb-8">
+            <div class="glass-panel p-5 rounded-[2rem]">
+                <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Mobile</p>
+                <p id="userPhone" class="text-sm font-extrabold text-slate-200">---</p>
             </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass-panel p-5 rounded-[2rem] border-l-4 border-blue-500/50">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Phone Link</p>
-                    <p id="userPhone" class="text-sm font-extrabold text-slate-200 tracking-wider">---</p>
-                </div>
-                <div class="glass-panel p-5 rounded-[2rem] border-l-4 border-indigo-500/50">
-                    <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Access ID</p>
-                    <p id="userInviteCode" class="text-sm font-black text-blue-400">---</p>
-                </div>
+            <div class="glass-panel p-5 rounded-[2rem]">
+                <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Account ID</p>
+                <p id="userInviteCode" class="text-sm font-black text-blue-500">---</p>
             </div>
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] ml-4">System Protocols</h3>
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Settings</h3>
             
-            <div class="glass-panel rounded-[2.5rem] overflow-hidden border border-white/5">
-                <a href="invite.html" class="flex items-center justify-between p-6 active:bg-white/5 transition-all border-b border-white/5">
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden">
+                <a href="invite.html" class="stat-card flex items-center justify-between p-6">
                     <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shadow-inner">
-                            <i class="fas fa-crown text-xl"></i>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                            <i class="fas fa-share-nodes text-xl"></i>
                         </div>
                         <div>
-                            <p class="text-[15px] font-extrabold text-white">Elite Rewards</p>
-                            <p class="text-xs text-slate-500 font-medium">Affiliate protocol status</p>
+                            <p class="text-[15px] font-extrabold text-white tracking-tight">Referral Program</p>
+                            <p class="text-xs text-slate-500 font-medium">Earn passive dividends</p>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-slate-700 mr-2"></i>
+                    <i class="fas fa-angle-right text-slate-700"></i>
                 </a>
 
-                <button onclick="requestPasswordReset()" class="w-full flex items-center justify-between p-6 active:bg-white/5 transition-all border-b border-white/5 text-left">
+                <button onclick="requestPasswordReset()" class="stat-card w-full flex items-center justify-between p-6 text-left">
                     <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center text-slate-400 shadow-inner">
-                            <i class="fas fa-shield-halved text-xl"></i>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                            <i class="fas fa-key text-xl"></i>
                         </div>
                         <div>
-                            <p class="text-[15px] font-extrabold text-white">Security Encryption</p>
-                            <p class="text-xs text-slate-500 font-medium">Update vault password</p>
+                            <p class="text-[15px] font-extrabold text-white tracking-tight">Security Vault</p>
+                            <p class="text-xs text-slate-500 font-medium">Reset access credentials</p>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right text-xs text-slate-700 mr-2"></i>
+                    <i class="fas fa-angle-right text-slate-700"></i>
                 </button>
 
-                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 active:bg-red-500/10 transition-all text-left group">
-                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 group-active:scale-90 transition-transform">
-                        <i class="fas fa-power-off text-xl"></i>
+                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 active:bg-red-500/5 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
+                        <i class="fas fa-door-open text-xl"></i>
                     </div>
-                    <p class="text-[15px] font-extrabold text-red-500">Terminate Protocol</p>
+                    <p class="text-[15px] font-extrabold text-red-500">Terminate Session</p>
                 </button>
             </div>
         </div>
@@ -217,18 +210,18 @@
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const d = docSnap.data();
-                    document.getElementById('userName').innerText = d.fullName || "AGENT";
+                    document.getElementById('userName').innerText = d.fullName || "USER";
                     document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userEmailDisplay').innerText = user.email;
-                    document.getElementById('userPhone').innerText = d.phoneNumber || "UNLINKED";
+                    document.getElementById('userPhone').innerText = d.phoneNumber || "N/A";
                     document.getElementById('userInviteCode').innerText = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=0f172a&color=3b82f6&bold=true&size=256`;
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=020617&color=3b82f6&bold=true&size=256`;
                 }
             } else { window.location.replace("login.html"); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Terminate secure connection?")) {
+            if (confirm("Logout from secure session?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
