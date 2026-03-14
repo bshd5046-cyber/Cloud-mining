@@ -21,7 +21,6 @@
         .pulse-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
         .pulse-dot::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: pulse-ring 1.5s infinite; }
         @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
-        
         .plan-card { border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); filter: grayscale(1); opacity: 0.4; }
         .plan-active { filter: grayscale(0); opacity: 1; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); transform: scale(1.02); }
         .plan-active::before { content: "ACTIVE"; position: absolute; top: 10px; right: -25px; background: var(--primary); color: white; font-size: 8px; font-weight: 900; padding: 2px 30px; transform: rotate(45deg); }
@@ -83,7 +82,6 @@
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
-
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -93,7 +91,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -103,7 +100,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -113,7 +109,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-diamond" data-min="5000" data-max="14999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -123,7 +118,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-elite" data-min="15000" data-max="1000000">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -146,7 +140,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp, increment, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -184,6 +178,57 @@
             } else { window.location.replace('login.html'); }
         });
 
+        // --- محرك توزيع أرباح الفريق (جيل 1، 2، 3) ---
+        async function distributeTeamRewards(parentCode, childProfit) {
+            if (!parentCode) return;
+            try {
+                // جيل 1 (20%)
+                const q1 = query(collection(db, "users"), where("myReferralCode", "==", parentCode));
+                const snap1 = await getDocs(q1);
+                if (!snap1.empty) {
+                    const d1 = snap1.docs[0];
+                    const reward1 = childProfit * 0.20;
+                    await updateDoc(doc(db, "users", d1.id), {
+                        balance: increment(reward1),
+                        teamEarn: increment(reward1),
+                        totalTeamEarned: increment(reward1)
+                    });
+
+                    // جيل 2 (9%)
+                    const d1Data = d1.data();
+                    if (d1Data.inviteCode) {
+                        const q2 = query(collection(db, "users"), where("myReferralCode", "==", d1Data.inviteCode));
+                        const snap2 = await getDocs(q2);
+                        if (!snap2.empty) {
+                            const d2 = snap2.docs[0];
+                            const reward2 = childProfit * 0.09;
+                            await updateDoc(doc(db, "users", d2.id), {
+                                balance: increment(reward2),
+                                teamEarn: increment(reward2),
+                                totalTeamEarned: increment(reward2)
+                            });
+
+                            // جيل 3 (5%)
+                            const d2Data = d2.data();
+                            if (d2Data.inviteCode) {
+                                const q3 = query(collection(db, "users"), where("myReferralCode", "==", d2Data.inviteCode));
+                                const snap3 = await getDocs(q3);
+                                if (!snap3.empty) {
+                                    const d3 = snap3.docs[0];
+                                    const reward3 = childProfit * 0.05;
+                                    await updateDoc(doc(db, "users", d3.id), {
+                                        balance: increment(reward3),
+                                        teamEarn: increment(reward3),
+                                        totalTeamEarned: increment(reward3)
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) { console.error("Team Reward Sync Failed", e); }
+        }
+
         function checkExecutionAvailability() {
             if (!userData.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
@@ -191,7 +236,6 @@
             const lastExecUK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(lastExecDate);
             const currentUKDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(now);
             const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now));
-
             if (currentUKDay !== lastExecUK && ukHour >= 1) resetButtonUI();
             else lockButtonUI();
         }
@@ -223,7 +267,19 @@
                 const profit = calculateDailyROI(bal);
                 if (bal < 50) { alert("Min $50 required"); resetButtonUI(); return; }
                 try {
-                    await updateDoc(doc(db, "users", currentUserId), { balance: increment(profit), dailyEarn: profit, totalEarned: increment(profit), lastExecution: serverTimestamp() });
+                    // 1. تحديث ربح المستخدم الأساسي
+                    await updateDoc(doc(db, "users", currentUserId), { 
+                        balance: increment(profit), 
+                        dailyEarn: profit, 
+                        totalEarned: increment(profit), 
+                        lastExecution: serverTimestamp() 
+                    });
+
+                    // 2. تفعيل نظام الأجيال (فقط إذا ضغط الصديق)
+                    if (userData.inviteCode) {
+                        await distributeTeamRewards(userData.inviteCode, profit);
+                    }
+
                     alert(`Success! Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
                 } catch (e) { console.error(e); }
