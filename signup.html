@@ -67,7 +67,7 @@
 
             <div class="input-field rounded-2xl flex items-center p-4 border-dashed border-blue-500/30">
                 <i class="fas fa-ticket-alt text-blue-500 mr-4 w-5 text-center"></i>
-                <input type="text" id="inviteCode" placeholder="Invite Code (Required)" class="bg-transparent border-none outline-none w-full text-sm font-bold text-blue-400">
+                <input type="text" id="inviteCode" placeholder="Invite Code (Optional)" class="bg-transparent border-none outline-none w-full text-sm font-bold text-blue-400">
             </div>
 
             <button id="signupBtn" class="gradient-btn w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition text-white">
@@ -98,7 +98,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // جلب كود الشخص الذي دعا المستخدم من الرابط
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const refFromUrl = urlParams.get('ref');
@@ -141,8 +140,9 @@
             const confirmPass = document.getElementById('confirmPassword').value;
             const invite = document.getElementById('inviteCode').value.trim();
 
-            if (!name || !phone || !email || !password || !invite) {
-                showAlert("All fields including Invite Code are required!");
+            // إزالة invite من التحقق الإجباري
+            if (!name || !phone || !email || !password) {
+                showAlert("Please fill in all required fields!");
                 return;
             }
             if (password !== confirmPass) {
@@ -155,21 +155,20 @@
             btn.disabled = true;
 
             try {
-                // 1. إنشاء الحساب
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. توليد كود دعوة فريد للمستخدم الجديد من الـ UID (5 خانات)
+                // توليد كود الدعوة الخاص بالمستخدم (5 خانات)
                 const myPersonalCode = user.uid.substring(0, 5).toUpperCase();
 
-                // 3. حفظ البيانات في Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     phoneNumber: document.getElementById('countryCode').value + phone,
                     email: email,
-                    inviteCode: invite, // كود الشخص الذي دعاه
-                    myReferralCode: myPersonalCode, // كود الدعوة الخاص بهذا المستخدم
+                    referralId: myPersonalCode, // هذا هو الـ UID المختصر الذي سيظهر في البروفايل
+                    inviteCode: invite || "DIRECT", // إذا لم يوجد كود دعوة، سيتم تسجيله كـ DIRECT
                     balance: 0,
+                    tier: "",
                     createdAt: new Date().toISOString()
                 });
 
