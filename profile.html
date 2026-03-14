@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profile | VERTEX PREMIER</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg-dark: #020617; 
+            --bg-dark: #050810; 
             --primary: #3b82f6; 
             --accent: #8b5cf6;
-            --nav-bg: rgba(7, 10, 22, 0.98); 
+            --nav-bg: rgba(10, 15, 28, 0.96); 
         }
 
         body { 
@@ -20,36 +20,56 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            /* خلفية استثمارية احترافية بتدرج شعاعي */
-            background: 
-                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 35%),
-                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 35%),
-                #020617;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), 
+                        radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 40%), 
+                        #050810;
             min-height: 100vh;
         }
 
-        #mainProfile { display: none; }
-
-        /* Panels Styles */
         .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
+            background: rgba(255, 255, 255, 0.03); 
             backdrop-filter: blur(25px); 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Slide-up Security Panel */
+        #securityPanel {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            height: 80vh;
+            background: var(--bg-dark);
+            z-index: 2000;
+            transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 3rem 3rem 0 0;
+            padding: 2rem;
+        }
+
+        #securityPanel.active { bottom: 0; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            z-index: 1500;
         }
 
         .profile-ring {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             padding: 4px;
             border-radius: 9999px;
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
         }
 
-        /* المنيو السفلي الموحد */
+        /* Bottom Nav */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.05); 
+            border-top: 1px solid rgba(255, 255, 255, 0.08); 
             height: 85px; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
@@ -62,111 +82,124 @@
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center; 
             position: relative; top: -28px; 
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
-            border: 6px solid #020617; 
+            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.5); 
+            border: 6px solid var(--bg-dark); 
         }
 
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        /* العناصر الجمالية */
-        .glow-dot {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            background: var(--primary);
-            filter: blur(100px);
-            opacity: 0.1;
-            z-index: -1;
+        .btn-action {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            transition: all 0.3s ease;
         }
-
-        .stat-card {
-            border-bottom: 2px solid rgba(255,255,255,0.02);
-            transition: 0.3s;
-        }
-        .stat-card:active { background: rgba(255,255,255,0.03); }
     </style>
 </head>
 <body class="pb-32">
 
-    <div class="glow-dot" style="top: 10%; left: -20px;"></div>
-    <div class="glow-dot" style="bottom: 20%; right: -20px; background: var(--accent);"></div>
+    <div id="overlay" class="overlay" onclick="toggleSecurity(false)"></div>
 
-    <main id="mainProfile">
-        <div class="px-8 pt-16 pb-12 text-center relative">
+    <main id="mainContent" class="opacity-0 transition-opacity duration-500">
+        <div class="px-8 pt-16 pb-10 text-center">
             <div class="profile-ring inline-block mb-6 relative">
-                <div class="w-28 h-28 rounded-full bg-slate-900 overflow-hidden border-4 border-[#020617]">
+                <div class="w-24 h-24 rounded-full bg-slate-900 overflow-hidden border-4 border-[#050810]">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
-                <div class="absolute bottom-1 right-1 w-7 h-7 bg-emerald-500 border-4 border-[#020617] rounded-full shadow-lg"></div>
+                <div class="absolute bottom-1 right-1 w-6 h-6 bg-emerald-500 border-4 border-[#050810] rounded-full shadow-lg"></div>
             </div>
-            
             <h2 id="userName" class="text-3xl font-black tracking-tighter text-white mb-1 uppercase italic">---</h2>
-            <p id="userEmailDisplay" class="text-slate-500 text-sm font-bold tracking-wide">---</p>
+            <p id="userEmailDisplay" class="text-slate-500 text-xs font-bold tracking-[0.1em]">---</p>
         </div>
 
-        <div class="px-6 mb-10">
-            <div class="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-600/10 rounded-full blur-3xl"></div>
-                <p class="text-[11px] text-slate-500 uppercase font-black tracking-[0.2em] mb-3">Total Portfolio Value</p>
+        <div class="px-6 mb-8">
+            <div class="glass-panel p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                <p class="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-2">Total Asset Value</p>
                 <div class="flex items-baseline gap-2">
                     <span id="userBalance" class="text-5xl font-black text-white tracking-tighter">$0.00</span>
-                    <span class="text-emerald-500 text-xs font-bold font-mono">+0.00%</span>
+                    <span class="text-emerald-500 text-[10px] font-bold">+2.4% Today</span>
                 </div>
             </div>
         </div>
 
         <div class="px-6 grid grid-cols-2 gap-4 mb-8">
             <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Mobile</p>
-                <p id="userPhone" class="text-sm font-extrabold text-slate-200">---</p>
+                <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Status</p>
+                <p class="text-xs font-extrabold text-blue-400 uppercase tracking-widest">Verified</p>
             </div>
             <div class="glass-panel p-5 rounded-[2rem]">
-                <p class="text-[10px] text-slate-500 uppercase font-black mb-1">Account ID</p>
-                <p id="userInviteCode" class="text-sm font-black text-blue-500">---</p>
+                <p class="text-[9px] text-slate-500 uppercase font-black mb-1">Account ID</p>
+                <p id="userInviteCode" class="text-xs font-black text-slate-200">---</p>
             </div>
         </div>
 
         <div class="px-6 space-y-4">
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Settings</h3>
+            <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Settings</h3>
             
             <div class="glass-panel rounded-[2.5rem] overflow-hidden">
-                <a href="invite.html" class="stat-card flex items-center justify-between p-6">
+                <button onclick="toggleSecurity(true)" class="w-full flex items-center justify-between p-6 border-b border-white/5 hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-5">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                            <i class="fas fa-shield-halved text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[15px] font-extrabold text-white">Security Vault</p>
+                            <p class="text-[11px] text-slate-500 font-medium">Password & Recovery</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-slate-700 text-sm"></i>
+                </button>
+
+                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 hover:bg-white/5 transition-all">
                     <div class="flex items-center gap-5">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
                             <i class="fas fa-share-nodes text-xl"></i>
                         </div>
-                        <div>
-                            <p class="text-[15px] font-extrabold text-white tracking-tight">Referral Program</p>
-                            <p class="text-xs text-slate-500 font-medium">Earn passive dividends</p>
+                        <div class="text-left">
+                            <p class="text-[15px] font-extrabold text-white">Referral Hub</p>
+                            <p class="text-[11px] text-slate-500 font-medium">Earn 10% Commission</p>
                         </div>
                     </div>
-                    <i class="fas fa-angle-right text-slate-700"></i>
+                    <i class="fas fa-chevron-right text-slate-700 text-sm"></i>
                 </a>
 
-                <button onclick="requestPasswordReset()" class="stat-card w-full flex items-center justify-between p-6 text-left">
-                    <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-                            <i class="fas fa-key text-xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-[15px] font-extrabold text-white tracking-tight">Security Vault</p>
-                            <p class="text-xs text-slate-500 font-medium">Reset access credentials</p>
-                        </div>
-                    </div>
-                    <i class="fas fa-angle-right text-slate-700"></i>
-                </button>
-
-                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 active:bg-red-500/5 transition-all">
+                <button id="logoutBtn" class="w-full flex items-center gap-5 p-6 text-left active:bg-red-500/5 transition-all">
                     <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
-                        <i class="fas fa-door-open text-xl"></i>
+                        <i class="fas fa-power-off text-xl"></i>
                     </div>
                     <p class="text-[15px] font-extrabold text-red-500">Terminate Session</p>
                 </button>
             </div>
         </div>
     </main>
+
+    <div id="securityPanel">
+        <div class="flex items-center justify-between mb-10">
+            <button onclick="toggleSecurity(false)" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                <i class="fas fa-arrow-left text-white"></i>
+            </button>
+            <h4 class="text-lg font-black italic tracking-tighter">SECURITY<span class="text-blue-500">VAULT</span></h4>
+            <div class="w-12"></div> </div>
+
+        <div class="text-center mb-12">
+            <div class="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20">
+                <i class="fas fa-lock-open text-3xl text-blue-500"></i>
+            </div>
+            <h3 class="text-2xl font-black mb-3">Password Recovery</h3>
+            <p class="text-slate-400 text-sm leading-relaxed px-4">
+                We will send a secure encryption link to your registered email address to reset your access credentials.
+            </p>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl border-blue-500/20 mb-10">
+            <p class="text-[10px] font-black text-slate-500 uppercase mb-2">Registered Email</p>
+            <p id="recoveryEmail" class="text-blue-400 font-bold tracking-wide">---</p>
+        </div>
+
+        <button onclick="sendResetEmail()" class="w-full btn-action py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[12px] shadow-xl shadow-blue-500/20">
+            Request Secure Link <i class="fas fa-paper-plane ml-2"></i>
+        </button>
+    </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -194,34 +227,48 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.requestPasswordReset = async () => {
+        // UI Helpers
+        window.toggleSecurity = (show) => {
+            const panel = document.getElementById('securityPanel');
+            const overlay = document.getElementById('overlay');
+            if (show) {
+                panel.classList.add('active');
+                overlay.style.display = 'block';
+            } else {
+                panel.classList.remove('active');
+                overlay.style.display = 'none';
+            }
+        };
+
+        window.sendResetEmail = async () => {
             const email = auth.currentUser?.email;
-            if (email && confirm("Send security link to: " + email + "?")) {
+            if (email) {
                 try {
                     await sendPasswordResetEmail(auth, email);
-                    alert("A secure link has been dispatched.");
+                    alert("Security link sent successfully! Check your inbox.");
+                    toggleSecurity(false);
                 } catch (e) { alert("Error: " + e.message); }
             }
         };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById('mainProfile').style.display = 'block';
+                document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
                 const docSnap = await getDoc(doc(db, "users", user.uid));
                 if (docSnap.exists()) {
                     const d = docSnap.data();
                     document.getElementById('userName').innerText = d.fullName || "USER";
                     document.getElementById('userBalance').innerText = `$${parseFloat(d.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     document.getElementById('userEmailDisplay').innerText = user.email;
-                    document.getElementById('userPhone').innerText = d.phoneNumber || "N/A";
-                    document.getElementById('userInviteCode').innerText = d.myReferralCode || user.uid.substring(0, 5).toUpperCase();
-                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=020617&color=3b82f6&bold=true&size=256`;
+                    document.getElementById('recoveryEmail').innerText = user.email;
+                    document.getElementById('userInviteCode').innerText = d.myReferralCode || "VER-" + user.uid.substring(0, 5).toUpperCase();
+                    document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${d.fullName}&background=050810&color=3b82f6&bold=true&size=256`;
                 }
             } else { window.location.replace("login.html"); }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm("Logout from secure session?")) {
+            if (confirm("Terminate current session?")) {
                 signOut(auth).then(() => window.location.replace("login.html"));
             }
         });
