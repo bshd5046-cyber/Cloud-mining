@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | AMANA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #02040a; font-family: 'Inter', sans-serif; color: #e2e8f0; }
+        .admin-card { background: rgba(17, 24, 39, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .status-pending { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .status-success { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <header class="p-6 border-b border-white/5 bg-black/20 flex justify-between items-center">
+        <h1 class="text-xl font-black italic uppercase tracking-tighter text-blue-500">Amana <span class="text-white">Admin</span></h1>
+        <div class="flex items-center gap-3">
+            <span id="adminName" class="text-xs font-bold text-gray-400">Master Admin</span>
+            <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold">A</div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 px-6 mt-6">
+        <div class="admin-card p-4 rounded-2xl">
+            <p class="text-[10px] uppercase font-black text-gray-500">Total Users</p>
+            <h3 id="statUsers" class="text-xl font-black mt-1">0</h3>
+        </div>
+        <div class="admin-card p-4 rounded-2xl">
+            <p class="text-[10px] uppercase font-black text-gray-500">Total Deposits</p>
+            <h3 id="statDeposits" class="text-xl font-black mt-1 text-green-500">$0</h3>
+        </div>
+        <div class="admin-card p-4 rounded-2xl">
+            <p class="text-[10px] uppercase font-black text-gray-500">Pending Withdraws</p>
+            <h3 id="statWithdraws" class="text-xl font-black mt-1 text-orange-500">0</h3>
+        </div>
+        <div class="admin-card p-4 rounded-2xl">
+            <p class="text-[10px] uppercase font-black text-gray-500">System Profit</p>
+            <h3 id="statProfit" class="text-xl font-black mt-1 text-blue-500">$0</h3>
+        </div>
+    </div>
+
+    <div class="px-6 mt-8">
+        <div class="admin-card p-6 rounded-[2.5rem]">
+            <h2 class="text-sm font-black uppercase mb-4 tracking-widest"><i class="fas fa-search mr-2"></i> Find User by ID</h2>
+            <div class="flex gap-2">
+                <input type="text" id="userSearchInput" placeholder="Enter User UID..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition">
+                <button id="searchBtn" class="bg-blue-600 px-6 rounded-xl font-black uppercase text-xs active:scale-95 transition">Search</button>
+            </div>
+            
+            <div id="searchResult" class="hidden mt-6 p-4 border border-blue-500/20 rounded-2xl bg-blue-500/5">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p id="resName" class="font-black text-lg">---</p>
+                        <p id="resEmail" class="text-xs text-gray-500">---</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="resBalance" class="text-xl font-black text-green-500">$0.00</p>
+                        <p class="text-[10px] font-bold text-gray-500 uppercase">Current Balance</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button id="addBalanceBtn" class="flex-1 py-2 bg-green-600/20 text-green-500 rounded-lg text-[10px] font-black uppercase">Add $100</button>
+                    <button id="banUserBtn" class="flex-1 py-2 bg-red-600/20 text-red-500 rounded-lg text-[10px] font-black uppercase">Ban User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 mt-8">
+        <div class="flex gap-6 mb-4 px-2">
+            <button onclick="loadRequests('deposits')" id="tabDep" class="tab-btn active text-xs font-black uppercase py-2">Deposits</button>
+            <button onclick="loadRequests('withdrawals')" id="tabWith" class="tab-btn text-xs font-black uppercase py-2 text-gray-500">Withdrawals</button>
+        </div>
+
+        <div class="admin-card rounded-[2.5rem] overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 text-[10px] uppercase text-gray-500 font-black">
+                        <tr>
+                            <th class="p-4">User</th>
+                            <th class="p-4">Amount</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestTableBody" class="text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentSearchUser = null;
+
+        // 1. وظيفة البحث عن مستخدم
+        document.getElementById('searchBtn').onclick = async () => {
+            const uid = document.getElementById('userSearchInput').value.trim();
+            if(!uid) return;
+
+            const userRef = doc(db, "users", uid);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                currentSearchUser = uid;
+                document.getElementById('searchResult').classList.remove('hidden');
+                document.getElementById('resName').innerText = data.fullName;
+                document.getElementById('resEmail').innerText = data.email;
+                document.getElementById('resBalance').innerText = `$${data.balance}`;
+            } else {
+                alert("User Not Found!");
+                document.getElementById('searchResult').classList.add('hidden');
+            }
+        };
+
+        // 2. شحن رصيد للمستخدم المبحوث عنه (مثال)
+        document.getElementById('addBalanceBtn').onclick = async () => {
+            if(!currentSearchUser) return;
+            const userRef = doc(db, "users", currentSearchUser);
+            const snap = await getDoc(userRef);
+            const newBalance = (snap.data().balance || 0) + 100;
+            await updateDoc(userRef, { balance: newBalance });
+            document.getElementById('resBalance').innerText = `$${newBalance}`;
+            alert("Added $100 Successfully!");
+        };
+
+        // 3. جلب طلبات السحب والإيداع
+        window.loadRequests = async (type) => {
+            // تحديث شكل الأزرار
+            document.getElementById('tabDep').classList.toggle('active', type === 'deposits');
+            document.getElementById('tabWith').classList.toggle('active', type === 'withdrawals');
+
+            const q = query(collection(db, type));
+            const querySnapshot = await getDocs(q);
+            const tbody = document.getElementById('requestTableBody');
+            tbody.innerHTML = "";
+
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const row = `
+                    <tr class="border-b border-white/5">
+                        <td class="p-4 text-[10px] font-bold">${data.userId.substring(0,8)}...</td>
+                        <td class="p-4 font-black text-blue-400">$${data.amount}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded-full text-[8px] font-black uppercase ${data.status === 'pending' ? 'status-pending' : 'status-success'}">${data.status}</span></td>
+                        <td class="p-4">
+                            ${data.status === 'pending' ? `<button onclick="approve('${type}', '${docSnap.id}', ${data.amount}, '${data.userId}')" class="text-green-500 font-black text-[10px] uppercase">Approve</button>` : '✓'}
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        };
+
+        // 4. الموافقة على الطلبات
+        window.approve = async (type, requestId, amount, userId) => {
+            if(!confirm("Confirm Approve?")) return;
+            
+            const reqRef = doc(db, type, requestId);
+            await updateDoc(reqRef, { status: 'completed' });
+
+            // إذا كان إيداع، نزيد الرصيد للمستخدم
+            if(type === 'deposits') {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                const newBalance = (userSnap.data().balance || 0) + amount;
+                await updateDoc(userRef, { balance: newBalance });
+            }
+            
+            alert("Approved!");
+            loadRequests(type);
+        };
+
+        // تشغيل افتراضي
+        loadRequests('deposits');
+    </script>
+</body>
+</html>
