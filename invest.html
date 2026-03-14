@@ -8,56 +8,43 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #020617; --brand: #3b82f6; }
+        :root { --bg: #020617; --brand: #3b82f6; --emerald: #10b981; }
         body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; padding-bottom: 110px; }
 
-        /* تدرج الخلفية الفخم الذي حُذف */
         .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
 
-        /* تصميم الكبسة الاحترافي الجديد */
-        .node-trigger {
-            background: rgba(59, 130, 246, 0.05);
+        /* تصميم الكبسة الجديد: احترافي وواضح وتحت الأرباح */
+        .execution-gate {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
             border: 1px solid rgba(59, 130, 246, 0.2);
-            backdrop-filter: blur(8px);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        .node-trigger::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
-            transition: 0.5s;
-        }
-        .node-trigger:active::before { left: 100%; }
-        
-        /* تأثير النبض الاحترافي */
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; position: relative; }
-        .status-dot::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            background: inherit;
-            border-radius: inherit;
-            animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
-        }
-        @keyframes pulse-ring { 0% { transform: scale(.7); opacity: 1; } 80%, 100% { transform: scale(2.5); opacity: 0; } }
-
-        /* تنسيق الـ Tiers الفخم */
-        .tier-card { 
-            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 24px;
-            transition: 0.3s;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
-        .tier-active { border-color: var(--brand); box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); }
+        
+        .btn-glow {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-glow:active { transform: scale(0.95); }
 
-        /* التنقل السفلي */
+        /* تأثير النقطة النابضة */
+        .pulse-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; position: relative; }
+        .pulse-dot::after {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            background: inherit; border-radius: inherit;
+            animation: pulse-ring 1.5s infinite;
+        }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+
+        .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
+        .tier-card { background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
+        .tier-active { border-color: var(--brand); box-shadow: 0 0 25px rgba(59, 130, 246, 0.1); }
+
         .bottom-nav { background: rgba(10, 15, 28, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--brand); }
         .invest-fab { width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -20px; box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); border: 4px solid #020617; }
@@ -66,44 +53,67 @@
 <body class="hero-gradient">
 
     <section class="p-6 pt-12">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-end mb-8">
             <div>
-                <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em]">Total Capital</p>
+                <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Trading Capital</p>
                 <h2 class="text-4xl font-black italic tracking-tighter">$<span id="displayBalance">0.00</span></h2>
             </div>
-            
-            <button id="execBtn" onclick="handleExecution()" class="node-trigger px-4 py-2.5 rounded-2xl flex items-center gap-3">
-                <div class="status-dot"></div>
-                <div class="flex flex-col items-start">
-                    <span id="execText" class="text-[9px] font-black uppercase tracking-widest text-blue-400">Initialize Node</span>
-                    <span id="tapCount" class="text-[8px] text-gray-500 font-bold">READY (0/2)</span>
-                </div>
-            </button>
+            <div class="text-right">
+                <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-blue-500/20 tracking-widest uppercase">Node Verified</span>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mb-6">
-            <div class="bg-white/5 p-4 rounded-3xl border border-white/5">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Personal Daily</p>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="stat-box p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Daily Personal</p>
                 <p class="text-lg font-black text-emerald-400">+$0.00</p>
             </div>
-            <div class="bg-white/5 p-4 rounded-3xl border border-white/5">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Team Daily</p>
+            <div class="stat-box p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Daily Team</p>
                 <p class="text-lg font-black text-blue-400">+$0.00</p>
             </div>
         </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <div class="stat-box p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Total Personal Yield</p>
+                <p class="text-lg font-black text-white">$0.00</p>
+            </div>
+            <div class="stat-box p-4">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Total Team Yield</p>
+                <p class="text-lg font-black text-white">$0.00</p>
+            </div>
+        </div>
+
+        <div class="execution-gate p-4 text-center">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <div class="flex items-center gap-2">
+                    <div class="pulse-dot"></div>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Quantum Engine</span>
+                </div>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase">Status: Ready 0/2</span>
+            </div>
+            
+            <button id="execBtn" onclick="handleExecution()" class="btn-glow w-full py-4 rounded-2xl flex items-center justify-center gap-3">
+                <i class="fas fa-microchip text-white text-sm"></i>
+                <span id="execText" class="text-xs font-black uppercase tracking-widest text-white">Execute Yield Sequence</span>
+            </button>
+            
+            <p class="text-[8px] text-gray-600 mt-3 italic font-medium">* System synchronization required twice daily for full ROI</p>
+        </div>
     </section>
 
-    <section class="px-6 space-y-4">
-        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Protocol Tiers</h3>
+    <section class="px-6 space-y-4 pb-10">
+        <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2 px-1">Institutional Levels</h3>
 
         <div class="tier-card tier-active p-5">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h4 class="text-sm font-black italic tracking-tight text-white">SILVER DISCOVERY</h4>
-                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1">Status: Active Node</p>
+                    <p class="text-[9px] text-blue-400 font-bold uppercase mt-1 tracking-tighter">Current Protocol</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-xl font-black">1.9%</p>
+                    <p class="text-xl font-black text-white">1.9%</p>
                     <p class="text-[8px] text-gray-500 font-bold">DAILY ROI</p>
                 </div>
             </div>
@@ -113,52 +123,27 @@
             </div>
         </div>
 
-        <div class="tier-card p-5">
-            <div class="flex justify-between items-start mb-4">
+        <div class="tier-card p-5 opacity-80">
+            <div class="flex justify-between items-start">
                 <div>
-                    <h4 class="text-sm font-black italic tracking-tight text-gray-300">GOLDEN CATALYST</h4>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mt-1">Locked</p>
+                    <h4 class="text-sm font-black italic text-gray-300">GOLDEN CATALYST</h4>
+                    <p class="text-[10px] text-amber-500 font-black mt-1">2.2% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
                 </div>
-                <div class="text-right text-gray-400">
-                    <p class="text-xl font-black">2.2%</p>
+                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
+                    $500 - $2,000<br>5 REFS
                 </div>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-500 font-bold border-t border-white/5 pt-4">
-                <span><i class="fas fa-wallet mr-1 text-amber-500"></i> $500 - $2,000</span>
-                <span class="text-red-400/70"><i class="fas fa-users mr-1"></i> 5 Refs</span>
-            </div>
-        </div>
-
-        <div class="tier-card p-5">
-            <div class="flex justify-between items-start mb-4">
-                <h4 class="text-sm font-black italic tracking-tight text-gray-400 uppercase">Platinum Nexus</h4>
-                <p class="text-xl font-black text-gray-500">2.4%</p>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-600 font-bold border-t border-white/5 pt-4">
-                <span>$2,000 - $6,000</span>
-                <span>10 Referrals</span>
             </div>
         </div>
 
         <div class="tier-card p-5 opacity-60">
-            <div class="flex justify-between items-start mb-4">
-                <h4 class="text-sm font-black italic tracking-tight text-sky-400 uppercase">Diamond Apex</h4>
-                <p class="text-xl font-black text-gray-500">2.8%</p>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-600 font-bold border-t border-white/5 pt-4">
-                <span>$6,000 - $10,000</span>
-                <span>20 Referrals</span>
-            </div>
-        </div>
-
-        <div class="tier-card p-5 opacity-40">
-            <div class="flex justify-between items-start mb-4">
-                <h4 class="text-sm font-black italic tracking-tight text-purple-500 uppercase">Quantum Zenith</h4>
-                <p class="text-xl font-black text-gray-500">3.5%</p>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-600 font-bold border-t border-white/5 pt-4">
-                <span>$10,000 - MAX</span>
-                <span>30 Referrals</span>
+            <div class="flex justify-between items-start">
+                <div>
+                    <h4 class="text-sm font-black italic text-gray-400">PLATINUM NEXUS</h4>
+                    <p class="text-[10px] text-slate-400 font-black mt-1">2.4% <span class="text-gray-600 ml-2 font-bold text-[8px]">DAILY</span></p>
+                </div>
+                <div class="text-[9px] text-gray-500 font-bold text-right leading-tight">
+                    $2,000 - $6k<br>10 REFS
+                </div>
             </div>
         </div>
     </section>
@@ -182,16 +167,17 @@
             const count = document.getElementById('tapCount');
             
             if(taps === 1) {
-                text.innerText = "Syncing Node...";
-                text.classList.add('text-emerald-400');
-                count.innerText = "PROGRESS (1/2)";
-                btn.style.borderColor = "rgba(16, 185, 129, 0.4)";
-                btn.style.background = "rgba(16, 185, 129, 0.05)";
+                text.innerText = "Processing Sequence...";
+                count.innerText = "Status: Syncing 1/2";
+                count.classList.replace('text-blue-500', 'text-amber-500');
+                btn.style.background = "linear-gradient(135deg, #065f46 0%, #10b981 100%)";
             } else if(taps === 2) {
                 text.innerText = "Yield Secured";
-                count.innerText = "COMPLETE (2/2)";
+                count.innerText = "Status: Complete 2/2";
+                count.classList.replace('text-amber-500', 'text-emerald-500');
                 btn.disabled = true;
-                btn.style.opacity = "0.6";
+                btn.style.opacity = "0.5";
+                btn.style.filter = "grayscale(1)";
                 alert("Protocol sequence complete. Daily earnings added to your balance.");
             }
         }
