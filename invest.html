@@ -186,22 +186,22 @@
         async function distributeTeamRewards(parentCode, childProfit) {
             if (!parentCode || childProfit <= 0) return;
             try {
-                // Gen 1 (20%)
-                const q1 = query(collection(db, "users"), where("myReferralCode", "==", parentCode));
+                // Gen 1 (20%) - تم التعديل إلى referralId بناءً على صورك
+                const q1 = query(collection(db, "users"), where("referralId", "==", parentCode));
                 const snap1 = await getDocs(q1);
                 if (!snap1.empty) {
                     const d1 = snap1.docs[0];
                     const reward1 = childProfit * 0.20;
                     await updateDoc(doc(db, "users", d1.id), {
                         balance: increment(reward1),
-                        teamEarn: increment(reward1), // Fixed: Use increment instead of overwrite
+                        teamEarn: increment(reward1),
                         totalTeamEarned: increment(reward1)
                     });
 
                     // Gen 2 (9%)
                     const d1Data = d1.data();
                     if (d1Data.inviteCode) {
-                        const q2 = query(collection(db, "users"), where("myReferralCode", "==", d1Data.inviteCode));
+                        const q2 = query(collection(db, "users"), where("referralId", "==", d1Data.inviteCode));
                         const snap2 = await getDocs(q2);
                         if (!snap2.empty) {
                             const d2 = snap2.docs[0];
@@ -215,7 +215,7 @@
                             // Gen 3 (5%)
                             const d2Data = d2.data();
                             if (d2Data.inviteCode) {
-                                const q3 = query(collection(db, "users"), where("myReferralCode", "==", d2Data.inviteCode));
+                                const q3 = query(collection(db, "users"), where("referralId", "==", d2Data.inviteCode));
                                 const snap3 = await getDocs(q3);
                                 if (!snap3.empty) {
                                     const d3 = snap3.docs[0];
