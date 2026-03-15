@@ -184,7 +184,7 @@
         });
 
         async function distributeTeamRewards(parentCode, childProfit) {
-            if (!parentCode) return;
+            if (!parentCode || childProfit <= 0) return;
             try {
                 // Gen 1 (20%)
                 const q1 = query(collection(db, "users"), where("myReferralCode", "==", parentCode));
@@ -194,7 +194,7 @@
                     const reward1 = childProfit * 0.20;
                     await updateDoc(doc(db, "users", d1.id), {
                         balance: increment(reward1),
-                        teamEarn: reward1, // Set direct to avoid stacking errors
+                        teamEarn: increment(reward1), // Fixed: Use increment instead of overwrite
                         totalTeamEarned: increment(reward1)
                     });
 
