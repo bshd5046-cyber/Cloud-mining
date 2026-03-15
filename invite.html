@@ -11,16 +11,35 @@
     
     <style>
         :root { --bg: #020617; --brand: #3b82f6; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; min-height: 100vh; }
-        .hero-gradient { background: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 70%); }
-        .qr-container { background: white; padding: 15px; border-radius: 20px; display: inline-block; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2); }
-        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; backdrop-filter: blur(10px); }
+        body { 
+            background: var(--bg); 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* خلفية محسنة ومتحركة بشكل خفيف */
+        .hero-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                #020617;
+        }
+
+        .qr-container { background: white; padding: 15px; border-radius: 20px; display: inline-block; box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 24px; backdrop-filter: blur(12px); }
         .copy-btn { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .back-btn { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; color: white; }
-        .friend-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(255,255,255,0.02); border-radius: 16px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .friend-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: rgba(255,255,255,0.02); border-radius: 18px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.04); }
     </style>
 </head>
-<body class="hero-gradient">
+<body>
+    <div class="hero-gradient"></div>
 
     <header class="p-6 pt-10 flex items-center justify-between">
         <a href="profile.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
@@ -32,13 +51,13 @@
 
     <main class="px-6 space-y-6 pb-20">
         <div class="glass-card p-8 text-center relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-3xl rounded-full"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full"></div>
             <div class="qr-container mb-6">
                 <div id="qrcode"></div> 
             </div>
             <div class="space-y-2">
-                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Private Node ID</p>
-                <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white">------</h3>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Your Referral ID</p>
+                <h3 id="refCodeDisplay" class="text-3xl font-black tracking-[0.2em] text-white uppercase">------</h3>
             </div>
         </div>
 
@@ -52,7 +71,7 @@
 
         <div class="grid grid-cols-2 gap-3">
             <div class="glass-card p-5">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Direct Nodes (L1)</p>
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Direct Members (L1)</p>
                 <p id="totalFriends" class="text-xl font-black text-white">0</p>
             </div>
             <div class="glass-card p-5">
@@ -66,7 +85,7 @@
                 <i class="fas fa-circle-info text-blue-400 mt-1"></i>
                 <p class="text-[11px] text-blue-100 leading-relaxed font-medium">
                     <strong class="text-white uppercase">Activation Protocol:</strong> 
-                    Nodes activate upon <span class="text-white font-bold">$100.00</span> capital deposit. 
+                    Accounts activate upon <span class="text-white font-bold">$100.00</span> capital deposit. 
                     Rewards are calculated from <span class="text-emerald-400 font-bold">Daily ROI</span>.
                 </p>
             </div>
@@ -92,11 +111,11 @@
 
         <div class="glass-card p-6">
             <div class="flex justify-between items-center mb-4">
-                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">Direct Assets</h4>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">Direct Members</h4>
                 <span class="text-[9px] text-gray-500 font-bold uppercase" id="teamCountTop">0 Members</span>
             </div>
             <div id="friendsList" class="space-y-2">
-                <p class="text-center text-[10px] text-gray-600 py-6 italic">Synchronizing with blockchain...</p>
+                <p class="text-center text-[10px] text-gray-600 py-6 italic">Synchronizing with system...</p>
             </div>
         </div>
     </main>
@@ -104,7 +123,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -121,12 +140,11 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // مراقبة بيانات المستخدم الحالي
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const userData = docSnap.data();
-                        // نستخدم الكود المخزن أو نولد واحد مؤقت إذا لم يوجد
-                        const userCode = userData.myReferralCode || "VX-" + user.uid.substring(0, 5).toUpperCase();
+                        // تم إزالة VX- هنا واختيار أول 6 أحرف لتكون أكثر وضوحاً
+                        const userCode = userData.referralId || user.uid.substring(0, 6).toUpperCase();
                         setupReferralUI(userCode);
                         listenToTeam(userCode);
                     }
@@ -137,7 +155,6 @@
         });
 
         function setupReferralUI(code) {
-            // رابط التسجيل - تأكد أن اسم الصفحة signup.html
             const refLink = `${window.location.origin}/signup.html?ref=${code}`;
             document.getElementById('refCodeDisplay').innerText = code;
             document.getElementById('refLinkInput').value = refLink;
@@ -156,7 +173,6 @@
 
         async function listenToTeam(code) {
             const friendsList = document.getElementById('friendsList');
-            // استعلام عن المباشرين فقط (الجيل الأول)
             const q = query(collection(db, "users"), where("inviteCode", "==", code));
             
             onSnapshot(q, (snapshot) => {
@@ -167,8 +183,8 @@
                 if (snapshot.empty) {
                     friendsList.innerHTML = `
                         <div class="text-center py-8">
-                            <i class="fas fa-users-slash text-gray-700 text-2xl mb-2"></i>
-                            <p class="text-[10px] text-gray-600 italic">Your network is currently empty.</p>
+                            <i class="fas fa-users-slash text-gray-800 text-2xl mb-2"></i>
+                            <p class="text-[10px] text-gray-600 italic">No members found in your direct network.</p>
                         </div>`;
                 }
 
@@ -185,21 +201,21 @@
                     div.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-xl ${isActive ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/10'} border flex items-center justify-center">
-                                <i class="fas fa-microchip text-[12px] ${isActive ? 'text-emerald-400' : 'text-slate-500'}"></i>
+                                <i class="fas fa-user text-[12px] ${isActive ? 'text-emerald-400' : 'text-slate-500'}"></i>
                             </div>
                             <div>
-                                <p class="text-[11px] font-extrabold text-white">${data.email ? data.email.split('@')[0] : 'Node_' + doc.id.substring(0,4)}</p>
+                                <p class="text-[11px] font-extrabold text-white">${data.email ? data.email.split('@')[0] : 'User_' + doc.id.substring(0,4)}</p>
                                 <div class="flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500/50'}"></span>
                                     <p class="text-[8px] font-black uppercase tracking-tighter ${isActive ? 'text-emerald-500' : 'text-red-500/70'}">
-                                        ${isActive ? 'Active Node' : 'Inactive'}
+                                        ${isActive ? 'Active Member' : 'Inactive'}
                                     </p>
                                 </div>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-[11px] font-black text-white">$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
-                            <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Stake Amount</p>
+                            <p class="text-[7px] text-slate-500 font-bold uppercase tracking-widest">Balance</p>
                         </div>
                     `;
                     friendsList.appendChild(div);
@@ -211,7 +227,6 @@
             });
         }
 
-        // تحسين وظيفة النسخ
         document.getElementById('copyBtn').addEventListener('click', () => {
             const copyText = document.getElementById("refLinkInput");
             if (copyText.value === "Generating link...") return;
