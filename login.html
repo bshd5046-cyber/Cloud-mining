@@ -3,51 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login | AMANA Secure Access</title>
+    <title>Login | VERTEX Secure Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { background-color: #050810; font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
-        .input-field {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
+        :root { --brand: #3b82f6; --bg: #020617; }
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
-        .input-field:focus-within {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.05);
+
+        /* خلفية سينمائية متحركة خفيفة */
+        .hero-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+                #020617;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-group {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-group:focus-within {
+            border-color: var(--brand);
+            background: rgba(59, 130, 246, 0.03);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+            transition: 0.3s all;
+        }
+
+        .login-btn:active { transform: scale(0.96); }
+
+        .logo-glow {
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body>
+    <div class="hero-bg"></div>
 
-    <div class="w-full max-w-md">
-        <div class="text-center mb-10">
-            <h1 class="text-3xl font-black italic tracking-tighter uppercase text-blue-500">Welcome <span class="text-white">Back</span></h1>
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-2">Secure biometric access</p>
-        </div>
-
-        <div class="space-y-4">
-            <div class="input-field rounded-2xl flex items-center p-4">
-                <i class="fas fa-at text-gray-500 mr-4"></i>
-                <input type="email" id="loginEmail" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+    <div class="w-full max-w-[400px] p-6 animate-fade-in">
+        <div class="glass-box p-8 md:p-10">
+            <div class="text-center mb-10">
+                <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto mb-4 logo-glow object-contain">
+                <h1 class="text-2xl font-black italic tracking-tighter text-white uppercase">Vertex <span class="text-blue-500">Cloud</span></h1>
+                <p class="text-[9px] text-gray-500 font-bold uppercase tracking-[0.3em] mt-1">Quantum Encryption Protocol</p>
             </div>
 
-            <div class="input-field rounded-2xl flex items-center p-4">
-                <i class="fas fa-shield-alt text-gray-500 mr-4"></i>
-                <input type="password" id="loginPassword" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-medium">
+            <div class="space-y-4">
+                <div class="input-group rounded-2xl flex items-center p-4">
+                    <i class="fas fa-envelope text-blue-500/50 mr-4 text-sm"></i>
+                    <input type="email" id="loginEmail" placeholder="Access Email" class="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-gray-600">
+                </div>
+
+                <div class="input-group rounded-2xl flex items-center p-4">
+                    <i class="fas fa-lock text-blue-500/50 mr-4 text-sm"></i>
+                    <input type="password" id="loginPassword" placeholder="Secure Password" class="bg-transparent border-none outline-none w-full text-sm font-medium placeholder:text-gray-600">
+                </div>
+
+                <button id="loginBtn" class="login-btn text-white w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] mt-6">
+                    Authenticate Access
+                </button>
             </div>
 
-            <button id="loginBtn" class="bg-white text-black w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm mt-4 active:scale-95 transition">
-                Authorize Login
-            </button>
+            <p id="loginMessage" class="text-center mt-5 text-[10px] font-black uppercase tracking-wider"></p>
+
+            <div class="mt-8 pt-6 border-t border-white/5 text-center">
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-tight">
+                    New Operator? 
+                    <a href="signup.html" class="text-blue-500 ml-1 hover:underline">Establish Account</a>
+                </p>
+            </div>
         </div>
-
-        <p id="loginMessage" class="text-center mt-4 text-xs font-bold uppercase"></p>
-
-        <p class="text-center mt-8 text-gray-500 text-xs font-bold uppercase">
-            New to Amana? 
-            <a href="signup.html" class="text-blue-500 ml-1">Create Account</a>
+        
+        <p class="text-center mt-8 text-gray-600 text-[9px] font-bold uppercase tracking-[0.2em]">
+            © 2026 VERTEX INFRASTRUCTURE SYSTEM
         </p>
     </div>
 
@@ -55,7 +113,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -65,28 +122,36 @@
             appId: "1:144227180849:web:ccbda447d074efbbddd010"
         };
 
-        // تهيئة Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // وظيفة تسجيل الدخول
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const msg = document.getElementById('loginMessage');
+            const btn = document.getElementById('loginBtn');
+
+            if(!email || !password) {
+                msg.style.color = "#f87171";
+                msg.innerText = "Credentials Required";
+                return;
+            }
+
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 msg.style.color = "#4ade80";
-                msg.innerText = "Login Successful! Redirecting...";
-                // التوجه إلى الصفحة الرئيسية بعد ثانية واحدة
-                setTimeout(() => window.location.href = "index.html", 1000);
+                msg.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Access Granted';
+                setTimeout(() => window.location.href = "index.html", 800);
             } catch (error) {
+                btn.disabled = false;
+                btn.innerText = "Authenticate Access";
                 msg.style.color = "#f87171";
-                // عرض رسالة خطأ بسيطة للمستخدم
-                if (error.code === 'auth/user-not-found') msg.innerText = "User not found";
-                else if (error.code === 'auth/wrong-password') msg.innerText = "Incorrect password";
-                else msg.innerText = "Login failed. Please try again.";
+                
+                if (error.code === 'auth/invalid-credential') msg.innerText = "Identity Mismatch";
+                else msg.innerText = "Authentication Failed";
             }
         });
     </script>
