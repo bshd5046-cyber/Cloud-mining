@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login | VERTEX</title>
+    <title>Vertex | Alpha Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand: #3b82f6; --bg: #020617; }
+        :root { --primary: #3b82f6; --accent: #60a5fa; }
         body { 
-            background: var(--bg); 
+            background: #02040a; 
             color: white; 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             min-height: 100vh;
@@ -21,97 +21,122 @@
             overflow: hidden;
         }
 
-        /* خلفية متدرجة تندمج مع لون الشعار */
-        .hero-bg {
+        /* خلفية أسطورية متحركة (Mesh Gradient) */
+        .animated-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background: 
-                radial-gradient(circle at 50% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 0% 0%, rgba(30, 58, 138, 0.1) 0%, transparent 40%),
-                #020617;
+            background: linear-gradient(45deg, #02040a, #050b18, #02040a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
 
-        .glass-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border-radius: 40px;
-            padding: 3rem 2.5rem;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .input-style {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s all ease;
-        }
-
-        .input-style:focus-within {
-            border-color: var(--brand);
-            background: rgba(59, 130, 246, 0.03);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
-        }
-
-        .login-btn {
-            background: #ffffff;
-            color: #000000;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .login-btn:active { transform: scale(0.95); }
-
-        /* نبض هادئ خلف الشعار */
-        .logo-aura {
+        /* جزيئات ضوئية عشوائية في الخلفية */
+        .particles {
             position: absolute;
-            width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
-            z-index: -1;
-            animation: pulse 4s infinite;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 80%);
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 0.8; }
+        /* تأثير الاسم اللماع (Glowing Text) */
+        .glossy-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 3.5rem;
+            letter-spacing: -2px;
+            background: linear-gradient(to bottom, #fff 20%, #3b82f6 50%, #1e3a8a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+            animation: textShine 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes textShine {
+            from { filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3)); transform: translateY(0); }
+            to { filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.7)); transform: translateY(-5px); }
+        }
+
+        /* حاوية المدخلات الزجاجية */
+        .ultra-glass {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(30px);
+            border-radius: 40px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+        }
+
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            transition: 0.4s;
+        }
+
+        .cyber-input:focus-within {
+            border-bottom-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* زر Login الأسطوري */
+        .btn-glow {
+            background: #fff;
+            color: #000;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.4s;
+            box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="hero-bg"></div>
+    <div class="animated-bg"></div>
+    <div class="particles"></div>
 
-    <div class="relative z-10 w-full flex justify-center p-6">
-        <div class="glass-box text-center">
-            
-            <div class="relative flex flex-col items-center mb-10">
-                <div class="logo-aura"></div>
-                <img src="logo.png" alt="Logo" class="w-28 h-28 object-contain mb-4 drop-shadow-2xl">
-                <h2 class="text-2xl font-extrabold tracking-tighter text-white uppercase">VERTEX</h2>
-            </div>
-
-            <div class="space-y-4 mb-8">
-                <div class="input-style rounded-2xl flex items-center px-4 py-4">
-                    <i class="fas fa-envelope text-gray-500 mr-3 text-sm"></i>
-                    <input type="email" id="loginEmail" placeholder="Email" class="bg-transparent border-none outline-none w-full text-sm font-semibold placeholder:text-gray-600">
-                </div>
-
-                <div class="input-style rounded-2xl flex items-center px-4 py-4">
-                    <i class="fas fa-lock text-gray-500 mr-3 text-sm"></i>
-                    <input type="password" id="loginPassword" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-semibold placeholder:text-gray-600">
-                </div>
-            </div>
-
-            <button id="loginBtn" class="login-btn w-full py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl mb-6">
-                Login
-            </button>
-
-            <div id="loginMessage" class="text-[10px] font-bold uppercase tracking-wider h-4 mb-4"></div>
-
-            <a href="signup.html" class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-blue-500 transition">
-                Create Account
-            </a>
+    <div class="w-full max-w-[440px] p-8 relative z-10 animate-fade-in">
+        
+        <div class="text-center mb-12">
+            <h1 class="glossy-title">VERTEX</h1>
+            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.5em] mt-2 opacity-70">Quantum Infrastructure</p>
         </div>
+
+        <div class="ultra-glass p-10 md:p-12">
+            <div class="space-y-6">
+                <div class="cyber-input py-3 flex items-center">
+                    <i class="fa-thin fa-user text-blue-500/50 mr-4"></i>
+                    <input type="email" id="loginEmail" placeholder="EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest placeholder:text-gray-700">
+                </div>
+
+                <div class="cyber-input py-3 flex items-center">
+                    <i class="fa-thin fa-lock-keyhole text-blue-500/50 mr-4"></i>
+                    <input type="password" id="loginPassword" placeholder="PASSWORD" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest placeholder:text-gray-700">
+                </div>
+
+                <button id="loginBtn" class="btn-glow w-full py-5 rounded-xl text-[11px] mt-8 active:scale-95">
+                    Login
+                </button>
+            </div>
+
+            <p id="loginMessage" class="text-center mt-6 text-[9px] font-black uppercase tracking-widest h-4"></p>
+
+            <div class="mt-10 text-center">
+                <a href="signup.html" class="text-gray-600 text-[10px] font-black uppercase tracking-[0.3em] hover:text-white transition-all">
+                    Create Account
+                </a>
+            </div>
+        </div>
+
+        <p class="text-center mt-12 text-gray-800 text-[9px] font-bold tracking-[0.4em]">SYSTEM v4.0.2</p>
     </div>
 
     <script type="module">
@@ -138,23 +163,23 @@
 
             if(!email || !password) {
                 msg.style.color = "#f87171";
-                msg.innerText = "Empty Credentials";
+                msg.innerText = "ACCESS DENIED: EMPTY FIELDS";
                 return;
             }
 
-            btn.innerText = "Processing...";
+            btn.innerText = "VERIFYING...";
             btn.disabled = true;
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 msg.style.color = "#4ade80";
-                msg.innerText = "Success";
+                msg.innerText = "CONNECTION ESTABLISHED";
                 setTimeout(() => window.location.href = "index.html", 800);
             } catch (error) {
                 btn.disabled = false;
                 btn.innerText = "Login";
                 msg.style.color = "#f87171";
-                msg.innerText = "Failed";
+                msg.innerText = "AUTHENTICATION FAILED";
             }
         });
     </script>
