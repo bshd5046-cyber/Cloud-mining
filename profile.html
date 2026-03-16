@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #020617; --primary: #3b82f6; --accent: #8b5cf6; --nav-bg: rgba(7, 10, 22, 0.98); }
-        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617; min-height: 100vh; overflow-x: hidden; }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617; min-height: 100vh; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); border: 6px solid #020617; }
@@ -19,8 +19,9 @@
         .slide-panel { position: fixed; bottom: -100%; left: 0; right: 0; height: auto; min-height: 45vh; background: #0a0f1c; z-index: 2000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem; padding-bottom: 4rem; }
         .slide-panel.active { bottom: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 1500; transition: 0.3s; }
-        #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); pointer-events: none; }
+        #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #customToast.show { transform: translateY(0); }
+        input::placeholder { letter-spacing: normal; font-size: 9px; opacity: 0.5; }
     </style>
 </head>
 <body class="pb-32">
@@ -38,128 +39,153 @@
 
     <div id="securityPanel" class="slide-panel">
         <div class="flex items-center justify-between mb-8">
-            <button onclick="closeAllPanels()" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><i class="fas fa-chevron-left"></i></button>
+            <button onclick="closeAllPanels()" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 active:scale-90 transition-all">
+                <i class="fas fa-chevron-left"></i>
+            </button>
             <h3 class="text-lg font-black uppercase tracking-tight">Security Vault</h3>
             <div class="w-10"></div>
         </div>
+        
         <div class="space-y-3">
-            <button id="resetEmailBtn" class="w-full flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+            <button id="resetEmailBtn" class="w-full flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 active:scale-95 transition-all">
                 <div class="flex items-center gap-4">
                     <i class="fas fa-key text-blue-400"></i>
                     <div class="text-left">
                         <p class="text-xs font-bold text-white">Reset Password</p>
-                        <p class="text-[9px] text-slate-500 uppercase">Identity Authentication</p>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-tighter">Identity Authentication</p>
                     </div>
                 </div>
+                <i class="fas fa-chevron-right text-slate-700 text-[10px]"></i>
             </button>
-            <button id="verifyEmailBtn" class="w-full flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5">
+
+            <button id="verifyEmailBtn" class="w-full flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 active:scale-95 transition-all">
                 <div class="flex items-center gap-4">
                     <i class="fas fa-envelope-circle-check text-indigo-400"></i>
                     <div class="text-left">
                         <p class="text-xs font-bold text-white">Email Verification</p>
-                        <p id="emailStatusText" class="text-[9px] text-slate-500 uppercase">Status: Pending</p>
+                        <p id="emailStatusText" class="text-[9px] text-slate-500 uppercase tracking-tighter">Status: Pending</p>
                     </div>
                 </div>
-                <div id="verifyBadge" class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase">Required</div>
+                <div id="verifyBadge" class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest">Required</div>
             </button>
-            <div class="p-5 bg-blue-500/5 rounded-3xl border border-blue-500/10 mt-4">
-                <p class="text-[10px] font-black text-white uppercase mb-3">Withdrawal PIN</p>
+
+            <hr class="border-white/5 my-4">
+
+            <div class="p-5 bg-blue-500/5 rounded-3xl border border-blue-500/10">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                        <i class="fas fa-lock text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-white uppercase">Withdrawal PIN</p>
+                        <p id="pinStatusText" class="text-[9px] text-slate-500 uppercase font-black">Not Set - Payouts Disabled</p>
+                    </div>
+                </div>
+                
                 <div id="pinInputs" class="space-y-2">
-                    <input type="password" id="oldPin" maxlength="6" placeholder="CURRENT PIN" class="hidden w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs tracking-[0.5em]">
-                    <input type="password" id="newPin" maxlength="6" placeholder="NEW 6-DIGIT PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs tracking-[0.5em]">
-                    <input type="password" id="confirmPin" maxlength="6" placeholder="CONFIRM PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs tracking-[0.5em]">
-                    <button id="savePinBtn" class="w-full mt-2 py-3 bg-blue-600 rounded-xl text-[10px] font-black uppercase">Initialize PIN</button>
+                    <input type="password" id="oldPin" maxlength="6" placeholder="ENTER CURRENT PIN" class="hidden w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] focus:border-blue-500 outline-none text-blue-400">
+                    <input type="password" id="newPin" maxlength="6" placeholder="NEW 6-DIGIT PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] focus:border-blue-500 outline-none">
+                    <input type="password" id="confirmPin" maxlength="6" placeholder="CONFIRM NEW PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] focus:border-blue-500 outline-none">
+                    
+                    <button id="savePinBtn" class="w-full mt-2 py-3 bg-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-900/20 active:scale-95 transition-all">
+                        Initialize PIN
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="referralPanel" class="slide-panel">
-        <div class="flex items-center justify-between mb-8">
-            <button onclick="closeAllPanels()" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-400"><i class="fas fa-chevron-left"></i></button>
-            <h3 class="text-lg font-black uppercase tracking-tight">Affiliate Network</h3>
-            <div class="w-10"></div>
+    <div id="logoutPanel" class="slide-panel text-center">
+        <div class="w-16 h-1 rounded-full bg-slate-800 mx-auto mb-6"></div>
+        <div class="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto mb-4">
+            <i class="fas fa-power-off"></i>
         </div>
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center text-indigo-400 text-3xl mx-auto mb-4">
-                <i class="fas fa-users"></i>
-            </div>
-            <p class="text-slate-400 text-xs px-6">Invite your partners to the Vertex network and earn commissions on every successful node deployment.</p>
-        </div>
-        <div class="space-y-4">
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <p class="text-[10px] text-slate-500 font-black uppercase mb-2">Your Referral ID</p>
-                <div class="flex items-center justify-between">
-                    <code id="refCodeDisplay" class="text-lg font-black text-blue-400 tracking-widest">-------</code>
-                    <button onclick="copyText('refCodeDisplay', 'ID Copied')" class="text-blue-500 text-xs font-bold uppercase">Copy</button>
-                </div>
-            </div>
-            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
-                <p class="text-[10px] text-slate-500 font-black uppercase mb-2">Invitation Link</p>
-                <div class="flex items-center justify-between gap-4">
-                    <p id="refLinkDisplay" class="text-[10px] text-slate-300 truncate font-mono">https://vertex.app/ref=...</p>
-                    <button onclick="copyText('refLinkDisplay', 'Link Copied')" class="shrink-0 text-blue-500 text-xs font-bold uppercase">Copy</button>
-                </div>
-            </div>
+        <h3 class="text-xl font-black mb-2 uppercase">Terminate Session?</h3>
+        <p class="text-slate-500 text-sm mb-8 px-6">Are you sure you want to end your current terminal connection with Vertex Premier?</p>
+        <div class="flex gap-4">
+            <button onclick="closeAllPanels()" class="flex-1 py-4 rounded-2xl bg-white/5 font-bold uppercase text-[10px] tracking-widest">Cancel</button>
+            <button id="confirmLogout" class="flex-1 py-4 rounded-2xl bg-red-600 font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-red-900/20 text-white">Sign Out</button>
         </div>
     </div>
 
     <main id="mainContent" class="opacity-0 transition-opacity duration-700">
         <div class="px-8 pt-10 pb-6 text-center">
-            <div class="inline-block mb-4 relative">
-                <div class="w-24 h-24 rounded-full bg-slate-900 overflow-hidden border-4 border-blue-500/20 p-1">
-                    <img id="userAvatar" src="" class="w-full h-full rounded-full object-cover">
+            <div class="profile-ring inline-block mb-4">
+                <div class="w-20 h-20 rounded-full bg-slate-900 overflow-hidden border-2 border-[#020617]">
+                    <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
             </div>
-            <h2 id="userName" class="text-2xl font-black tracking-tight text-white mb-1 uppercase">---</h2>
-            <p id="userPhoneDisplay" class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">---</p>
+            <h2 id="userName" class="text-xl font-extrabold tracking-tight text-white mb-1 uppercase">---</h2>
+            <div class="flex flex-col items-center gap-1.5 mt-3 text-[9px] font-black uppercase tracking-widest">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500">UID:</span>
+                    <span id="userIdDisplay" class="text-blue-400 font-mono">---</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500">Phone:</span>
+                    <span id="userPhoneDisplay" class="text-slate-300">---</span>
+                </div>
+            </div>
         </div>
 
         <div class="px-6 mb-4">
-            <div class="glass-panel p-6 rounded-[2.5rem] border-white/10">
+            <div class="glass-panel p-6 rounded-[2.5rem] border-white/10 relative overflow-hidden">
                 <div class="flex justify-between items-start mb-6">
                     <div>
-                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Portfolio Balance</p>
+                        <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Personal Assets</p>
                         <h1 id="userBalance" class="text-3xl font-black text-white">$0.00</h1>
                     </div>
                     <div id="userTierBadge" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter">Checking...</div>
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between text-[9px] font-black uppercase">
-                        <span class="text-slate-500">System Integrity</span>
-                        <span id="statusText">Offline</span>
+                        <span class="text-slate-500">Status Protocol</span>
+                        <span id="statusText" class="">Offline</span>
                     </div>
                     <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div id="progressBar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                        <div id="progressBar" class="h-full bg-blue-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="px-6 space-y-4 mt-8">
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Control</h3>
+        <div class="px-6 mb-8">
+            <div class="glass-panel p-5 rounded-[2rem] border-white/5 flex items-center justify-between bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Monthly Team Profit</p>
+                        <p id="monthlyTeamEarn" class="text-lg font-black text-white">+$0.00</p>
+                    </div>
+                </div>
+                <i class="fas fa-arrow-trend-up text-emerald-500 animate-pulse"></i>
+            </div>
+        </div>
+
+        <div class="px-6 space-y-4">
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Terminal Access</h3>
             <div class="glass-panel rounded-[2.5rem] overflow-hidden">
                 <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-xl"><i class="fas fa-shield-halved"></i></div>
                         <div class="text-left">
                             <p class="text-[15px] font-bold text-white">Security Vault</p>
-                            <p class="text-[11px] text-slate-500">Credentials & Protection</p>
+                            <p class="text-[11px] text-slate-500">Identity & Credentials</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </button>
 
-                <button onclick="togglePanel('referralPanel', true)" class="w-full flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5">
+                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 no-underline">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl"><i class="fas fa-share-nodes"></i></div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl"><i class="fas fa-users"></i></div>
                         <div class="text-left">
-                            <p class="text-[15px] font-bold text-white">Referral Network</p>
-                            <p class="text-[11px] text-slate-500">Manage Affiliates & IDs</p>
+                            <p class="text-[15px] font-bold text-white">Affiliate Program</p>
+                            <p class="text-[11px] text-slate-500">Referral Commissions</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
-                </button>
+                </a>
 
                 <button onclick="togglePanel('logoutPanel', true)" class="w-full flex items-center gap-4 p-6 active:bg-red-500/5">
                     <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 text-xl"><i class="fas fa-power-off"></i></div>
@@ -168,16 +194,6 @@
             </div>
         </div>
     </main>
-
-    <div id="logoutPanel" class="slide-panel text-center">
-        <div class="w-16 h-1 rounded-full bg-slate-800 mx-auto mb-6"></div>
-        <h3 class="text-xl font-black mb-2 uppercase">End Session?</h3>
-        <p class="text-slate-500 text-sm mb-8">This will disconnect your terminal access.</p>
-        <div class="flex gap-4">
-            <button onclick="closeAllPanels()" class="flex-1 py-4 rounded-2xl bg-white/5 font-bold uppercase text-[10px]">Cancel</button>
-            <button id="confirmLogout" class="flex-1 py-4 rounded-2xl bg-red-600 font-bold uppercase text-[10px]">Sign Out</button>
-        </div>
-    </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -209,19 +225,14 @@
 
         function showToast(msg, iconClass = 'fa-info-circle', color = 'text-blue-400') {
             const toast = document.getElementById('customToast');
-            document.getElementById('toastMsg').innerText = msg;
+            const toastMsg = document.getElementById('toastMsg');
             const toastIcon = document.getElementById('toastIcon');
+            toastMsg.innerText = msg;
             toastIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
             toastIcon.className = `w-10 h-10 rounded-full flex items-center justify-center bg-white/5 ${color}`;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
-
-        window.copyText = (elementId, successMsg) => {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text);
-            showToast(successMsg, "fa-copy", "text-emerald-400");
-        };
 
         window.togglePanel = (id, show) => {
             document.getElementById(id).classList.toggle('active', show);
@@ -236,86 +247,129 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
+
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
+                        
+                        // Basic UI Info
+                        document.getElementById('userIdDisplay').innerText = data.referralId || "VX-USER";
                         document.getElementById('userName').innerText = data.fullName || "Member";
-                        document.getElementById('userPhoneDisplay').innerText = data.phone || "---";
+                        document.getElementById('userPhoneDisplay').innerText = data.phone || "No Phone";
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                         
-                        // Referral System Data
-                        const refID = data.referralId || "VX-" + user.uid.substring(0,5).toUpperCase();
-                        document.getElementById('refCodeDisplay').innerText = refID;
-                        document.getElementById('refLinkDisplay').innerText = `https://vertex-premier.web.app/register.html?ref=${refID}`;
-
-                        // Balance & Progress Logic
+                        // Balance Logic
                         const balance = parseFloat(data.balance || 0);
                         document.getElementById('userBalance').innerText = `$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        
+                        document.getElementById('monthlyTeamEarn').innerText = `+$${parseFloat(data.totalTeamEarned || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
                         const tierBadge = document.getElementById('userTierBadge');
                         const statusText = document.getElementById('statusText');
                         const progressBar = document.getElementById('progressBar');
 
                         if (balance >= 100) {
                             tierBadge.innerText = "ACTIVE";
-                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black border border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
                             statusText.innerText = "Quantum Live";
                             statusText.className = "text-emerald-500 animate-pulse";
                             progressBar.style.width = "100%";
                             progressBar.style.backgroundColor = "#10b981";
                         } else {
                             tierBadge.innerText = "NOT ACTIVE";
-                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black border border-red-500/20 bg-red-500/10 text-red-500";
-                            statusText.innerText = "Min $100 Required";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border border-red-500/20 bg-red-500/10 text-red-500";
+                            statusText.innerText = "Min Capital Required ($100)";
                             statusText.className = "text-slate-500";
                             progressBar.style.width = Math.min((balance/100)*100, 100) + "%";
                             progressBar.style.backgroundColor = "#475569";
                         }
 
+                        // Email Verification UI
                         if(user.emailVerified) {
-                            document.getElementById('emailStatusText').innerText = "Verified";
-                            document.getElementById('verifyBadge').style.display = "none";
+                            document.getElementById('emailStatusText').innerText = "Account Verified";
+                            document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
+                            document.getElementById('verifyBadge').innerText = "Verified";
+                            document.getElementById('verifyBadge').className = "px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest";
+                            document.getElementById('verifyEmailBtn').disabled = true;
+                            document.getElementById('verifyEmailBtn').style.opacity = "0.6";
                         }
 
-                        if (data.securePin || data.pin) {
+                        // Secure PIN UI Logic
+                        if (data.securePin) {
                             userHasPin = true;
+                            document.getElementById('pinStatusText').innerText = "PIN Status: PROTECTED";
+                            document.getElementById('pinStatusText').className = "text-[9px] text-emerald-400 uppercase font-black";
+                            document.getElementById('savePinBtn').innerText = "Update Security PIN";
                             document.getElementById('oldPin').classList.remove('hidden');
-                            document.getElementById('savePinBtn').innerText = "Update PIN";
                         }
                     }
                 });
             } else { window.location.replace("login.html"); }
         });
 
-        // PIN & Auth Button Listeners... (نفس الأكواد السابقة لضمان التشغيل)
+        // Save PIN Functionality
         document.getElementById('savePinBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             const oldPinInput = document.getElementById('oldPin');
             const newPinVal = document.getElementById('newPin').value;
             const confirmPinVal = document.getElementById('confirmPin').value;
 
-            if (newPinVal.length !== 6) { showToast("PIN must be 6 digits", "fa-shield", "text-amber-400"); return; }
-            if (newPinVal !== confirmPinVal) { showToast("PINs mismatch", "fa-xmark", "text-red-400"); return; }
+            if (newPinVal.length !== 6 || !/^\d+$/.test(newPinVal)) {
+                showToast("PIN must be 6 digits", "fa-shield-halved", "text-amber-400");
+                return;
+            }
+
+            if (newPinVal !== confirmPinVal) {
+                showToast("New PINs mismatch", "fa-xmark", "text-red-400");
+                return;
+            }
 
             try {
                 const userRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userRef);
-                const storedPin = userDoc.data().securePin || userDoc.data().pin;
-
-                if (userHasPin && oldPinInput.value !== String(storedPin)) {
-                    showToast("Incorrect Old PIN", "fa-lock", "text-red-500");
-                    return;
-                }
                 
-                await updateDoc(userRef, { securePin: newPinVal, pin: newPinVal });
-                showToast("PIN Updated", "fa-check", "text-emerald-400");
-                closeAllPanels();
-            } catch (e) { showToast("System Error", "fa-bug", "text-red-500"); }
+                if (userHasPin) {
+                    const userDoc = await getDoc(userRef);
+                    if (userDoc.data().securePin !== oldPinInput.value) {
+                        showToast("Incorrect Current PIN", "fa-lock", "text-red-500");
+                        return;
+                    }
+                }
+
+                await updateDoc(userRef, { securePin: newPinVal });
+                showToast("PIN Securely Saved", "fa-check-double", "text-emerald-400");
+                
+                // Reset inputs
+                oldPinInput.value = "";
+                document.getElementById('newPin').value = "";
+                document.getElementById('confirmPin').value = "";
+                
+            } catch (e) {
+                showToast("Database Error", "fa-bug", "text-red-500");
+            }
+        });
+
+        // Auth Logic
+        document.getElementById('verifyEmailBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user) {
+                sendEmailVerification(user)
+                    .then(() => showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400"))
+                    .catch((err) => showToast("Rate limit reached", "fa-clock", "text-red-400"));
+            }
+        });
+
+        document.getElementById('resetEmailBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user && user.email) {
+                sendPasswordResetEmail(auth, user.email)
+                    .then(() => showToast("Reset Link Sent", "fa-key", "text-emerald-400"))
+                    .catch(() => showToast("Error resetting", "fa-xmark", "text-red-500"));
+            }
         });
 
         document.getElementById('confirmLogout').addEventListener('click', () => {
             signOut(auth).then(() => window.location.replace("login.html"));
         });
+
     </script>
 </body>
 </html>
