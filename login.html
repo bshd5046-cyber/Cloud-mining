@@ -3,118 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vertex | Authorization Protocol</title>
+    <title>Vertex | Authorization Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand: #3b82f6; --bg: #010208; --glass: rgba(255, 255, 255, 0.01); }
+        :root { --brand: #3b82f6; --bg: #010208; }
         body { 
             background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; 
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; position: relative;
+            overflow-x: hidden; position: relative;
         }
 
-        /* خلفية الفضاء العميق مع نبض ضوئي خفي */
-        .deep-space-bg {
+        /* نفس خلفية النجوم المتحركة */
+        .starfield-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-                radial-gradient(circle at 10% 10%, rgba(30, 58, 138, 0.1) 0%, transparent 40%),
-                var(--bg);
-            animation: blackHolePulse 8s infinite alternate;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 80%), #010208;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            animation: starsMove 100s linear infinite;
         }
-        @keyframes blackHolePulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+        @keyframes starsMove { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
 
-        /* الاسم الكرومي البارز (البراق) */
-        .glass-3d-title {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 3.2rem;
-            text-transform: uppercase; letter-spacing: -3px;
-            background: linear-gradient(135deg, #fff 30%, #3b82f6 60%, #1e3a8a 80%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+        /* العنوان الكرومي المتطابق */
+        .chrome-title {
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.8rem;
+            background: linear-gradient(135deg, #fff 20%, #3b82f6 50%, #fff 80%);
+            background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6));
+            animation: shine 3s linear infinite;
         }
+        @keyframes shine { to { background-position: 200% center; } }
 
-        /* الحاوية الزجاجية مع إطار نيون */
-        .cyber-glass-box {
-            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(35px); border-radius: 40px; position: relative;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+        /* الحاوية الزجاجية مع النيون المتدفق */
+        .stellar-card {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px); border-radius: 40px; position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
         }
-        .cyber-glass-box::before {
+        .stellar-card::before {
             content: ""; position: absolute; inset: -1px; border-radius: 41px; z-index: -1;
-            background: linear-gradient(135deg, transparent, rgba(59, 130, 246, 0.4), transparent);
+            background: linear-gradient(135deg, transparent, var(--brand), transparent);
+            animation: borderFlow 3s infinite;
         }
+        @keyframes borderFlow { 0% { opacity: 0.2; } 50% { opacity: 0.7; } 100% { opacity: 0.2; } }
 
         /* الحقول البراقة */
         .bright-input {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.4s all ease;
+            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .bright-input:focus-within {
-            border-color: var(--brand); transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+            border-color: var(--brand); transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
         }
 
-        /* الزر الأبيض المشتعل */
-        .btn-neon-white {
+        /* الزر الأبيض المشتعل المتطابق */
+        .btn-ignite {
             background: #ffffff; color: #000; font-weight: 900;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            transition: 0.4s;
         }
-        .btn-neon-white:hover {
-            box-shadow: 0 0 60px rgba(255, 255, 255, 0.8);
+        .btn-ignite:hover {
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
             transform: translateY(-3px);
         }
 
-        #loginMessage { transition: 0.3s; }
+        #alertBox { transform: translateY(-150%); transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        #alertBox.show { transform: translateY(0); }
     </style>
 </head>
 <body>
-    <div class="deep-space-bg"></div>
+    <div class="starfield-bg"></div>
 
-    <div class="w-full max-w-[430px] p-6 relative z-10 flex flex-col items-center">
-        
-        <div class="text-center mb-14 relative flex flex-col items-center">
-            <h1 class="glass-3d-title">VERTEX</h1>
-            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.5em] mt-2 opacity-70">Quantum Infrastructure</p>
+    <div id="alertBox" class="fixed top-8 left-6 right-6 z-[1000] hidden">
+        <div class="p-5 rounded-3xl border border-white/20 bg-black/80 backdrop-blur-3xl flex items-center gap-4 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            <i id="alertIcon" class="fas fa-key text-blue-500 text-xl"></i>
+            <p id="alertMsg" class="text-xs font-black uppercase tracking-widest text-white"></p>
+        </div>
+    </div>
+
+    <div class="w-full max-w-[440px] p-6 relative z-10 flex flex-col items-center">
+        <div class="text-center mb-10">
+            <h1 class="chrome-title">VERTEX</h1>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.6em] mt-2">Authorization Terminal</p>
         </div>
 
-        <div class="cyber-glass-box p-10 md:p-12 w-full">
-            <div class="space-y-6">
-                <div class="bright-input rounded-2xl flex items-center p-5">
-                    <i class="fas fa-fingerprint text-blue-500/70 mr-4 text-lg"></i>
-                    <input type="email" id="loginEmail" placeholder="OPERATOR EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-bold text-white placeholder:text-gray-700 focus:ring-0">
-                </div>
-
-                <div class="bright-input rounded-2xl flex items-center p-5">
-                    <i class="fas fa-shield-alt text-blue-500/70 mr-4 text-lg"></i>
-                    <input type="password" id="loginPassword" placeholder="ACCESS KEY" class="bg-transparent border-none outline-none w-full text-xs font-bold text-white placeholder:text-gray-700 focus:ring-0">
-                </div>
-
-                <button id="loginBtn" class="btn-neon-white w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] mt-10">
-                    AUTHORIZE ACCESS
-                </button>
+        <div class="stellar-card p-10 md:p-12 w-full space-y-6">
+            <div class="bright-input rounded-2xl p-5 flex items-center">
+                <i class="fas fa-fingerprint text-blue-500/60 mr-4 text-lg"></i>
+                <input type="email" id="loginEmail" placeholder="OPERATOR EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-black tracking-widest text-white">
             </div>
 
-            <p id="loginMessage" class="text-center mt-6 text-[9px] font-black uppercase tracking-wider h-4"></p>
+            <div class="bright-input rounded-2xl p-5 flex items-center">
+                <i class="fas fa-shield-halved text-blue-500/60 mr-4 text-lg"></i>
+                <input type="password" id="loginPassword" placeholder="ACCESS KEY" class="bg-transparent border-none outline-none w-full text-xs font-black tracking-widest text-white">
+            </div>
 
-            <div class="mt-10 text-center">
-                <a href="signup.html" class="text-gray-600 text-[10px] font-black uppercase tracking-[0.4em] hover:text-white transition-all">
-                    Establish New Account
-                </a>
+            <button id="loginBtn" class="btn-ignite w-full py-5 rounded-2xl text-[11px] uppercase tracking-[0.3em] mt-8">
+                AUTHORIZE ACCESS
+            </button>
+
+            <div class="text-center pt-8">
+                <a href="signup.html" class="text-gray-500 text-[9px] font-black uppercase tracking-[0.4em] hover:text-white transition-all">Establish New Node</a>
             </div>
         </div>
 
-        <p class="text-center mt-12 text-gray-800 text-[9px] font-bold tracking-[0.5em]">SYSTEM v7.1.0 // Deep Space</p>
+        <p class="text-center mt-14 text-gray-800 text-[9px] font-bold tracking-[0.6em]">SYSTEM v8.2.1 // Stellar Class</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -127,15 +128,25 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        function showAlert(message) {
+            const box = document.getElementById('alertBox');
+            const msg = document.getElementById('alertMsg');
+            msg.innerText = message;
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('show'), 10);
+            setTimeout(() => {
+                box.classList.remove('show');
+                setTimeout(() => box.classList.add('hidden'), 500);
+            }, 3000);
+        }
+
         document.getElementById('loginBtn').addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-            const msg = document.getElementById('loginMessage');
             const btn = document.getElementById('loginBtn');
 
-            if(!email || !password) {
-                msg.style.color = "#f87171";
-                msg.innerText = "ACCESS DENIED: CREDENTIALS REQUIRED";
+            if (!email || !password) {
+                showAlert("CREDENTIALS REQUIRED: ACCESS DENIED");
                 return;
             }
 
@@ -144,14 +155,12 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                msg.style.color = "#4ade80";
-                msg.innerText = "IDENTITY CONFIRMED. ACCESS GRANTED.";
-                setTimeout(() => window.location.href = "index.html", 800);
+                showAlert("IDENTITY CONFIRMED: WELCOME OPERATOR");
+                setTimeout(() => window.location.href = "index.html", 1000);
             } catch (error) {
-                btn.disabled = false;
                 btn.innerText = "AUTHORIZE ACCESS";
-                msg.style.color = "#f87171";
-                msg.innerText = "AUTHENTICATION MISMATCH";
+                btn.disabled = false;
+                showAlert("AUTH ERROR: INVALID ACCESS KEY");
             }
         });
     </script>
