@@ -10,7 +10,6 @@
     <style>
         :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
         
-        /* منع الوميض وتحسين سرعة الظهور */
         body { 
             background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -22,7 +21,6 @@
 
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
         
-        /* تنعيم حركة القوائم */
         .slide-panel { 
             position: fixed; bottom: -100%; left: 0; right: 0; 
             background: #0a0f1c; z-index: 2000; 
@@ -42,9 +40,11 @@
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--primary); }
 
-        /* لودر التحميل السريع */
         .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 10px; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        /* تحسين مظهر المدخلات */
+        input::placeholder { color: rgba(255,255,255,0.2); letter-spacing: normal; font-size: 9px; }
     </style>
 </head>
 <body class="pb-32">
@@ -64,28 +64,31 @@
             <h3 class="text-sm font-black uppercase tracking-widest">Vault Security</h3>
             <div class="w-10"></div>
         </div>
+        
         <div class="space-y-4">
-            <button id="resetEmailBtn" class="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+            <button id="resetEmailBtn" class="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 active:scale-95 transition-transform">
                 <div class="flex items-center gap-4 text-left">
                     <i class="fas fa-key text-blue-400"></i>
                     <div><p class="text-xs font-bold">Reset Password</p><p class="text-[8px] text-slate-500 uppercase">Update Account Access</p></div>
                 </div>
-                <i class="fas fa-chevron-right text-slate-800"></i>
+                <i class="fas fa-chevron-right text-slate-700"></i>
             </button>
-            <button id="verifyEmailBtn" class="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+
+            <button id="verifyEmailBtn" class="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 active:scale-95 transition-transform">
                 <div class="flex items-center gap-4 text-left">
                     <i class="fas fa-envelope-circle-check text-indigo-400"></i>
                     <div><p class="text-xs font-bold">Verification</p><p id="emailStatusText" class="text-[8px] text-slate-500 uppercase tracking-tighter">Status: Checking...</p></div>
                 </div>
                 <div id="verifyBadge" class="text-[8px] font-black uppercase px-2 py-1 rounded bg-amber-500/10 text-amber-500">Required</div>
             </button>
+
             <div class="p-5 bg-blue-500/5 rounded-3xl border border-blue-500/10">
-                <p class="text-[10px] font-black uppercase text-blue-400 mb-3">Withdrawal PIN</p>
-                <div id="pinInputs" class="space-y-2">
-                    <input type="password" id="oldPin" maxlength="6" inputmode="numeric" placeholder="CURRENT PIN (IF SET)" class="hidden w-full bg-black/40 border border-white/5 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none">
-                    <input type="password" id="newPin" maxlength="6" inputmode="numeric" placeholder="NEW 6-DIGIT PIN" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none">
-                    <input type="password" id="confirmPin" maxlength="6" inputmode="numeric" placeholder="CONFIRM NEW PIN" class="w-full bg-black/40 border border-white/5 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none">
-                    <button id="savePinBtn" class="w-full py-3 bg-blue-600 rounded-xl text-[10px] font-black uppercase">Save Security PIN</button>
+                <p class="text-[10px] font-black uppercase text-blue-400 mb-3 ml-1">Withdrawal PIN</p>
+                <div id="pinInputs" class="space-y-3">
+                    <input type="password" id="oldPin" maxlength="6" inputmode="numeric" placeholder="ENTER CURRENT PIN" class="hidden w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none focus:border-blue-500/50 transition-colors">
+                    <input type="password" id="newPin" maxlength="6" inputmode="numeric" placeholder="NEW 6-DIGIT PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none focus:border-blue-500/50 transition-colors">
+                    <input type="password" id="confirmPin" maxlength="6" inputmode="numeric" placeholder="CONFIRM NEW PIN" class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-center text-xs font-black tracking-[0.5em] outline-none focus:border-blue-500/50 transition-colors">
+                    <button id="savePinBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-[10px] font-black uppercase transition-all shadow-lg shadow-blue-900/20">Save Security PIN</button>
                 </div>
             </div>
         </div>
@@ -154,21 +157,21 @@
         <div class="px-6 space-y-4">
             <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">Terminal Access</h3>
             <div class="glass-panel rounded-[2.5rem] overflow-hidden">
-                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5">
+                <button onclick="togglePanel('securityPanel', true)" class="w-full flex items-center justify-between p-5 border-b border-white/5 active:bg-white/5 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 text-lg"><i class="fas fa-shield-halved"></i></div>
                         <div class="text-left"><p class="text-sm font-bold text-white">Security Vault</p><p class="text-[10px] text-slate-500 uppercase">Credentials & PIN</p></div>
                     </div>
-                    <i class="fas fa-chevron-right text-slate-800"></i>
+                    <i class="fas fa-chevron-right text-slate-700"></i>
                 </button>
-                <a href="invite.html" class="flex items-center justify-between p-5 border-b border-white/5 no-underline">
+                <a href="invite.html" class="flex items-center justify-between p-5 border-b border-white/5 no-underline active:bg-white/5 transition-colors">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-lg"><i class="fas fa-users"></i></div>
                         <div class="text-left"><p class="text-sm font-bold text-white">Affiliates</p><p class="text-[10px] text-slate-500 uppercase">Invite & Earn</p></div>
                     </div>
-                    <i class="fas fa-chevron-right text-slate-800"></i>
+                    <i class="fas fa-chevron-right text-slate-700"></i>
                 </a>
-                <button onclick="togglePanel('logoutPanel', true)" class="w-full flex items-center gap-4 p-5 active:bg-red-500/5">
+                <button onclick="togglePanel('logoutPanel', true)" class="w-full flex items-center gap-4 p-5 active:bg-red-500/5 transition-colors">
                     <div class="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 text-lg"><i class="fas fa-power-off"></i></div>
                     <p class="text-sm font-bold text-red-500 uppercase">Terminate Session</p>
                 </button>
@@ -225,7 +228,6 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // إخفاء الـ skeletons بمجرد التحميل
                 const removeSkeletons = () => {
                     document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
                 };
@@ -285,9 +287,11 @@
 
         document.getElementById('savePinBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
+            const oldPinInput = document.getElementById('oldPin');
             const newPinVal = document.getElementById('newPin').value;
             const confirmPinVal = document.getElementById('confirmPin').value;
 
+            if (userHasPin && !oldPinInput.value) return showToast("CURRENT PIN REQUIRED", "fa-lock", "text-amber-400");
             if (newPinVal.length !== 6 || !/^\d+$/.test(newPinVal)) return showToast("6-DIGIT PIN REQUIRED", "fa-shield", "text-amber-400");
             if (newPinVal !== confirmPinVal) return showToast("PIN MISMATCH", "fa-x", "text-red-400");
 
@@ -295,11 +299,11 @@
                 const userRef = doc(db, "users", user.uid);
                 if (userHasPin) {
                     const userDoc = await getDoc(userRef);
-                    if (userDoc.data().securePin !== document.getElementById('oldPin').value) return showToast("INCORRECT CURRENT PIN", "fa-lock", "text-red-500");
+                    if (userDoc.data().securePin !== oldPinInput.value) return showToast("INCORRECT CURRENT PIN", "fa-lock", "text-red-500");
                 }
                 await updateDoc(userRef, { securePin: newPinVal });
                 showToast("PIN SECURED", "fa-check", "text-emerald-400");
-                document.querySelectorAll('input[type="password"]').forEach(i => i.value = "");
+                document.querySelectorAll('#pinInputs input').forEach(i => i.value = "");
             } catch (e) { showToast("DATABASE ERROR", "fa-bug", "text-red-500"); }
         });
 
