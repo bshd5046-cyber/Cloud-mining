@@ -37,7 +37,7 @@
         </div>
 
         <div class="px-6 mt-8">
-            <div class="crypto-card p-9 text-center sm:text-left">
+            <div class="crypto-card p-9">
                 <p class="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Secured Balance</p>
                 <h2 id="userBalance" class="text-5xl font-black mt-2 tracking-tighter">$ 0.00</h2>
                 <div class="mt-8 flex justify-between items-end">
@@ -52,8 +52,14 @@
             <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
         </div>
 
-        <div class="px-6 mt-8">
-            <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6 px-2">Recent Transactions</h3>
+        <div class="px-6 mt-12 flex justify-between items-center">
+            <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 px-2">Recent Transactions</h3>
+            <button id="mainInfoBtn" class="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                <i class="fas fa-info text-[10px] text-blue-500"></i>
+            </button>
+        </div>
+
+        <div class="px-6 mt-4">
             <div id="transactionHistory" class="glass-panel rounded-[2.5rem] overflow-hidden p-4 space-y-4">
                 <p class="text-center text-[10px] text-slate-500 py-4 font-bold uppercase italic">Scanning Blockchain...</p>
             </div>
@@ -63,7 +69,7 @@
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content">
             <div class="flex items-center gap-4 mb-8">
-                <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left text-sm"></i></button>
+                <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left text-sm text-blue-500"></i></button>
                 <h3 class="text-xl font-black uppercase italic text-blue-500">Deposit Node</h3>
             </div>
             <div class="glass-panel p-6 rounded-2xl mb-6">
@@ -80,16 +86,10 @@
 
     <div id="withdrawPanel" class="slide-panel">
         <div class="panel-content">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-4">
-                    <button id="closeWith" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left text-sm"></i></button>
-                    <h3 class="text-xl font-black uppercase italic text-red-500">Withdrawal</h3>
-                </div>
-                <button id="infoTrigger" class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                    <i class="fas fa-info text-blue-500"></i>
-                </button>
+            <div class="flex items-center gap-4 mb-8">
+                <button id="closeWith" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left text-sm text-red-500"></i></button>
+                <h3 class="text-xl font-black uppercase italic text-red-500">Withdrawal</h3>
             </div>
-            
             <div class="space-y-4">
                 <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none">
                     <option value="TRC20">USDT (TRC20)</option>
@@ -97,7 +97,7 @@
                 </select>
                 <input type="text" id="withdrawAddr" placeholder="Destination Address" class="w-full p-5 rounded-2xl outline-none">
                 <input type="number" id="withdrawAmount" placeholder="Amount" class="w-full p-5 rounded-2xl outline-none">
-                <button id="startWithdrawBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest">Verify & Next</button>
+                <button id="startWithdrawBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest">Next Step</button>
             </div>
         </div>
     </div>
@@ -141,18 +141,18 @@
         const openP = (id) => document.getElementById(id).classList.add('show-panel');
         const closeP = (id) => document.getElementById(id).classList.remove('show-panel');
 
-        // Info Button Logic
-        document.getElementById('infoTrigger').onclick = () => {
+        // Main Rules Logic
+        document.getElementById('mainInfoBtn').onclick = () => {
             Swal.fire({
-                title: 'Withdrawal Terms',
-                html: `<div class="text-left text-[11px] leading-relaxed space-y-2 opacity-80">
-                    <p>• Processing takes 2 - 96 business hours.</p>
-                    <p>• In case of cancellation, you can re-apply immediately.</p>
-                    <p>• Withdrawal Fee: 5% Network processing fee.</p>
-                    <p>• Limit: One withdrawal every 5 business days after approval.</p>
-                    <p>• Warning: We are not responsible for funds lost due to incorrect address or network selection.</p>
+                title: 'SYSTEM RULES',
+                html: `<div class="text-left text-[11px] leading-relaxed space-y-3 opacity-90 p-2">
+                    <p>• <b>Time:</b> Withdrawal process takes 2 - 96 Hours.</p>
+                    <p>• <b>Fees:</b> 5.00% network fee deducted automatically.</p>
+                    <p>• <b>Cooldown:</b> After a successful withdrawal, you must wait 5 business days for the next request.</p>
+                    <p>• <b>Limits:</b> Only one active request allowed at a time.</p>
+                    <p class="text-red-400 font-bold">• <b>Disclaimer:</b> Incorrect addresses or network selection will result in permanent loss of funds.</p>
                 </div>`,
-                confirmButtonText: 'Understood'
+                confirmButtonText: 'I AGREE'
             });
         };
 
@@ -170,24 +170,25 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // Withdrawal Lock Logic
+        // Withdrawal Click Handler
         document.getElementById('withdrawTrigger').onclick = async () => {
-            if(!auth.currentUser) return;
-            
-            // Check for pending withdrawals
-            const q = query(collection(db, "users", auth.currentUser.uid, "withdrawals"), where("status", "==", "pending"));
-            const pendingSnap = await getDocs(q);
+            const user = auth.currentUser;
+            if(!user) return;
+
+            // 1. Check for Pending
+            const qPending = query(collection(db, "users", user.uid, "withdrawals"), where("status", "==", "pending"), where("type", "==", "Withdrawal"));
+            const pendingSnap = await getDocs(qPending);
             if (!pendingSnap.empty) {
-                return Swal.fire('Action Locked', 'You have a pending withdrawal request under review.', 'warning');
+                return Swal.fire('Locked', 'You already have a pending withdrawal request.', 'warning');
             }
 
-            // Check for 5-day rule
-            const lastQ = query(collection(db, "users", auth.currentUser.uid, "withdrawals"), where("status", "==", "completed"), orderBy("timestamp", "desc"), limit(1));
-            const lastSnap = await getDocs(lastQ);
+            // 2. Check for 5-Day Cooldown
+            const qLast = query(collection(db, "users", user.uid, "withdrawals"), where("status", "==", "completed"), orderBy("timestamp", "desc"), limit(1));
+            const lastSnap = await getDocs(qLast);
             if (!lastSnap.empty) {
                 const lastDate = new Date(lastSnap.docs[0].data().timestamp);
                 const diff = (new Date() - lastDate) / (1000 * 60 * 60 * 24);
-                if (diff < 5) return Swal.fire('Cooldown', `Please wait ${Math.ceil(5 - diff)} more days before next withdrawal.`, 'info');
+                if (diff < 5) return Swal.fire('Cooldown', `Please wait ${Math.ceil(5 - diff)} more days.`, 'info');
             }
 
             openP('withdrawPanel');
@@ -200,41 +201,33 @@
 
         document.getElementById('startWithdrawBtn').onclick = () => {
             const amt = parseFloat(document.getElementById('withdrawAmount').value);
-            if (!amt || amt < 10 || amt > (userData.balance || 0)) return Swal.fire('Error', 'Invalid amount or insufficient balance', 'error');
+            if (!amt || amt < 10 || amt > (userData.balance || 0)) return Swal.fire('Error', 'Invalid amount', 'error');
             closeP('withdrawPanel');
             setTimeout(() => openP('pinPanel'), 400);
         };
 
         document.getElementById('finalConfirmBtn').onclick = async () => {
-            const pin = document.getElementById('withdrawPin').value;
-            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-            const actualPin = String(userSnap.data().securePin || userSnap.data().pin);
+            const pinInput = document.getElementById('withdrawPin').value;
+            const actualPin = String(userData.securePin || userData.pin || "");
 
-            if (pin !== actualPin) return Swal.fire('Error', 'Incorrect Security PIN', 'error');
+            if (pinInput !== actualPin) return Swal.fire('Error', 'Incorrect PIN', 'error');
 
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const address = document.getElementById('withdrawAddr').value;
-            const network = document.getElementById('withdrawNetwork').value;
-
-            // Submit to User history AND Admin Global Withdrawals
+            const amt = parseFloat(document.getElementById('withdrawAmount').value);
             const requestData = {
                 uid: auth.currentUser.uid,
                 email: auth.currentUser.email,
                 fullName: userData.fullName || 'N/A',
-                amount: amount,
-                fee: (amount * 0.05).toFixed(2),
-                netAmount: (amount * 0.95).toFixed(2),
-                address: address,
-                network: network,
+                amount: amt,
+                netAmount: (amt * 0.95).toFixed(2),
+                address: document.getElementById('withdrawAddr').value,
+                network: document.getElementById('withdrawNetwork').value,
                 status: "pending",
                 timestamp: new Date().toISOString(),
-                type: "Withdrawal",
-                ip: "Captured" 
+                type: "Withdrawal"
             };
 
             await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), requestData);
-            
-            Swal.fire('Request Submitted', 'Your withdrawal is being processed by the blockchain node.', 'success').then(() => location.reload());
+            Swal.fire('Success', 'Withdrawal request submitted to admin.', 'success').then(() => location.reload());
         };
 
         document.getElementById('confirmDepositBtn').onclick = async () => {
@@ -246,7 +239,7 @@
                 type: "Deposit",
                 timestamp: new Date().toISOString()
             });
-            Swal.fire('Notification', 'Deposit request logged. Please complete the transfer.', 'success').then(() => location.reload());
+            Swal.fire('Success', 'Deposit request sent.', 'success').then(() => location.reload());
         };
 
         function fetchTransactions(uid) {
@@ -256,7 +249,7 @@
                 sn.forEach(d => {
                     const data = d.data();
                     const color = data.type === 'Withdrawal' ? 'text-red-400' : 'text-green-400';
-                    const statusColor = data.status === 'pending' ? 'text-yellow-500' : (data.status === 'completed' ? 'text-green-500' : 'text-red-500');
+                    const statusColor = data.status === 'pending' ? 'text-yellow-500' : (data.status === 'completed' ? 'text-green-500' : 'text-red-400');
                     h += `<div class="flex justify-between items-center border-b border-white/5 pb-3">
                         <div class="text-left">
                             <p class="text-[10px] font-black uppercase">${data.type}</p>
@@ -265,13 +258,13 @@
                         <span class="text-[11px] font-black ${color}">${data.type === 'Withdrawal' ? '-' : '+'}$${data.amount}</span>
                     </div>`;
                 });
-                document.getElementById('transactionHistory').innerHTML = h || '<p class="text-[10px] opacity-30">No transaction logs</p>';
+                document.getElementById('transactionHistory').innerHTML = h || '<p class="text-[10px] opacity-30 text-center">No records found</p>';
             });
         }
 
         document.getElementById('copyBtn').onclick = () => {
             navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
-            Swal.fire({toast:true, position:'top', title:'Address Copied', icon:'success', showConfirmButton:false, timer:1500});
+            Swal.fire({toast:true, position:'top', title:'Copied', icon:'success', showConfirmButton:false, timer:1500});
         };
     </script>
 </body>
