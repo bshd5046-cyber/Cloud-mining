@@ -24,6 +24,8 @@
         .show-panel .panel-content { transform: translateY(0); }
         input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
         .swal2-popup { background: #0f172a !important; color: white !important; border-radius: 2rem !important; border: 1px solid rgba(59, 130, 246, 0.2) !important; }
+        .status-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 9999px; font-size: 9px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; }
+        .status-dot { width: 8px; height: 8px; border-radius: 9999px; }
     </style>
 </head>
 <body class="pb-32">
@@ -48,6 +50,25 @@
                 <div class="mt-8 flex justify-between items-end">
                     <p id="userName" class="text-sm font-black tracking-widest italic uppercase text-slate-200">---</p>
                     <p class="text-xs font-black text-white italic">USDT Ecosystem</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 mt-5">
+            <div class="glass-panel rounded-[2rem] p-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">Withdrawal Access</span>
+                    <a href="profile.html" class="text-[9px] font-black uppercase tracking-widest text-blue-400">Open Profile</a>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <div id="emailVerifiedBadge" class="status-pill bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        <span class="status-dot bg-amber-400"></span>
+                        <span>Email Pending</span>
+                    </div>
+                    <div id="pinStatusBadge" class="status-pill bg-red-500/10 text-red-400 border border-red-500/20">
+                        <span class="status-dot bg-red-400"></span>
+                        <span>PIN Missing</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,8 +141,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, addDoc, collection, query, orderBy, limit, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -140,15 +161,83 @@
         const openP = (id) => document.getElementById(id).classList.add('show-panel');
         const closeP = (id) => document.getElementById(id).classList.remove('show-panel');
 
-        // Rules Pop-up
+        function hasSecurePin() {
+            const pin = String(userData.securePin || userData.pin || "");
+            return /^\d{6}$/.test(pin);
+        }
+
+        function updateSecurityBadges() {
+            const emailBadge = document.getElementById('emailVerifiedBadge');
+            const pinBadge = document.getElementById('pinStatusBadge');
+            const verified = !!auth.currentUser?.emailVerified;
+            const pinReady = hasSecurePin();
+
+            if (verified) {
+                emailBadge.className = "status-pill bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                emailBadge.innerHTML = `<span class="status-dot bg-emerald-400"></span><span>Email Verified</span>`;
+            } else {
+                emailBadge.className = "status-pill bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                emailBadge.innerHTML = `<span class="status-dot bg-amber-400"></span><span>Email Pending</span>`;
+            }
+
+            if (pinReady) {
+                pinBadge.className = "status-pill bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                pinBadge.innerHTML = `<span class="status-dot bg-emerald-400"></span><span>PIN Ready</span>`;
+            } else {
+                pinBadge.className = "status-pill bg-red-500/10 text-red-400 border border-red-500/20";
+                pinBadge.innerHTML = `<span class="status-dot bg-red-400"></span><span>PIN Missing</span>`;
+            }
+        }
+
+        async function ensureWithdrawAccess() {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.replace('login.html');
+                return false;
+            }
+
+            await reload(user);
+
+            if (!user.emailVerified) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Email Verification Required',
+                    text: 'Please verify your email first from the profile page before using withdrawals.',
+                    confirmButtonText: 'Open Profile'
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = 'profile.html';
+                });
+                updateSecurityBadges();
+                return false;
+            }
+
+            if (!hasSecurePin()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Security PIN Required',
+                    text: 'Please set your 6-digit withdrawal PIN first from the profile page.',
+                    confirmButtonText: 'Open Profile'
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = 'profile.html';
+                });
+                updateSecurityBadges();
+                return false;
+            }
+
+            updateSecurityBadges();
+            return true;
+        }
+
         window.showRules = () => {
             Swal.fire({
                 title: 'Withdrawal Protocol',
                 html: `<div class="text-left text-[11px] leading-relaxed space-y-3 p-2 border-t border-white/5 mt-3">
+                    <p>• <b>Access:</b> Verified email and active 6-digit withdrawal PIN are required.</p>
                     <p>• <b>Processing:</b> 2 - 96 business hours.</p>
                     <p>• <b>Fees:</b> Flat 5% network processing fee.</p>
-                    <p>• <b>Limit:</b> 1 withdrawal per 5 business days after approval.</p>
-                    <p>• <b>Re-apply:</b> Allowed immediately if a request is rejected.</p>
+                    <p>• <b>Minimum:</b> $10 per withdrawal request.</p>
+                    <p>• <b>Limit:</b> Only one pending withdrawal request is allowed at a time.</p>
+                    <p>• <b>Cooldown:</b> 1 withdrawal per 5 business days after approval.</p>
                     <p class="text-red-400 font-bold">• <b>Warning:</b> VERTEX is not responsible for funds sent to wrong networks.</p>
                 </div>`,
                 confirmButtonText: 'I UNDERSTAND'
@@ -157,20 +246,25 @@
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                await reload(user);
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
-                        document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
                         document.getElementById('userName').innerText = userData.fullName || "USER";
                         document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "Fetching Node...";
+                        updateSecurityBadges();
                         fetchTransactions(user.uid);
                     }
                 });
-            } else { window.location.replace('login.html'); }
+            } else {
+                window.location.replace('login.html');
+            }
         });
 
-        // Simplified Withdraw Trigger (Fixing the "not opening" issue)
-        document.getElementById('withdrawTrigger').onclick = () => {
+        document.getElementById('withdrawTrigger').onclick = async () => {
+            const allowed = await ensureWithdrawAccess();
+            if (!allowed) return;
             openP('withdrawPanel');
         };
 
@@ -179,29 +273,38 @@
         document.getElementById('closeWith').onclick = () => closeP('withdrawPanel');
         document.getElementById('closePin').onclick = () => closeP('pinPanel');
 
-        // Validation on Step 1
         document.getElementById('startWithdrawBtn').onclick = async () => {
+            const allowed = await ensureWithdrawAccess();
+            if (!allowed) return;
+
             const amt = parseFloat(document.getElementById('withdrawAmount').value);
-            const addr = document.getElementById('withdrawAddr').value;
-            
+            const addr = document.getElementById('withdrawAddr').value.trim();
+
             if (!amt || amt < 10) return Swal.fire('Error', 'Minimum withdrawal is $10', 'error');
             if (amt > (userData.balance || 0)) return Swal.fire('Error', 'Insufficient balance', 'error');
-            if (addr.length < 10) return Swal.fire('Error', 'Invalid Wallet Address', 'error');
+            if (addr.length < 10) return Swal.fire('Error', 'Invalid wallet address', 'error');
 
-            // Check Cooldown/Pending here to be safe
-            const q = query(collection(db, "users", auth.currentUser.uid, "withdrawals"), where("status", "==", "pending"), where("type", "==", "Withdrawal"));
+            const q = query(
+                collection(db, "users", auth.currentUser.uid, "withdrawals"),
+                where("status", "==", "pending"),
+                where("type", "==", "Withdrawal")
+            );
             const pendingSnap = await getDocs(q);
-            if (!pendingSnap.empty) return Swal.fire('Notice', 'You have a pending request already.', 'warning');
+            if (!pendingSnap.empty) return Swal.fire('Notice', 'You already have a pending withdrawal request.', 'warning');
 
             closeP('withdrawPanel');
             setTimeout(() => openP('pinPanel'), 400);
         };
 
         document.getElementById('finalConfirmBtn').onclick = async () => {
-            const pinEntered = document.getElementById('withdrawPin').value;
+            const allowed = await ensureWithdrawAccess();
+            if (!allowed) return;
+
+            const pinEntered = document.getElementById('withdrawPin').value.trim();
             const actualPin = String(userData.securePin || userData.pin || "");
 
-            if (pinEntered !== actualPin) return Swal.fire('Error', 'Incorrect Security PIN', 'error');
+            if (!/^\d{6}$/.test(pinEntered)) return Swal.fire('Error', 'Enter your 6-digit security PIN.', 'error');
+            if (pinEntered !== actualPin) return Swal.fire('Error', 'Incorrect security PIN', 'error');
 
             const amt = parseFloat(document.getElementById('withdrawAmount').value);
             const requestData = {
@@ -210,7 +313,7 @@
                 fullName: userData.fullName || 'N/A',
                 amount: amt,
                 netAmount: (amt * 0.95).toFixed(2),
-                address: document.getElementById('withdrawAddr').value,
+                address: document.getElementById('withdrawAddr').value.trim(),
                 network: document.getElementById('withdrawNetwork').value,
                 status: "pending",
                 timestamp: new Date().toISOString(),
@@ -227,8 +330,8 @@
 
         document.getElementById('confirmDepositBtn').onclick = async () => {
             const amt = document.getElementById('depAmount').value;
-            if(!amt || amt <= 0) return Swal.fire('Error', 'Enter a valid amount', 'error');
-            
+            if (!amt || amt <= 0) return Swal.fire('Error', 'Enter a valid amount', 'error');
+
             await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), {
                 amount: parseFloat(amt),
                 status: "pending",
@@ -260,7 +363,7 @@
 
         document.getElementById('copyBtn').onclick = () => {
             navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
-            Swal.fire({toast:true, position:'top', title:'Address Copied', icon:'success', showConfirmButton:false, timer:1500});
+            Swal.fire({ toast: true, position: 'top', title: 'Address Copied', icon: 'success', showConfirmButton: false, timer: 1500 });
         };
     </script>
 </body>
