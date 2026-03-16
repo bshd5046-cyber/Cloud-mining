@@ -4,38 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wallet | VERTEX PREMIER</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <style>
         :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
         body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), #020617; min-height: 100vh; margin: 0; padding: 0; }
-        
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
-
         .crypto-card { background: linear-gradient(135deg, rgba(30, 64, 175, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2.5rem; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
         .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: flex-end; }
         .panel-content { width: 100%; background: #070b16; border-radius: 3rem 3rem 0 0; padding: 2.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
-        
         input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
-        
-        /* تصميم مخصص لحالات الطلبات */
         .status-pending { color: #f59e0b; }
         .status-completed { color: #10b981; }
         .status-rejected { color: #ef4444; }
-
-        /* تغيير ستايل الـ SweetAlert ليكون متناسق مع الموقع */
         .swal2-popup { background: #0f172a !important; color: white !important; border-radius: 2rem !important; border: 1px solid rgba(59, 130, 246, 0.2) !important; }
         .swal2-confirm { background: #2563eb !important; border-radius: 1rem !important; font-weight: 800 !important; }
     </style>
@@ -79,47 +69,11 @@
         </div>
     </div>
 
-    <div id="depositPanel" class="slide-panel">
-        <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('depositPanel')"></div>
-            <h3 class="text-xl font-black mb-6 uppercase italic">Deposit <span class="text-blue-500">Node</span></h3>
-            <div class="glass-panel p-6 rounded-2xl mb-6">
-                <p class="text-[10px] text-slate-500 uppercase font-black mb-2">TRC20 Address</p>
-                <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5">
-                    <p id="walletAddrDisplay" class="text-[10px] font-mono text-blue-400 truncate">Fetching...</p>
-                    <button id="copyBtn" class="text-blue-500 ml-2"><i class="fas fa-copy"></i></button>
-                </div>
-            </div>
-            <input type="number" id="depAmount" placeholder="Amount USDT" class="w-full p-5 rounded-2xl mb-4 outline-none">
-            <button id="confirmDepositBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase">Confirm Request</button>
-        </div>
-    </div>
+    <div id="depositPanel" class="slide-panel"><div class="panel-content"><div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('depositPanel')"></div><h3 class="text-xl font-black mb-6 uppercase italic">Deposit <span class="text-blue-500">Node</span></h3><div class="glass-panel p-6 rounded-2xl mb-6"><p class="text-[10px] text-slate-500 uppercase font-black mb-2">TRC20 Address</p><div class="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5"><p id="walletAddrDisplay" class="text-[10px] font-mono text-blue-400 truncate">Fetching...</p><button id="copyBtn" class="text-blue-500 ml-2"><i class="fas fa-copy"></i></button></div></div><input type="number" id="depAmount" placeholder="Amount USDT" class="w-full p-5 rounded-2xl mb-4 outline-none"><button id="confirmDepositBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase">Confirm Request</button></div></div>
 
-    <div id="withdrawPanel" class="slide-panel">
-        <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('withdrawPanel')"></div>
-            <h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal <span class="text-white">Request</span></h3>
-            <p class="text-[9px] text-slate-500 uppercase font-bold mb-6 italic">ETA: 2h - 96h Process Time</p>
-            <div class="space-y-4">
-                <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none mt-1">
-                    <option value="TRC20">USDT (TRC20) - Fast</option>
-                    <option value="BEP20">USDT (BEP20) - Low Fee</option>
-                </select>
-                <input type="text" id="withdrawAddr" placeholder="Destination Address" class="w-full p-5 rounded-2xl outline-none">
-                <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw" class="w-full p-5 rounded-2xl outline-none">
-                <button id="startWithdrawBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95">Initiate Payout</button>
-            </div>
-        </div>
-    </div>
+    <div id="withdrawPanel" class="slide-panel"><div class="panel-content"><div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('withdrawPanel')"></div><h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal <span class="text-white">Request</span></h3><p class="text-[9px] text-slate-500 uppercase font-bold mb-6 italic">ETA: 2h - 96h Process Time</p><div class="space-y-4"><select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none mt-1"><option value="TRC20">USDT (TRC20) - Fast</option><option value="BEP20">USDT (BEP20) - Low Fee</option></select><input type="text" id="withdrawAddr" placeholder="Destination Address" class="w-full p-5 rounded-2xl outline-none"><input type="number" id="withdrawAmount" placeholder="Amount to Withdraw" class="w-full p-5 rounded-2xl outline-none"><button id="startWithdrawBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95">Initiate Payout</button></div></div></div>
 
-    <div id="pinPanel" class="slide-panel !z-[3000]">
-        <div class="panel-content !bg-slate-950">
-            <h3 class="text-center font-black mb-6 uppercase tracking-widest">Security PIN Required</h3>
-            <input type="password" id="withdrawPin" maxlength="6" placeholder="******" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border-blue-500/30 mb-6 outline-none">
-            <button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black uppercase">Verify & Submit</button>
-            <button onclick="closePanel('pinPanel')" class="w-full mt-4 text-[10px] font-black text-slate-500 uppercase">Cancel Action</button>
-        </div>
-    </div>
+    <div id="pinPanel" class="slide-panel !z-[3000]"><div class="panel-content !bg-slate-950"><h3 class="text-center font-black mb-6 uppercase tracking-widest">Security PIN Required</h3><input type="password" id="withdrawPin" maxlength="6" placeholder="******" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border-blue-500/30 mb-6 outline-none"><button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black uppercase">Verify & Submit</button><button onclick="closePanel('pinPanel')" class="w-full mt-4 text-[10px] font-black text-slate-500 uppercase">Cancel Action</button></div></div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
@@ -146,102 +100,70 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
         let userData = {};
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // --- الحل الجذري: تحديث الحالة من السيرفر فور الدخول ---
+                await user.reload(); 
+                const verifiedNow = auth.currentUser.emailVerified;
+
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
                         userData.uid = user.uid;
-                        userData.emailVerified = user.emailVerified;
+                        userData.emailVerified = verifiedNow; // استخدام الحالة الطازجة
+
                         document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = userData.fullName || "PREMIER AGENT";
                         document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "No Admin Address";
-                        
-                        // جلب سجل المعاملات
                         fetchTransactions(user.uid);
                     }
                 });
             } else { window.location.replace('login.html'); }
         });
 
-        // جلب سجل المعاملات
-        async function fetchTransactions(uid) {
-            const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(5));
-            onSnapshot(q, (snapshot) => {
-                let html = '';
-                if(snapshot.empty) {
-                    html = '<p class="text-center text-[9px] text-slate-500 font-bold uppercase py-2">No Transactions Found</p>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const date = new Date(data.timestamp).toLocaleDateString();
-                        const statusClass = `status-${data.status}`;
-                        html += `
-                        <div class="flex justify-between items-center border-b border-white/5 pb-3">
-                            <div>
-                                <p class="text-xs font-black uppercase tracking-tighter">${data.type || 'Withdrawal'}</p>
-                                <p class="text-[8px] text-slate-500 font-bold italic">${date}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-black text-blue-400">$${data.amount}</p>
-                                <p class="text-[8px] font-black uppercase italic ${statusClass}">${data.status}</p>
-                            </div>
-                        </div>`;
-                    });
-                }
-                document.getElementById('transactionHistory').innerHTML = html;
-            });
-        }
-
         window.handleWithdrawClick = async () => {
-            // التحقق من التوثيق (Email) ورمز PIN برسالة SweetAlert
-            if (!userData.emailVerified || !userData.securePin) {
+            // تحديث أخير قبل فتح اللوحة
+            await auth.currentUser.reload();
+            const isVerified = auth.currentUser.emailVerified;
+
+            if (!isVerified || !userData.securePin) {
                 Swal.fire({
-                    title: 'SECURITY PROTOCOL',
-                    text: 'Your account is not fully secured. Please verify your email and set a 6-digit PIN to enable withdrawals.',
+                    title: 'SECURITY ALERT',
+                    html: `<div class="text-left text-sm space-y-2">
+                            <p>● Email: ${isVerified ? '✅ Verified' : '❌ Not Verified'}</p>
+                            <p>● Security PIN: ${userData.securePin ? '✅ Set' : '❌ Not Set'}</p>
+                           </div>`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Go to Profile',
-                    cancelButtonText: 'Later'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'profile.html';
-                    }
-                });
+                    confirmButtonText: 'Fix Now'
+                }).then(res => { if(res.isConfirmed) window.location.href='profile.html'; });
                 return;
             }
 
-            // التحقق من طلب معلق
             const q = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "pending"));
             const qSnap = await getDocs(q);
             if (!qSnap.empty) {
-                Swal.fire('WAITING', 'You already have an active withdrawal request.', 'info');
+                Swal.fire('WAITING', 'Active request already exists.', 'info');
                 return;
             }
-
             openPanel('withdrawPanel');
         };
 
-        // زر التحقق قبل الـ PIN
         document.getElementById('startWithdrawBtn').addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const addr = document.getElementById('withdrawAddr').value;
-            if (!amount || amount < 10) { Swal.fire('Error', 'Minimum withdrawal $10', 'error'); return; }
-            if (amount > userData.balance) { Swal.fire('Error', 'Insufficient Balance', 'error'); return; }
-            if (addr.length < 10) { Swal.fire('Error', 'Enter a valid address', 'error'); return; }
+            if (!amount || amount < 10) { Swal.fire('Error', 'Minimum $10', 'error'); return; }
+            if (amount > userData.balance) { Swal.fire('Error', 'Insufficient funds', 'error'); return; }
+            if (addr.length < 10) { Swal.fire('Error', 'Invalid address', 'error'); return; }
             openPanel('pinPanel');
         });
 
-        // التنفيذ النهائي
         document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
             const pin = document.getElementById('withdrawPin').value;
-            if (pin !== userData.securePin) {
-                Swal.fire('DENIED', 'Incorrect PIN code', 'error');
-                return;
-            }
+            if (pin !== userData.securePin) { Swal.fire('DENIED', 'Wrong PIN', 'error'); return; }
+            
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const network = document.getElementById('withdrawNetwork').value;
             const addr = document.getElementById('withdrawAddr').value;
@@ -251,21 +173,34 @@
                     amount, network, address: addr, status: "pending", type: "Withdrawal",
                     timestamp: new Date().toISOString()
                 });
-                Swal.fire('SUCCESS', 'Withdrawal request transmitted to blockchain.', 'success').then(() => {
-                    location.reload();
-                });
-            } catch (e) { Swal.fire('ERROR', 'System busy, try later.', 'error'); }
+                Swal.fire('SUCCESS', 'Transaction Broadcasted', 'success').then(() => location.reload());
+            } catch (e) { Swal.fire('ERROR', 'Network Busy', 'error'); }
         });
+
+        async function fetchTransactions(uid) {
+            const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(5));
+            onSnapshot(q, (snapshot) => {
+                let html = snapshot.empty ? '<p class="text-center text-[9px] text-slate-500 py-4 font-bold uppercase italic">No Transactions</p>' : '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `<div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <div><p class="text-xs font-black uppercase tracking-tighter">${data.type}</p>
+                                <p class="text-[8px] text-slate-500 font-bold italic">${new Date(data.timestamp).toLocaleDateString()}</p></div>
+                                <div class="text-right"><p class="text-sm font-black text-blue-400">$${data.amount}</p>
+                                <p class="text-[8px] font-black uppercase italic status-${data.status}">${data.status}</p></div>
+                            </div>`;
+                });
+                document.getElementById('transactionHistory').innerHTML = html;
+            });
+        }
 
         window.openPanel = (id) => document.getElementById(id).classList.add('show-panel');
         window.closePanel = (id) => document.getElementById(id).classList.remove('show-panel');
-        
         document.getElementById('copyBtn').addEventListener('click', () => {
             navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
-            Swal.fire({ toast: true, position: 'top-end', title: 'Address Copied', icon: 'success', showConfirmButton: false, timer: 2000 });
+            Swal.fire({ toast: true, position: 'top-end', title: 'Copied', icon: 'success', showConfirmButton: false, timer: 1500 });
         });
 
-        // جلب الأسواق
         async function fetchMarketData() {
             try {
                 const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd&include_24hr_change=true');
@@ -277,17 +212,11 @@
                 ];
                 let html = '';
                 assets.forEach(a => {
-                    const price = data[a.id].usd;
-                    const change = data[a.id].usd_24h_change || 0;
                     html += `<div class="p-6 flex items-center justify-between border-b border-white/5">
-                        <div class="flex items-center gap-4">
-                            <i class="fab ${a.icon} ${a.color} text-xl"></i>
-                            <div><p class="font-black text-sm text-white">${a.name}</p><p class="text-[8px] text-slate-500 uppercase tracking-widest">${a.symbol}</p></div>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-black text-sm">$${price.toLocaleString()}</p>
-                            <p class="text-[9px] ${change >= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold">${change.toFixed(2)}%</p>
-                        </div>
+                        <div class="flex items-center gap-4"><i class="fab ${a.icon} ${a.color} text-xl"></i>
+                        <div><p class="font-black text-sm text-white">${a.name}</p><p class="text-[8px] text-slate-500 uppercase tracking-widest">${a.symbol}</p></div></div>
+                        <div class="text-right"><p class="font-black text-sm">$${data[a.id].usd.toLocaleString()}</p>
+                        <p class="text-[9px] ${data[a.id].usd_24h_change >= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold">${data[a.id].usd_24h_change.toFixed(2)}%</p></div>
                     </div>`;
                 });
                 document.getElementById('assetsList').innerHTML = html;
