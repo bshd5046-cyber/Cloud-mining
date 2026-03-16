@@ -51,8 +51,8 @@
         </div>
 
         <div class="px-6 mt-10 flex gap-4">
-            <button id="withdrawTrigger" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
-            <button id="depositTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
+            <button id="depositTrigger" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
+            <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
         </div>
 
         <div class="px-6 mt-8">
@@ -131,7 +131,6 @@
         const db = getFirestore(app);
         let userData = {};
 
-        // Helper functions
         const openP = (id) => document.getElementById(id).classList.add('show-panel');
         const closeP = (id) => document.getElementById(id).classList.remove('show-panel');
 
@@ -140,9 +139,8 @@
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
-                        userData.uid = user.uid;
                         document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('userName').innerText = userData.fullName || "PREMIER AGENT";
+                        document.getElementById('userName').innerText = userData.fullName || "AGENT";
                         document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "No Admin Address";
                         fetchTransactions(user.uid);
                     }
@@ -150,116 +148,75 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // 1. معالجة فتح السحب (Security First)
+        // تصحيح: الضغط على السحب
         document.getElementById('withdrawTrigger').addEventListener('click', async () => {
             if(!auth.currentUser) return;
-            
-            // جلب بيانات فريش من السيرفر فوراً
             const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-            const freshData = userSnap.exists() ? userSnap.data() : {};
-            
+            const fresh = userSnap.data() || {};
             await auth.currentUser.reload();
-            const isEmailVerified = auth.currentUser.emailVerified;
-            const currentPin = freshData.securePin || freshData.pin || freshData.securityPin;
 
-            if (!isEmailVerified || !currentPin) {
+            const isVerified = auth.currentUser.emailVerified;
+            const hasPin = fresh.securePin || fresh.pin || fresh.securityPin;
+
+            if (!isVerified || !hasPin) {
                 Swal.fire({
                     title: 'SECURITY PROTOCOL',
-                    html: `<div class="text-left text-[11px] p-5 bg-black/40 rounded-3xl border border-white/5 space-y-3 font-black uppercase tracking-widest">
-                            <div class="flex justify-between items-center">
-                                <span class="text-slate-500">Identity Verified:</span> 
-                                <span class="${isEmailVerified ? 'text-emerald-500' : 'text-red-500'}">${isEmailVerified ? 'APPROVED' : 'REQUIRED'}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-slate-500">Security Vault PIN:</span> 
-                                <span class="${currentPin ? 'text-emerald-500' : 'text-red-500'}">${currentPin ? 'ACTIVE' : 'NOT SET'}</span>
-                            </div>
-                           </div>`,
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Go to Profile',
-                    background: '#070b16',
-                    color: '#fff'
-                }).then(res => { if(res.isConfirmed) window.location.href='profile.html'; });
-                return;
-            }
-
-            // منع السحب المزدوج
-            const q = query(collection(db, "users", auth.currentUser.uid, "withdrawals"), where("status", "==", "pending"));
-            const qSnap = await getDocs(q);
-            if (!qSnap.empty) {
-                Swal.fire({ title: 'PENDING REQUEST', text: 'Wait for current request to finish.', icon: 'warning' });
+                    html: `<div class="text-[11px] uppercase p-4 bg-black/40 rounded-2xl border border-white/5">
+                        Verified: ${isVerified ? '✅' : '❌'}<br>PIN Set: ${hasPin ? '✅' : '❌'}
+                    </div>`,
+                    confirmButtonText: 'Go to Profile'
+                }).then(r => { if(r.isConfirmed) window.location.href='profile.html'; });
                 return;
             }
             openP('withdrawPanel');
         });
 
-        // 2. معالجة زر الإيداع واللوحات
-        document.getElementById('depositTrigger').onclick = () => openP('depositPanel');
+        // تصحيح: الإيداع
+        document.getElementById('depositTrigger').addEventListener('click', () => openP('depositPanel'));
+        
+        // إغلاق اللوحات
         document.getElementById('closeDep').onclick = () => closeP('depositPanel');
         document.getElementById('closeWith').onclick = () => closeP('withdrawPanel');
         document.getElementById('closePin').onclick = () => closeP('pinPanel');
 
-        // 3. الخطوة التالية في السحب
+        // الخطوات
         document.getElementById('startWithdrawBtn').addEventListener('click', () => {
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const addr = document.getElementById('withdrawAddr').value;
-            if (!amount || amount < 10) return Swal.fire('Error', 'Min $10.00', 'error');
-            if (amount > (userData.balance || 0)) return Swal.fire('Error', 'Insufficient balance.', 'error');
-            if (addr.length < 10) return Swal.fire('Error', 'Invalid address.', 'error');
+            const amt = parseFloat(document.getElementById('withdrawAmount').value);
+            if (!amt || amt < 10 || amt > (userData.balance || 0)) return Swal.fire('Error', 'Check amount/balance', 'error');
             openP('pinPanel');
         });
 
-        // 4. التوثيق النهائي والارسال
         document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
-            const enteredPin = document.getElementById('withdrawPin').value;
+            const pin = document.getElementById('withdrawPin').value;
             const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-            const fresh = userSnap.data();
-            const actualPin = String(fresh.securePin || fresh.pin || fresh.securityPin);
+            const actualPin = String(userSnap.data().securePin || userSnap.data().pin);
 
-            if (enteredPin !== actualPin) {
-                return Swal.fire({ title: 'INVALID PIN', text: 'Try again.', icon: 'error' });
-            }
+            if (pin !== actualPin) return Swal.fire('Error', 'Wrong PIN', 'error');
 
-            try {
-                await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), {
-                    amount: parseFloat(document.getElementById('withdrawAmount').value),
-                    network: document.getElementById('withdrawNetwork').value,
-                    address: document.getElementById('withdrawAddr').value,
-                    status: "pending",
-                    type: "Withdrawal",
-                    timestamp: new Date().toISOString()
-                });
-                Swal.fire({ title: 'SUCCESS', text: 'Transmitted to blockchain.', icon: 'success' })
-                .then(() => location.reload());
-            } catch (e) { Swal.fire('ERROR', 'Sync failed.', 'error'); }
+            await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), {
+                amount: parseFloat(document.getElementById('withdrawAmount').value),
+                address: document.getElementById('withdrawAddr').value,
+                status: "pending",
+                timestamp: new Date().toISOString(),
+                type: "Withdrawal"
+            });
+            Swal.fire('Success', 'Request Sent', 'success').then(() => location.reload());
         });
 
         async function fetchTransactions(uid) {
-            const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(10));
-            onSnapshot(q, (snapshot) => {
-                let html = snapshot.empty ? '<p class="text-center text-[9px] text-slate-500 py-4 font-bold uppercase italic">No Records</p>' : '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    html += `<div class="flex justify-between items-center border-b border-white/5 pb-3">
-                        <div>
-                            <p class="text-[11px] font-black uppercase tracking-tighter">${data.type}</p>
-                            <p class="text-[8px] text-slate-500 font-bold italic">${new Date(data.timestamp).toLocaleDateString()}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black text-blue-400">-$${data.amount}</p>
-                            <p class="text-[8px] font-black uppercase status-${data.status}">${data.status}</p>
-                        </div>
+            const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(5));
+            onSnapshot(q, (sn) => {
+                let h = '';
+                sn.forEach(d => {
+                    const data = d.data();
+                    h += `<div class="flex justify-between border-b border-white/5 pb-2">
+                        <span class="text-[10px] font-black">${data.type}</span>
+                        <span class="text-[10px] text-blue-400">$${data.amount}</span>
                     </div>`;
                 });
-                document.getElementById('transactionHistory').innerHTML = html;
+                document.getElementById('transactionHistory').innerHTML = h || 'No Records';
             });
         }
-
-        document.getElementById('copyBtn').onclick = () => {
-            navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
-            Swal.fire({ toast: true, position: 'top-end', title: 'Copied', icon: 'success', showConfirmButton: false, timer: 1500 });
-        };
     </script>
 </body>
 </html>
