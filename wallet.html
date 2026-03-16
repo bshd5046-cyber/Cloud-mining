@@ -6,30 +6,40 @@
     <title>Wallet | VERTEX PREMIER</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
-        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), #020617; min-height: 100vh; }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), #020617; min-height: 100vh; margin: 0; padding: 0; }
+        
+        /* ضبط البار السفلي ليكون مطابقاً لبقية الموقع */
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); }
+
         .crypto-card { background: linear-gradient(135deg, rgba(30, 64, 175, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2.5rem; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
-        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; font-size: 10px; font-weight: 700; }
-        .nav-item.active { color: var(--primary); }
+        
+        /* لوحات الانزلاق */
         .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: flex-end; }
-        .panel-content { width: 100%; background: #070b16; border-radius: 3rem 3rem 0 0; padding: 2rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s ease; max-height: 90vh; overflow-y: auto; }
+        .panel-content { width: 100%; background: #070b16; border-radius: 3rem 3rem 0 0; padding: 2.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
+        
         input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="mainContent" class="hidden">
+    <div id="mainContent">
         <div class="px-8 pt-16 flex justify-between items-center">
             <h1 class="text-3xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Vault</span></h1>
-            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"><i class="fas fa-shield-halved text-blue-500 text-xl"></i></div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                <i class="fas fa-shield-halved text-blue-500 text-xl"></i>
+            </div>
         </div>
 
         <div class="px-6 mt-8">
@@ -44,13 +54,13 @@
         </div>
 
         <div class="px-6 mt-10 flex gap-4">
-            <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
+            <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all shadow-lg shadow-blue-600/20">Deposit</button>
             <button onclick="handleWithdrawClick()" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
         </div>
 
         <div class="px-6 mt-12">
-            <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6">Global Markets</h3>
-            <div id="assetsList" class="glass-panel rounded-[2.5rem] overflow-hidden"></div>
+            <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6 px-2">Global Markets</h3>
+            <div id="assetsList" class="glass-panel rounded-[2.5rem] overflow-hidden mb-10"></div>
         </div>
     </div>
 
@@ -77,21 +87,16 @@
             <p class="text-[9px] text-slate-500 uppercase font-bold mb-6 italic">ETA: 2h - 96h Process Time</p>
             
             <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-black text-slate-500 ml-2 uppercase">Select Protocol</label>
-                    <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none mt-1">
-                        <option value="TRC20">USDT (TRC20) - Fast</option>
-                        <option value="BEP20">USDT (BEP20) - Low Fee</option>
-                    </select>
-                </div>
-
+                <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none mt-1">
+                    <option value="TRC20">USDT (TRC20) - Fast</option>
+                    <option value="BEP20">USDT (BEP20) - Low Fee</option>
+                </select>
                 <input type="text" id="withdrawAddr" placeholder="Destination Address" class="w-full p-5 rounded-2xl outline-none">
                 <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw" class="w-full p-5 rounded-2xl outline-none">
                 
                 <div class="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl">
-                    <p class="text-[9px] text-red-400 leading-relaxed font-bold">
-                        * Withdrawal is only available 3h after your last investment.<br>
-                        * 5-day cooldown applies after each successful payout.
+                    <p class="text-[9px] text-red-400 leading-relaxed font-bold italic text-center uppercase">
+                        Requires verified email & security PIN
                     </p>
                 </div>
 
@@ -101,18 +106,20 @@
     </div>
 
     <div id="pinPanel" class="slide-panel !z-[3000]">
-        <div class="panel-content !bg-blue-950">
-            <h3 class="text-center font-black mb-6">ENTER 6-DIGIT SECURITY PIN</h3>
-            <input type="password" id="withdrawPin" maxlength="6" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border-blue-500/30 mb-6 outline-none">
-            <button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black">VERIFY & SUBMIT</button>
-            <button onclick="closePanel('pinPanel')" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase">Cancel</button>
+        <div class="panel-content !bg-slate-950">
+            <h3 class="text-center font-black mb-6 uppercase tracking-widest">Security PIN Required</h3>
+            <input type="password" id="withdrawPin" maxlength="6" placeholder="******" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border-blue-500/30 mb-6 outline-none">
+            <button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black uppercase">Verify & Submit</button>
+            <button onclick="closePanel('pinPanel')" class="w-full mt-4 text-[10px] font-black text-slate-500 uppercase">Cancel Action</button>
         </div>
     </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
+        </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -139,86 +146,82 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('mainContent').classList.remove('hidden');
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         userData = docSnap.data();
                         userData.uid = user.uid;
                         userData.emailVerified = user.emailVerified;
                         document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('userName').innerText = userData.fullName || "AGENT";
-                        document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "No Address";
+                        document.getElementById('userName').innerText = userData.fullName || "PREMIER AGENT";
+                        document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "Generating...";
                     }
                 });
             } else { window.location.replace('login.html'); }
         });
 
-        // نظام التحقق قبل فتح لوحة السحب
+        // تشغيل نظام السحب
         window.handleWithdrawClick = async () => {
+            // 1. التحقق من إعدادات الأمان
             if (!userData.emailVerified) {
-                alert("Security Error: Please verify your email in Profile first.");
+                alert("Action Blocked: Email not verified.");
                 return;
             }
             if (!userData.securePin) {
-                alert("Security Error: Set your 6-digit PIN in Security Vault.");
+                alert("Action Blocked: Security PIN not set. Visit Profile.");
                 return;
             }
 
-            // التأقق من وجود طلب سحب قيد الانتظار
+            // 2. التحقق من الطلبات المعلقة
             const q = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "pending"));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                alert("You have an active withdrawal request pending approval.");
+            const qSnap = await getDocs(q);
+            if (!qSnap.empty) {
+                alert("Error: A withdrawal request is already being processed.");
                 return;
             }
 
-            // التحقق من شرط الـ 5 أيام بعد آخر سحب ناجح
-            const lastSucc = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "completed"), orderBy("timestamp", "desc"), limit(1));
-            const lastSnap = await getDocs(lastSucc);
-            if (!lastSnap.empty) {
-                const lastDate = new Date(lastSnap.docs[0].data().timestamp).getTime();
-                const now = new Date().getTime();
-                const diff = (now - lastDate) / (1000 * 60 * 60 * 24);
-                if (diff < 5 && (userData.investmentClicks || 0) < 5) {
-                    alert(`Cooldown Active: Wait ${Math.ceil(5 - diff)} more days or complete 5 more investments.`);
-                    return;
-                }
-            }
-
-            // التحقق من شرط الـ 3 ساعات بعد الاستثمار
+            // 3. التحقق من شرط الـ 3 ساعات بعد الاستثمار
             if (userData.lastInvestTime) {
-                const lastInv = new Date(userData.lastInvestTime).getTime();
-                const now = new Date().getTime();
-                const hoursSince = (now - lastInv) / (1000 * 60 * 60);
-                if (hoursSince < 3) {
-                    alert(`Protocol Lock: Please wait ${Math.ceil(3 - hoursSince)} hours after your last investment to withdraw.`);
+                const diff = (new Date().getTime() - new Date(userData.lastInvestTime).getTime()) / (1000 * 60 * 60);
+                if (diff < 3) {
+                    alert(`Protocol Lock: Wait ${Math.ceil(3 - diff)} hours after last investment.`);
                     return;
                 }
             } else {
-                alert("Investment required: You must trigger the investment protocol at least once.");
+                alert("Protocol Error: Complete at least one investment cycle.");
                 return;
+            }
+
+            // 4. التحقق من شرط الـ 5 أيام بعد السحب الناجح
+            const lastSucc = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "completed"), orderBy("timestamp", "desc"), limit(1));
+            const lastSnap = await getDocs(lastSucc);
+            if (!lastSnap.empty) {
+                const dayDiff = (new Date().getTime() - new Date(lastSnap.docs[0].data().timestamp).getTime()) / (1000 * 60 * 60 * 24);
+                if (dayDiff < 5 && (userData.investmentClicks || 0) < 5) {
+                    alert("Cooldown: Wait 5 days or complete 5 new investments.");
+                    return;
+                }
             }
 
             openPanel('withdrawPanel');
         };
 
-        // بدء عملية السحب (طلب الـ PIN)
+        // زر التحقق من البيانات قبل طلب الـ PIN
         document.getElementById('startWithdrawBtn').addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const addr = document.getElementById('withdrawAddr').value;
             
-            if (!amount || amount < 10) { alert("Minimum withdrawal is $10.00"); return; }
-            if (amount > userData.balance) { alert("Insufficient funds in vault."); return; }
-            if (addr.length < 10) { alert("Please enter a valid wallet address."); return; }
+            if (!amount || amount < 10) { alert("Min withdrawal: $10.00"); return; }
+            if (amount > userData.balance) { alert("Insufficient Balance."); return; }
+            if (addr.length < 10) { alert("Invalid Wallet Address."); return; }
 
             openPanel('pinPanel');
         });
 
-        // التأكيد النهائي بالـ PIN
+        // التنفيذ النهائي بعد كتابة الـ PIN
         document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
-            const pin = document.getElementById('withdrawPin').value;
-            if (pin !== userData.securePin) {
-                alert("ACCESS DENIED: Incorrect PIN code.");
+            const enteredPin = document.getElementById('withdrawPin').value;
+            if (enteredPin !== userData.securePin) {
+                alert("Security Error: Incorrect PIN.");
                 return;
             }
 
@@ -228,38 +231,37 @@
 
             try {
                 await addDoc(collection(db, "users", userData.uid, "withdrawals"), {
-                    amount: amount,
-                    network: network,
-                    address: addr,
-                    status: "pending",
-                    timestamp: new Date().toISOString(),
-                    type: "Withdrawal"
+                    amount, network, address: addr, status: "pending",
+                    timestamp: new Date().toISOString()
                 });
-                alert("SUCCESS: Withdrawal request sent to the blockchain queue (2h-96h).");
+                alert("Protocol Accepted: Your withdrawal is in the queue.");
                 location.reload();
-            } catch (e) { alert("Error processing transaction."); }
+            } catch (e) { alert("System Error."); }
         });
 
-        // الدوال المساعدة (نفس التي لديك)
+        // الدوال المساعدة
         window.openPanel = (id) => {
-            const el = document.getElementById(id);
-            el.style.display = 'flex';
-            setTimeout(() => el.classList.add('show-panel'), 10);
+            document.getElementById(id).classList.add('show-panel');
         };
         window.closePanel = (id) => {
-            const el = document.getElementById(id);
-            el.classList.remove('show-panel');
-            setTimeout(() => el.style.display = 'none', 400);
+            document.getElementById(id).classList.remove('show-panel');
         };
 
-        // جلب بيانات السوق (Bitcoin, etc.)
+        // زر النسخ
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const addr = document.getElementById('walletAddrDisplay').innerText;
+            navigator.clipboard.writeText(addr);
+            alert("Address Copied!");
+        });
+
+        // جلب أسعار العملات
         async function fetchMarketData() {
             try {
                 const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd&include_24hr_change=true');
                 const data = await res.json();
                 const assets = [
                     { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', icon: 'fa-bitcoin', color: 'text-orange-500' },
-                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-blue-400', color: 'text-blue-400' },
+                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-ethereum', color: 'text-blue-400' },
                     { id: 'binancecoin', name: 'BNB Chain', symbol: 'BNB', icon: 'fa-coins', color: 'text-yellow-500' }
                 ];
                 let html = '';
