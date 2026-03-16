@@ -23,9 +23,6 @@
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
         input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
-        .status-pending { color: #f59e0b; }
-        .status-completed { color: #10b981; }
-        .status-rejected { color: #ef4444; }
         .swal2-popup { background: #0f172a !important; color: white !important; border-radius: 2rem !important; border: 1px solid rgba(59, 130, 246, 0.2) !important; }
     </style>
 </head>
@@ -57,8 +54,8 @@
 
         <div class="px-6 mt-8">
             <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6 px-2">Recent Transactions</h3>
-            <div id="transactionHistory" class="glass-panel rounded-[2.5rem] overflow-hidden p-4 space-y-4">
-                <p class="text-center text-[10px] text-slate-500 py-4 font-bold uppercase italic">Scanning Blockchain...</p>
+            <div id="transactionHistory" class="glass-panel rounded-[2.5rem] overflow-hidden p-4 space-y-4 text-center py-8">
+                <p class="text-[10px] text-slate-500 font-bold uppercase italic">Scanning Blockchain...</p>
             </div>
         </div>
     </div>
@@ -81,9 +78,19 @@
 
     <div id="withdrawPanel" class="slide-panel">
         <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" id="closeWith"></div>
-            <h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal</h3>
-            <div class="space-y-4 mt-6">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6" id="closeWith"></div>
+            <h3 class="text-xl font-black mb-4 uppercase italic text-red-500">Withdrawal</h3>
+            
+            <div class="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl mb-6 space-y-2">
+                <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-red-400">
+                    <i class="fas fa-clock"></i> <span>Processing: 2 - 96 Hours</span>
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-red-400">
+                    <i class="fas fa-percent"></i> <span>Network Fee: 5.00%</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
                 <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none">
                     <option value="TRC20">USDT (TRC20)</option>
                     <option value="BEP20">USDT (BEP20)</option>
@@ -115,7 +122,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, addDoc, collection, query, where, orderBy, limit, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, query, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -148,45 +155,38 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // تصحيح: الضغط على السحب
-        document.getElementById('withdrawTrigger').addEventListener('click', async () => {
+        document.getElementById('withdrawTrigger').onclick = async () => {
             if(!auth.currentUser) return;
-            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-            const fresh = userSnap.data() || {};
+            const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const fresh = snap.data() || {};
             await auth.currentUser.reload();
-
             const isVerified = auth.currentUser.emailVerified;
             const hasPin = fresh.securePin || fresh.pin || fresh.securityPin;
 
             if (!isVerified || !hasPin) {
                 Swal.fire({
                     title: 'SECURITY PROTOCOL',
-                    html: `<div class="text-[11px] uppercase p-4 bg-black/40 rounded-2xl border border-white/5">
-                        Verified: ${isVerified ? '✅' : '❌'}<br>PIN Set: ${hasPin ? '✅' : '❌'}
-                    </div>`,
+                    html: `<div class="text-[11px] uppercase p-4 bg-black/40 rounded-2xl border border-white/5">Verified: ${isVerified ? '✅' : '❌'}<br>PIN Set: ${hasPin ? '✅' : '❌'}</div>`,
                     confirmButtonText: 'Go to Profile'
                 }).then(r => { if(r.isConfirmed) window.location.href='profile.html'; });
                 return;
             }
             openP('withdrawPanel');
-        });
+        };
 
-        // تصحيح: الإيداع
-        document.getElementById('depositTrigger').addEventListener('click', () => openP('depositPanel'));
-        
-        // إغلاق اللوحات
+        document.getElementById('depositTrigger').onclick = () => openP('depositPanel');
         document.getElementById('closeDep').onclick = () => closeP('depositPanel');
         document.getElementById('closeWith').onclick = () => closeP('withdrawPanel');
         document.getElementById('closePin').onclick = () => closeP('pinPanel');
 
-        // الخطوات
-        document.getElementById('startWithdrawBtn').addEventListener('click', () => {
+        document.getElementById('startWithdrawBtn').onclick = () => {
             const amt = parseFloat(document.getElementById('withdrawAmount').value);
             if (!amt || amt < 10 || amt > (userData.balance || 0)) return Swal.fire('Error', 'Check amount/balance', 'error');
-            openP('pinPanel');
-        });
+            closeP('withdrawPanel');
+            setTimeout(() => openP('pinPanel'), 400);
+        };
 
-        document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
+        document.getElementById('finalConfirmBtn').onclick = async () => {
             const pin = document.getElementById('withdrawPin').value;
             const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
             const actualPin = String(userSnap.data().securePin || userSnap.data().pin);
@@ -201,22 +201,40 @@
                 type: "Withdrawal"
             });
             Swal.fire('Success', 'Request Sent', 'success').then(() => location.reload());
-        });
+        };
 
-        async function fetchTransactions(uid) {
+        document.getElementById('confirmDepositBtn').onclick = async () => {
+            const amt = document.getElementById('depAmount').value;
+            if(!amt) return;
+            await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), {
+                amount: parseFloat(amt),
+                status: "pending",
+                type: "Deposit",
+                timestamp: new Date().toISOString()
+            });
+            Swal.fire('Success', 'Deposit Request Sent', 'success').then(() => location.reload());
+        };
+
+        function fetchTransactions(uid) {
             const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(5));
             onSnapshot(q, (sn) => {
                 let h = '';
                 sn.forEach(d => {
                     const data = d.data();
-                    h += `<div class="flex justify-between border-b border-white/5 pb-2">
-                        <span class="text-[10px] font-black">${data.type}</span>
-                        <span class="text-[10px] text-blue-400">$${data.amount}</span>
+                    const color = data.type === 'Withdrawal' ? 'text-red-400' : 'text-green-400';
+                    h += `<div class="flex justify-between items-center border-b border-white/5 pb-3">
+                        <div class="text-left"><p class="text-[10px] font-black uppercase">${data.type}</p><p class="text-[8px] opacity-40">${data.status}</p></div>
+                        <span class="text-[11px] font-black ${color}">${data.type === 'Withdrawal' ? '-' : '+'}$${data.amount}</span>
                     </div>`;
                 });
-                document.getElementById('transactionHistory').innerHTML = h || 'No Records';
+                document.getElementById('transactionHistory').innerHTML = h || 'No records found';
             });
         }
+
+        document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
+            Swal.fire({toast:true, position:'top', title:'Copied', icon:'success', showConfirmButton:false, timer:1500});
+        };
     </script>
 </body>
 </html>
