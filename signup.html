@@ -3,152 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vertex | Initialize Node</title>
+    <title>Vertex | Stellar Authorization</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand: #3b82f6; --bg: #02040a; }
+        :root { --brand: #3b82f6; --bg: #010208; --glass: rgba(255, 255, 255, 0.01); }
         body { 
-            background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            overflow-x: hidden; position: relative;
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* خلفية ضوئية متحركة خفيفة */
-        .bg-glow {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 500px; height: 500px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-            z-index: -1; filter: blur(60px); animation: pulse 8s infinite alternate;
+        /* خلفية الفضاء العميق مع تأثير السفر عبر النجوم */
+        .deep-space-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 60%),
+                radial-gradient(circle at 10% 10%, rgba(30, 58, 138, 0.08) 0%, transparent 40%),
+                var(--bg);
+            animation: warpSpeed 10s linear infinite;
         }
 
-        @keyframes pulse { from { opacity: 0.4; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px); border-radius: 35px; box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+        @keyframes warpSpeed {
+            0% { background-position: 0 0; }
+            100% { background-position: -200px 200px; }
         }
 
-        .input-box {
-            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        /* الاسم الكرومي اللماع والديناميكي (المذهل) */
+        .chrome-dynamic-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 3.2rem;
+            text-transform: uppercase;
+            letter-spacing: -3px;
+            position: relative;
+            background: linear-gradient(135deg, #fff 10%, #3b82f6 40%, #1e3a8a 60%, #fff 90%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+            animation: chromeShine 4s linear infinite;
         }
 
-        .input-box:focus-within {
-            border-color: var(--brand); background: rgba(59, 130, 246, 0.02);
-            transform: translateX(5px);
+        @keyframes chromeShine {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
         }
 
-        .eye-btn { cursor: pointer; transition: 0.3s; color: rgba(255,255,255,0.3); }
-        .eye-btn:hover { color: var(--brand); }
-
-        .referral-input {
-            border: 1px dashed rgba(245, 158, 11, 0.4) !important;
-            color: #f59e0b !important;
+        /* هالة ضوئية نبضية خلف الاسم */
+        .title-aura {
+            position: absolute;
+            width: 250px; h-250px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            z-index: -1;
+            animation: pulse-glow 3s infinite;
         }
 
-        .btn-main {
-            background: white; color: black; font-weight: 900;
-            transition: 0.4s; box-shadow: 0 15px 30px rgba(255,255,255,0.1);
+        @keyframes pulse-glow {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
         }
 
-        .btn-main:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3); }
+        /* حاوية زجاجية فخمة جداً مع إطار نيون نابض متدفق (الخرافي) */
+        .cyber-glass-box {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(30px);
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), inset 0 0 5px rgba(59, 130, 246, 0.1);
+        }
 
-        #alertBox { transform: translateY(-130%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        #alertBox.show { transform: translateY(0); }
+        /* خط النيون النابض والمتدفق (الأسطوري) */
+        .cyber-glass-box::before {
+            content: "";
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: 41px;
+            z-index: -1;
+            background: linear-gradient(135deg, transparent, rgba(59, 130, 246, 0.4), transparent, rgba(37, 99, 235, 0.3), transparent);
+            filter: blur(1.5px);
+            animation: borderPulse 2s infinite alternate;
+        }
+
+        @keyframes borderPulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.8; }
+        }
+
+        /* الحقول العائمة (Floating Inputs) بتأثير توهج قوي */
+        .floating-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: 0.4s all ease;
+        }
+
+        .floating-input:focus-within {
+            border-color: rgba(59, 130, 246, 0.7);
+            background: rgba(59, 130, 246, 0.04);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 35px rgba(59, 130, 246, 0.25);
+        }
+
+        /* زر الدخول المشتعل بقوة (Neon White) */
+        .btn-neon-white {
+            background: #ffffff;
+            color: #000000;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 45px -5px rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-neon-white:hover {
+            box-shadow: 0 15px 55px 0px rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .btn-neon-white:active { transform: scale(0.96); }
+
     </style>
 </head>
-<body>
-    <div class="bg-glow"></div>
+<body class="Stellar Authorization">
+    <div class="deep-space-bg"></div>
 
-    <div id="alertBox" class="fixed top-6 left-4 right-4 z-[500] hidden">
-        <div id="alertBg" class="p-4 rounded-2xl border border-white/10 bg-black/90 backdrop-blur-2xl flex items-center gap-3">
-            <i id="alertIcon" class="fas fa-ghost text-blue-500"></i>
-            <p id="alertMsg" class="text-[10px] font-black uppercase tracking-widest text-white"></p>
-        </div>
-    </div>
-
-    <div class="w-full max-w-[450px] p-6 relative">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-black tracking-tighter italic" style="font-family: 'Orbitron';">VERTEX</h1>
-            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-[0.5em] mt-1">Global Node Initialization</p>
+    <div class="w-full max-w-[440px] p-6 animate-fade-in relative z-10 flex flex-col items-center">
+        
+        <div class="text-center mb-16 relative flex flex-col items-center">
+            <div class="title-aura -top-10"></div>
+            <h1 class="chrome-dynamic-title">VERTEX</h1>
+            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.6em] mt-2 opacity-80">Quantum Infrastructure</p>
         </div>
 
-        <div class="glass-card p-8 md:p-10 space-y-4">
-            <div class="input-box rounded-2xl p-4 flex items-center">
-                <i class="fas fa-user-ninja text-blue-500/40 mr-4"></i>
-                <input type="text" id="fullName" placeholder="FULL NAME" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
-            </div>
-
-            <div class="flex gap-3">
-                <div class="input-box rounded-2xl p-4 w-32 flex items-center justify-center">
-                    <select id="countryCode" class="bg-transparent border-none outline-none text-[10px] font-black text-blue-400">
-                        <option value="+961">🇱🇧 +961</option>
-                        <option value="+966">🇸🇦 +966</option>
-                        <option value="+971">🇦🇪 +971</option>
-                        <option value="+20">🇪🇬 +20</option>
-                        <option value="+962">🇯🇴 +962</option>
-                        <option value="+965">🇰🇼 +965</option>
-                        <option value="+974">🇶🇦 +974</option>
-                        <option value="+973">🇧🇭 +973</option>
-                        <option value="+968">🇴🇲 +968</option>
-                        <option value="+212">🇲🇦 +212</option>
-                        <option value="+213">🇩🇿 +213</option>
-                        <option value="+216">🇹🇳 +216</option>
-                        <option value="+218">🇱🇾 +218</option>
-                        <option value="+249">🇸🇩 +249</option>
-                        <option value="+963">🇸🇾 +963</option>
-                        <option value="+970">🇵🇸 +970</option>
-                        <option value="+964">🇮🇶 +964</option>
-                        <option value="+967">🇾🇪 +967</option>
-                        <option value="+252">🇸🇴 +252</option>
-                        <option value="+222">🇲🇷 +222</option>
-                    </select>
+        <div class="cyber-glass-box p-10 md:p-12 w-full">
+            <div class="space-y-7">
+                <div class="floating-input rounded-2xl flex items-center p-5">
+                    <i class="fas fa-fingerprint text-blue-500 mr-4 text-base"></i>
+                    <input type="email" id="loginEmail" placeholder="Authorized Operator Email" class="bg-transparent border-none outline-none w-full text-xs font-bold text-white placeholder:text-gray-700 focus:ring-0">
                 </div>
-                <div class="input-box rounded-2xl p-4 flex-1">
-                    <input type="tel" id="phone" placeholder="PHONE" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
+
+                <div class="floating-input rounded-2xl flex items-center p-5">
+                    <i class="fas fa-shield-alt text-blue-500 mr-4 text-base"></i>
+                    <input type="password" id="loginPassword" placeholder="Secure Password" class="bg-transparent border-none outline-none w-full text-xs font-bold text-white placeholder:text-gray-600 focus:ring-0">
                 </div>
+
+                <button id="loginBtn" class="btn-neon-white text-white w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[11px] mt-12">
+                    AUTHORIZE ACCESS
+                </button>
             </div>
 
-            <div class="input-box rounded-2xl p-4 flex items-center">
-                <i class="fas fa-envelope-open text-blue-500/40 mr-4"></i>
-                <input type="email" id="email" placeholder="ACCESS EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
-            </div>
+            <p id="loginMessage" class="text-center mt-7 text-[9px] font-black uppercase tracking-wider h-4"></p>
 
-            <div class="input-box rounded-2xl p-4 flex items-center">
-                <i class="fas fa-lock text-blue-500/40 mr-4"></i>
-                <input type="password" id="password" placeholder="SECURE PASSWORD" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
-                <i class="fas fa-eye eye-btn ml-2" onclick="togglePass('password')"></i>
-            </div>
-
-            <div class="input-box rounded-2xl p-4 flex items-center">
-                <i class="fas fa-shield-check text-blue-500/40 mr-4"></i>
-                <input type="password" id="confirmPassword" placeholder="CONFIRM PASSWORD" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
-                <i class="fas fa-eye eye-btn ml-2" onclick="togglePass('confirmPassword')"></i>
-            </div>
-
-            <div class="input-box referral-input rounded-2xl p-4 flex items-center">
-                <i class="fas fa-id-badge text-amber-500/60 mr-4"></i>
-                <input type="text" id="inviteCode" placeholder="INVITE CODE (REQUIRED)" class="bg-transparent border-none outline-none w-full text-xs font-black placeholder:text-amber-900/40">
-            </div>
-
-            <button id="signupBtn" class="btn-main w-full py-5 rounded-2xl text-[11px] uppercase tracking-[0.2em] mt-6">
-                Establish Node
-            </button>
-
-            <div class="text-center pt-6">
-                <a href="login.html" class="text-gray-600 text-[9px] font-black uppercase tracking-[0.3em] hover:text-white transition">Back to Terminal</a>
+            <div class="mt-11 text-center">
+                <a href="signup.html" class="text-gray-600 text-[10px] font-black uppercase tracking-[0.5em] hover:text-white transition-all">
+                    Establish New Account
+                </a>
             </div>
         </div>
+
+        <p class="text-center mt-14 text-gray-800 text-[9px] font-bold tracking-[0.6em]">SYSTEM v8.2.1 // Stellar Class</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // CONFIG (نفس إعداداتك السابقة)
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -160,69 +192,34 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
 
-        // وظيفة إظهار/إخفاء كلمة السر
-        window.togglePass = (id) => {
-            const input = document.getElementById(id);
-            input.type = input.type === "password" ? "text" : "password";
-        };
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msg = document.getElementById('loginMessage');
+            const btn = document.getElementById('loginBtn');
 
-        function showAlert(message) {
-            const box = document.getElementById('alertBox');
-            const msg = document.getElementById('alertMsg');
-            msg.innerText = message;
-            box.classList.remove('hidden');
-            setTimeout(() => box.classList.add('show'), 10);
-            setTimeout(() => {
-                box.classList.remove('show');
-                setTimeout(() => box.classList.add('hidden'), 500);
-            }, 3000);
-        }
-
-        document.getElementById('signupBtn').addEventListener('click', async () => {
-            const name = document.getElementById('fullName').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('confirmPassword').value;
-            const invite = document.getElementById('inviteCode').value.trim();
-
-            if (!name || !phone || !email || !pass || !invite) {
-                showAlert("Access Denied: Missing Protocols");
+            if(!email || !password) {
+                msg.style.color = "#f87171";
+                msg.innerText = "Credentials Required: Unauthorized";
                 return;
             }
 
-            if (pass !== confirm) {
-                showAlert("Error: Password Mismatch");
-                return;
-            }
-
-            const btn = document.getElementById('signupBtn');
-            btn.innerText = "LINKING CORE...";
+            btn.innerText = "Verifying Identity...";
             btn.disabled = true;
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                const user = userCredential.user;
-                const personalCode = user.uid.substring(0, 5).toUpperCase();
-
-                await setDoc(doc(db, "users", user.uid), {
-                    fullName: name,
-                    phone: document.getElementById('countryCode').value + phone,
-                    email: email,
-                    referralId: personalCode,
-                    inviteCode: invite,
-                    balance: 0,
-                    createdAt: new Date().toISOString()
-                });
-
-                showAlert("Success: Node Online");
-                setTimeout(() => window.location.href = "index.html", 1500);
+                await signInWithEmailAndPassword(auth, email, password);
+                msg.style.color = "#4ade80";
+                msg.innerText = "Identity Confirmed. Access Granted.";
+                setTimeout(() => window.location.href = "index.html", 800);
             } catch (error) {
-                btn.innerText = "ESTABLISH NODE";
                 btn.disabled = false;
-                showAlert(error.message.toUpperCase());
+                btn.innerText = "AUTHORIZE ACCESS";
+                msg.style.color = "#f87171";
+                
+                if (error.code === 'auth/invalid-credential') msg.innerText = "Authentication Mismatch: Access Denied";
+                else msg.innerText = "Critical Authentication Error";
             }
         });
     </script>
