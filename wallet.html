@@ -51,17 +51,13 @@
         </div>
 
         <div class="px-6 mt-10 flex gap-4">
-            <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
-            <button onclick="handleWithdrawClick()" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
-        </div>
-
-        <div class="px-6 mt-12 text-center">
-             <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest opacity-50">Authorized Terminal Connection Required</p>
+            <button id="withdrawTrigger" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
+            <button id="depositTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
         </div>
 
         <div class="px-6 mt-8">
             <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6 px-2">Recent Transactions</h3>
-            <div id="transactionHistory" class="glass-panel rounded-[2.5rem] overflow-hidden mb-6 p-4 space-y-4">
+            <div id="transactionHistory" class="glass-panel rounded-[2.5rem] overflow-hidden p-4 space-y-4">
                 <p class="text-center text-[10px] text-slate-500 py-4 font-bold uppercase italic">Scanning Blockchain...</p>
             </div>
         </div>
@@ -69,10 +65,10 @@
 
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('depositPanel')"></div>
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" id="closeDep"></div>
             <h3 class="text-xl font-black mb-6 uppercase italic text-blue-500">Deposit Node</h3>
             <div class="glass-panel p-6 rounded-2xl mb-6">
-                <p class="text-[10px] text-slate-500 uppercase font-black mb-2">TRC20 Address</p>
+                <p class="text-[10px] text-slate-500 uppercase font-black mb-2">Admin TRC20 Address</p>
                 <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5">
                     <p id="walletAddrDisplay" class="text-[10px] font-mono text-blue-400 truncate">Fetching...</p>
                     <button id="copyBtn" class="text-blue-500 ml-2"><i class="fas fa-copy"></i></button>
@@ -85,10 +81,9 @@
 
     <div id="withdrawPanel" class="slide-panel">
         <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('withdrawPanel')"></div>
-            <h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal Request</h3>
-            <p class="text-[9px] text-slate-500 uppercase font-bold mb-6 italic">ETA: 2h - 96h Process Time</p>
-            <div class="space-y-4">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" id="closeWith"></div>
+            <h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal</h3>
+            <div class="space-y-4 mt-6">
                 <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none">
                     <option value="TRC20">USDT (TRC20)</option>
                     <option value="BEP20">USDT (BEP20)</option>
@@ -105,7 +100,7 @@
             <h3 class="text-center font-black mb-6 uppercase tracking-widest text-blue-400">Security Vault Access</h3>
             <input type="password" id="withdrawPin" maxlength="6" inputmode="numeric" placeholder="••••••" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border border-blue-500/30 mb-6 outline-none">
             <button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black uppercase">Verify & Submit</button>
-            <button onclick="closePanel('pinPanel')" class="w-full mt-4 text-[10px] font-black text-slate-500 uppercase">Cancel Action</button>
+            <button id="closePin" class="w-full mt-4 text-[10px] font-black text-slate-500 uppercase">Cancel Action</button>
         </div>
     </div>
 
@@ -136,6 +131,10 @@
         const db = getFirestore(app);
         let userData = {};
 
+        // Helper functions
+        const openP = (id) => document.getElementById(id).classList.add('show-panel');
+        const closeP = (id) => document.getElementById(id).classList.remove('show-panel');
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
@@ -144,31 +143,26 @@
                         userData.uid = user.uid;
                         document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = userData.fullName || "PREMIER AGENT";
-                        document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "Address Not Assigned";
+                        document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "No Admin Address";
                         fetchTransactions(user.uid);
                     }
                 });
             } else { window.location.replace('login.html'); }
         });
 
-        // تم إصلاحها بالكامل لتجلب البيانات مباشرة من السيرفر
-        window.handleWithdrawClick = async () => {
+        // 1. معالجة فتح السحب (Security First)
+        document.getElementById('withdrawTrigger').addEventListener('click', async () => {
             if(!auth.currentUser) return;
             
-            // جلب أحدث بيانات المستخدم من السيرفر مباشرة للتأكد من الـ PIN
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            const data = userSnap.exists() ? userSnap.data() : {};
+            // جلب بيانات فريش من السيرفر فوراً
+            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const freshData = userSnap.exists() ? userSnap.data() : {};
             
-            // جلب حالة الإيميل الفريش
             await auth.currentUser.reload();
             const isEmailVerified = auth.currentUser.emailVerified;
-            
-            // فحص كل مسميات الـ PIN الممكنة
-            const userPin = data.securePin || data.pin || data.securityPin;
-            const hasSecurePin = !!userPin;
+            const currentPin = freshData.securePin || freshData.pin || freshData.securityPin;
 
-            if (!isEmailVerified || !hasSecurePin) {
+            if (!isEmailVerified || !currentPin) {
                 Swal.fire({
                     title: 'SECURITY PROTOCOL',
                     html: `<div class="text-left text-[11px] p-5 bg-black/40 rounded-3xl border border-white/5 space-y-3 font-black uppercase tracking-widest">
@@ -178,7 +172,7 @@
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-slate-500">Security Vault PIN:</span> 
-                                <span class="${hasSecurePin ? 'text-emerald-500' : 'text-red-500'}">${hasSecurePin ? 'ACTIVE' : 'NOT SET'}</span>
+                                <span class="${currentPin ? 'text-emerald-500' : 'text-red-500'}">${currentPin ? 'ACTIVE' : 'NOT SET'}</span>
                             </div>
                            </div>`,
                     icon: 'info',
@@ -190,50 +184,55 @@
                 return;
             }
 
-            // منع السحب إذا كان هناك طلب قيد الانتظار
+            // منع السحب المزدوج
             const q = query(collection(db, "users", auth.currentUser.uid, "withdrawals"), where("status", "==", "pending"));
             const qSnap = await getDocs(q);
             if (!qSnap.empty) {
-                Swal.fire({ title: 'PENDING REQUEST', text: 'You already have an active withdrawal.', icon: 'warning' });
+                Swal.fire({ title: 'PENDING REQUEST', text: 'Wait for current request to finish.', icon: 'warning' });
                 return;
             }
-            openPanel('withdrawPanel');
-        };
+            openP('withdrawPanel');
+        });
 
+        // 2. معالجة زر الإيداع واللوحات
+        document.getElementById('depositTrigger').onclick = () => openP('depositPanel');
+        document.getElementById('closeDep').onclick = () => closeP('depositPanel');
+        document.getElementById('closeWith').onclick = () => closeP('withdrawPanel');
+        document.getElementById('closePin').onclick = () => closeP('pinPanel');
+
+        // 3. الخطوة التالية في السحب
         document.getElementById('startWithdrawBtn').addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const addr = document.getElementById('withdrawAddr').value;
-            if (!amount || amount < 10) return Swal.fire('Error', 'Minimum withdrawal is $10.00', 'error');
+            if (!amount || amount < 10) return Swal.fire('Error', 'Min $10.00', 'error');
             if (amount > (userData.balance || 0)) return Swal.fire('Error', 'Insufficient balance.', 'error');
-            if (addr.length < 10) return Swal.fire('Error', 'Enter a valid address.', 'error');
-            openPanel('pinPanel');
+            if (addr.length < 10) return Swal.fire('Error', 'Invalid address.', 'error');
+            openP('pinPanel');
         });
 
+        // 4. التوثيق النهائي والارسال
         document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
             const enteredPin = document.getElementById('withdrawPin').value;
-            // نأخذ الـ PIN من البيانات التي جلبناها مؤخراً
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            const userSnap = await getDoc(userRef);
-            const freshData = userSnap.data();
-            const actualPin = String(freshData.securePin || freshData.pin || freshData.securityPin);
+            const userSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+            const fresh = userSnap.data();
+            const actualPin = String(fresh.securePin || fresh.pin || fresh.securityPin);
 
             if (enteredPin !== actualPin) {
-                Swal.fire({ title: 'INVALID PIN', text: 'Incorrect security code.', icon: 'error' });
-                return;
+                return Swal.fire({ title: 'INVALID PIN', text: 'Try again.', icon: 'error' });
             }
-
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const network = document.getElementById('withdrawNetwork').value;
-            const addr = document.getElementById('withdrawAddr').value;
 
             try {
                 await addDoc(collection(db, "users", auth.currentUser.uid, "withdrawals"), {
-                    amount, network, address: addr, status: "pending", type: "Withdrawal",
+                    amount: parseFloat(document.getElementById('withdrawAmount').value),
+                    network: document.getElementById('withdrawNetwork').value,
+                    address: document.getElementById('withdrawAddr').value,
+                    status: "pending",
+                    type: "Withdrawal",
                     timestamp: new Date().toISOString()
                 });
-                Swal.fire({ title: 'SUCCESS', text: 'Request submitted.', icon: 'success' })
+                Swal.fire({ title: 'SUCCESS', text: 'Transmitted to blockchain.', icon: 'success' })
                 .then(() => location.reload());
-            } catch (e) { Swal.fire('ERROR', 'Failed to submit.', 'error'); }
+            } catch (e) { Swal.fire('ERROR', 'Sync failed.', 'error'); }
         });
 
         async function fetchTransactions(uid) {
@@ -257,13 +256,10 @@
             });
         }
 
-        window.openPanel = (id) => document.getElementById(id).classList.add('show-panel');
-        window.closePanel = (id) => document.getElementById(id).classList.remove('show-panel');
-        document.getElementById('copyBtn').addEventListener('click', () => {
-            const addr = document.getElementById('walletAddrDisplay').innerText;
-            navigator.clipboard.writeText(addr);
+        document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(document.getElementById('walletAddrDisplay').innerText);
             Swal.fire({ toast: true, position: 'top-end', title: 'Copied', icon: 'success', showConfirmButton: false, timer: 1500 });
-        });
+        };
     </script>
 </body>
 </html>
