@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vertex | Authorization Portal</title>
+    <title>Vertex | Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
@@ -16,57 +16,57 @@
             overflow-x: hidden; position: relative;
         }
 
-        /* نفس خلفية النجوم المتحركة */
+        /* خلفية النجوم المضيئة */
         .starfield-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 80%), #010208;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 80%), #010208;
             background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-            animation: starsMove 100s linear infinite;
+            animation: starsMove 80s linear infinite;
         }
         @keyframes starsMove { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
 
-        /* العنوان الكرومي المتطابق */
+        /* العنوان الكرومي المتوهج */
         .chrome-title {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.8rem;
-            background: linear-gradient(135deg, #fff 20%, #3b82f6 50%, #fff 80%);
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 3rem;
+            background: linear-gradient(135deg, #fff 20%, #60a5fa 50%, #fff 80%);
             background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6));
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
             animation: shine 3s linear infinite;
         }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* الحاوية الزجاجية مع النيون المتدفق */
+        /* الحاوية المضيئة بنور النيون */
         .stellar-card {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(59, 130, 246, 0.2);
             backdrop-filter: blur(30px); border-radius: 40px; position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
         }
         .stellar-card::before {
             content: ""; position: absolute; inset: -1px; border-radius: 41px; z-index: -1;
-            background: linear-gradient(135deg, transparent, var(--brand), transparent);
-            animation: borderFlow 3s infinite;
+            background: linear-gradient(135deg, transparent, #3b82f6, transparent);
+            animation: borderFlow 2s linear infinite;
         }
-        @keyframes borderFlow { 0% { opacity: 0.2; } 50% { opacity: 0.7; } 100% { opacity: 0.2; } }
+        @keyframes borderFlow { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 
-        /* الحقول البراقة */
+        /* الحقول التقليدية مع التوهج */
         .bright-input {
-            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
         }
         .bright-input:focus-within {
-            border-color: var(--brand); transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            border-color: #60a5fa; transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
         }
 
-        /* الزر الأبيض المشتعل المتطابق */
-        .btn-ignite {
-            background: #ffffff; color: #000; font-weight: 900;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-            transition: 0.4s;
+        /* زر Login الأبيض المشتعل */
+        .btn-login {
+            background: #ffffff; color: #000; font-weight: 800;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-ignite:hover {
-            box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
-            transform: translateY(-3px);
+        .btn-login:hover {
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.9);
+            transform: scale(1.03);
         }
 
         #alertBox { transform: translateY(-150%); transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
@@ -77,39 +77,42 @@
     <div class="starfield-bg"></div>
 
     <div id="alertBox" class="fixed top-8 left-6 right-6 z-[1000] hidden">
-        <div class="p-5 rounded-3xl border border-white/20 bg-black/80 backdrop-blur-3xl flex items-center gap-4 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-            <i id="alertIcon" class="fas fa-key text-blue-500 text-xl"></i>
-            <p id="alertMsg" class="text-xs font-black uppercase tracking-widest text-white"></p>
+        <div class="p-5 rounded-3xl border border-blue-500/30 bg-black/90 backdrop-blur-3xl flex items-center gap-4 shadow-[0_0_40px_rgba(59,130,246,0.4)]">
+            <i class="fas fa-shield-check text-blue-400"></i>
+            <p id="alertMsg" class="text-xs font-bold tracking-wide text-white"></p>
         </div>
     </div>
 
     <div class="w-full max-w-[440px] p-6 relative z-10 flex flex-col items-center">
         <div class="text-center mb-10">
             <h1 class="chrome-title">VERTEX</h1>
-            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.6em] mt-2">Authorization Terminal</p>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.6em] mt-2">Welcome Back</p>
         </div>
 
         <div class="stellar-card p-10 md:p-12 w-full space-y-6">
             <div class="bright-input rounded-2xl p-5 flex items-center">
-                <i class="fas fa-fingerprint text-blue-500/60 mr-4 text-lg"></i>
-                <input type="email" id="loginEmail" placeholder="OPERATOR EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-black tracking-widest text-white">
+                <i class="fas fa-envelope text-blue-400/50 mr-4 text-lg"></i>
+                <input type="email" id="loginEmail" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600 text-white">
             </div>
 
             <div class="bright-input rounded-2xl p-5 flex items-center">
-                <i class="fas fa-shield-halved text-blue-500/60 mr-4 text-lg"></i>
-                <input type="password" id="loginPassword" placeholder="ACCESS KEY" class="bg-transparent border-none outline-none w-full text-xs font-black tracking-widest text-white">
+                <i class="fas fa-lock text-blue-400/50 mr-4 text-lg"></i>
+                <input type="password" id="loginPassword" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600 text-white">
             </div>
 
-            <button id="loginBtn" class="btn-ignite w-full py-5 rounded-2xl text-[11px] uppercase tracking-[0.3em] mt-8">
-                AUTHORIZE ACCESS
+            <button id="loginBtn" class="btn-login w-full py-5 rounded-2xl text-xs uppercase tracking-[0.2em] mt-8">
+                LOGIN
             </button>
 
             <div class="text-center pt-8">
-                <a href="signup.html" class="text-gray-500 text-[9px] font-black uppercase tracking-[0.4em] hover:text-white transition-all">Establish New Node</a>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider">
+                    Don't have an account? 
+                    <a href="signup.html" class="text-blue-400 hover:text-white transition-all ml-1 underline decoration-blue-500/30">Create Account</a>
+                </p>
             </div>
         </div>
 
-        <p class="text-center mt-14 text-gray-800 text-[9px] font-bold tracking-[0.6em]">SYSTEM v8.2.1 // Stellar Class</p>
+        <p class="text-center mt-14 text-gray-800 text-[9px] font-bold tracking-[0.6em]">SECURE ACCESS // VERTEX v8.2.1</p>
     </div>
 
     <script type="module">
@@ -130,8 +133,7 @@
 
         function showAlert(message) {
             const box = document.getElementById('alertBox');
-            const msg = document.getElementById('alertMsg');
-            msg.innerText = message;
+            document.getElementById('alertMsg').innerText = message;
             box.classList.remove('hidden');
             setTimeout(() => box.classList.add('show'), 10);
             setTimeout(() => {
@@ -146,21 +148,21 @@
             const btn = document.getElementById('loginBtn');
 
             if (!email || !password) {
-                showAlert("CREDENTIALS REQUIRED: ACCESS DENIED");
+                showAlert("Please enter your email and password");
                 return;
             }
 
-            btn.innerText = "VERIFYING IDENTITY...";
+            btn.innerText = "VERIFYING...";
             btn.disabled = true;
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                showAlert("IDENTITY CONFIRMED: WELCOME OPERATOR");
+                showAlert("Login Successful! Redirecting...");
                 setTimeout(() => window.location.href = "index.html", 1000);
             } catch (error) {
-                btn.innerText = "AUTHORIZE ACCESS";
+                btn.innerText = "LOGIN";
                 btn.disabled = false;
-                showAlert("AUTH ERROR: INVALID ACCESS KEY");
+                showAlert("Invalid email or password");
             }
         });
     </script>
