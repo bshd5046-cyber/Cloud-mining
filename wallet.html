@@ -10,175 +10,109 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { 
-            --bg-dark: #020617; 
-            --primary: #3b82f6; 
-            --accent: #8b5cf6;
-            --nav-bg: rgba(7, 10, 22, 0.98); 
-        }
-
-        body { 
-            background-color: var(--bg-dark); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #ffffff; 
-            overflow-x: hidden;
-            background: 
-                radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 0% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
-                #020617;
-            min-height: 100vh;
-        }
-        
-        #mainContent { display: none; }
-
-        .crypto-card {
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative; overflow: hidden;
-            box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.6);
-            border-radius: 2.5rem;
-        }
-
-        .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(25px); 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .bottom-nav { 
-            background: var(--nav-bg); 
-            backdrop-filter: blur(20px); 
-            border-top: 1px solid rgba(255, 255, 255, 0.05); 
-            height: 85px; 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            display: flex; justify-content: space-around; align-items: center; 
-            z-index: 1000; padding-bottom: 15px; 
-        }
-
-        .invest-fab { 
-            width: 68px; height: 68px; 
-            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -28px; 
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); 
-            border: 6px solid #020617; 
-        }
-
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), #020617; min-height: 100vh; }
+        .crypto-card { background: linear-gradient(135deg, rgba(30, 64, 175, 0.4) 0%, rgba(124, 58, 237, 0.4) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2.5rem; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; font-size: 10px; font-weight: 700; }
         .nav-item.active { color: var(--primary); }
-
-        .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: flex-end; }
-        .panel-content { width: 100%; background: #070b16; border-radius: 3.5rem 3.5rem 0 0; padding: 2.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .slide-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: flex-end; }
+        .panel-content { width: 100%; background: #070b16; border-radius: 3rem 3rem 0 0; padding: 2rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s ease; max-height: 90vh; overflow-y: auto; }
         .show-panel .panel-content { transform: translateY(0); }
-        
-        .market-row { transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .skeleton { background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
-        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        input, select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
     </style>
 </head>
-
 <body class="pb-32">
 
-    <div id="mainContent" class="animate-fadeIn">
+    <div id="mainContent" class="hidden">
         <div class="px-8 pt-16 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Vault</span></h1>
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-[0.2em]">Secure Node: Active</p>
-                </div>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                <i class="fas fa-shield-halved text-blue-500 text-xl"></i>
-            </div>
+            <h1 class="text-3xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Vault</span></h1>
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"><i class="fas fa-shield-halved text-blue-500 text-xl"></i></div>
         </div>
 
         <div class="px-6 mt-8">
             <div class="crypto-card p-9">
-                <div class="flex justify-between items-start mb-16">
-                    <div>
-                        <p class="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Secured Balance</p>
-                        <h2 id="userBalance" class="text-5xl font-black mt-2 tracking-tighter text-white">$ --.--</h2>
-                    </div>
-                    <div class="bg-black/20 px-4 py-2 rounded-2xl backdrop-blur-md border border-white/5">
-                        <i class="fab fa-ethereum text-blue-400"></i>
-                    </div>
-                </div>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <p class="text-blue-200 text-[9px] uppercase font-bold mb-1 opacity-40">Master Protocol ID</p>
-                        <p id="userName" class="text-sm font-black tracking-widest italic uppercase text-slate-200">--- ---</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] text-emerald-400 font-black uppercase tracking-tighter mb-1">Network</p>
-                        <p class="text-xs font-black text-white italic">USDT.TRC20</p>
-                    </div>
+                <p class="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Secured Balance</p>
+                <h2 id="userBalance" class="text-5xl font-black mt-2 tracking-tighter">$ 0.00</h2>
+                <div class="mt-8 flex justify-between items-end">
+                    <p id="userName" class="text-sm font-black tracking-widest italic uppercase text-slate-200">---</p>
+                    <p class="text-xs font-black text-white italic">USDT Ecosystem</p>
                 </div>
             </div>
         </div>
 
         <div class="px-6 mt-10 flex gap-4">
-            <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] flex items-center justify-center gap-3 shadow-xl shadow-blue-600/20 active:scale-95 transition-all">
-                <i class="fas fa-arrow-down-long text-xs"></i>
-                <span class="font-black uppercase text-[11px] tracking-[0.15em]">Deposit</span>
-            </button>
-            <button onclick="openPanel('withdrawPanel')" class="flex-1 glass-panel py-5 rounded-[2rem] flex items-center justify-center gap-3 active:scale-95 transition-all border-white/5">
-                <i class="fas fa-arrow-up-long text-xs"></i>
-                <span class="font-black uppercase text-[11px] tracking-[0.15em]">Withdraw</span>
-            </button>
+            <button onclick="openPanel('depositPanel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Deposit</button>
+            <button onclick="handleWithdrawClick()" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all">Withdraw</button>
         </div>
 
         <div class="px-6 mt-12">
-            <div class="flex justify-between items-center mb-6 px-2">
-                <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600">Global Markets</h3>
-                <span class="text-[9px] font-bold text-blue-500 bg-blue-500/10 px-2 py-1 rounded-lg italic">Real-time</span>
-            </div>
-            <div id="assetsList" class="glass-panel rounded-[2.5rem] overflow-hidden">
-                <div class="p-6 flex items-center justify-between opacity-20">
-                    <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl skeleton"></div><div class="space-y-2"><div class="w-20 h-3 skeleton rounded"></div><div class="w-12 h-2 skeleton rounded"></div></div></div>
-                    <div class="w-16 h-8 skeleton rounded-xl"></div>
-                </div>
-            </div>
+            <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 mb-6">Global Markets</h3>
+            <div id="assetsList" class="glass-panel rounded-[2.5rem] overflow-hidden"></div>
         </div>
     </div>
 
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content">
-            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-10" onclick="closePanel('depositPanel')"></div>
-            <div class="flex items-center gap-4 mb-8">
-                <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
-                    <i class="fas fa-qrcode text-2xl"></i>
-                </div>
-                <div>
-                    <h3 class="text-xl font-black uppercase italic text-white">Deposit <span class="text-blue-500">Hub</span></h3>
-                    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Protocol: TRC-20 Tether</p>
-                </div>
-            </div>
-            
-            <div class="glass-panel p-7 rounded-[2.2rem] mb-8 border-blue-500/10">
-                <p class="text-[9px] text-slate-600 uppercase font-black mb-4 tracking-[0.2em]">Personal Node Address</p>
-                <div class="flex justify-between items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">
-                    <p id="walletAddrDisplay" class="text-[11px] font-mono font-bold text-blue-400 truncate tracking-tighter text-white">Fetching address...</p>
-                    <button id="copyBtn" class="bg-blue-600 p-2 rounded-lg text-xs text-white active:scale-90 transition-all"><i class="fas fa-copy"></i></button>
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('depositPanel')"></div>
+            <h3 class="text-xl font-black mb-6 uppercase italic">Deposit <span class="text-blue-500">Node</span></h3>
+            <div class="glass-panel p-6 rounded-2xl mb-6">
+                <p class="text-[10px] text-slate-500 uppercase font-black mb-2">TRC20 Address</p>
+                <div class="flex justify-between items-center bg-black/40 p-4 rounded-xl border border-white/5">
+                    <p id="walletAddrDisplay" class="text-[10px] font-mono text-blue-400 truncate">Fetching...</p>
+                    <button id="copyBtn" class="text-blue-500 ml-2"><i class="fas fa-copy"></i></button>
                 </div>
             </div>
+            <input type="number" id="depAmount" placeholder="Amount USDT" class="w-full p-5 rounded-2xl mb-4 outline-none">
+            <button id="confirmDepositBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase">Confirm Request</button>
+        </div>
+    </div>
 
+    <div id="withdrawPanel" class="slide-panel">
+        <div class="panel-content">
+            <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8" onclick="closePanel('withdrawPanel')"></div>
+            <h3 class="text-xl font-black mb-2 uppercase italic text-red-500">Withdrawal <span class="text-white">Request</span></h3>
+            <p class="text-[9px] text-slate-500 uppercase font-bold mb-6 italic">ETA: 2h - 96h Process Time</p>
+            
             <div class="space-y-4">
-                <input type="number" id="depAmount" placeholder="0.00" class="w-full bg-slate-900/50 border border-white/5 py-6 px-8 rounded-[2rem] font-black outline-none focus:border-blue-500/50 transition-all text-white text-xl">
-                <button id="confirmDepositBtn" class="w-full bg-blue-600 py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/40 text-white active:scale-95 transition-all">Confirm Protocol</button>
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 ml-2 uppercase">Select Protocol</label>
+                    <select id="withdrawNetwork" class="w-full p-5 rounded-2xl outline-none mt-1">
+                        <option value="TRC20">USDT (TRC20) - Fast</option>
+                        <option value="BEP20">USDT (BEP20) - Low Fee</option>
+                    </select>
+                </div>
+
+                <input type="text" id="withdrawAddr" placeholder="Destination Address" class="w-full p-5 rounded-2xl outline-none">
+                <input type="number" id="withdrawAmount" placeholder="Amount to Withdraw" class="w-full p-5 rounded-2xl outline-none">
+                
+                <div class="p-4 bg-red-500/5 border border-red-500/10 rounded-2xl">
+                    <p class="text-[9px] text-red-400 leading-relaxed font-bold">
+                        * Withdrawal is only available 3h after your last investment.<br>
+                        * 5-day cooldown applies after each successful payout.
+                    </p>
+                </div>
+
+                <button id="startWithdrawBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95">Initiate Payout</button>
             </div>
+        </div>
+    </div>
+
+    <div id="pinPanel" class="slide-panel !z-[3000]">
+        <div class="panel-content !bg-blue-950">
+            <h3 class="text-center font-black mb-6">ENTER 6-DIGIT SECURITY PIN</h3>
+            <input type="password" id="withdrawPin" maxlength="6" class="w-full text-center text-3xl tracking-[0.5em] p-6 rounded-2xl bg-black/40 border-blue-500/30 mb-6 outline-none">
+            <button id="finalConfirmBtn" class="w-full bg-blue-500 py-5 rounded-2xl font-black">VERIFY & SUBMIT</button>
+            <button onclick="closePanel('pinPanel')" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase">Cancel</button>
         </div>
     </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a>
-        </div>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -186,7 +120,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, getDocs, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -201,119 +135,150 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUserId = null;
+        let userData = {};
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUserId = user.uid;
-                document.getElementById('mainContent').style.display = 'block';
-                
-                // الاستماع المباشر لبيانات المستخدم
+                document.getElementById('mainContent').classList.remove('hidden');
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // تحديث الرصيد والاسم
-                        const balance = data.balance || 0;
-                        document.getElementById('userBalance').innerText = `$${parseFloat(balance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('userName').innerText = data.fullName || "PREMIER AGENT";
-                        
-                        // تحديث عنوان المحفظة داخل الـ Panel
-                        const walletAddr = data.walletAddress || "No Address Assigned";
-                        document.getElementById('walletAddrDisplay').innerText = walletAddr;
+                        userData = docSnap.data();
+                        userData.uid = user.uid;
+                        userData.emailVerified = user.emailVerified;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(userData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        document.getElementById('userName').innerText = userData.fullName || "AGENT";
+                        document.getElementById('walletAddrDisplay').innerText = userData.walletAddress || "No Address";
                     }
                 });
             } else { window.location.replace('login.html'); }
         });
 
-        // زر النسخ
-        document.getElementById('copyBtn').addEventListener('click', () => {
-            const addr = document.getElementById('walletAddrDisplay').innerText;
-            if(addr && addr !== "Fetching address...") {
-                navigator.clipboard.writeText(addr);
-                const btn = document.getElementById('copyBtn');
-                btn.innerHTML = '<i class="fas fa-check"></i>';
-                setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+        // نظام التحقق قبل فتح لوحة السحب
+        window.handleWithdrawClick = async () => {
+            if (!userData.emailVerified) {
+                alert("Security Error: Please verify your email in Profile first.");
+                return;
             }
-        });
-
-        // تأكيد الإيداع
-        document.getElementById('confirmDepositBtn').addEventListener('click', async () => {
-            const amount = document.getElementById('depAmount').value;
-            if(!amount || amount <= 0) {
-                alert("Please enter a valid amount");
+            if (!userData.securePin) {
+                alert("Security Error: Set your 6-digit PIN in Security Vault.");
                 return;
             }
 
-            const btn = document.getElementById('confirmDepositBtn');
-            btn.disabled = true;
-            btn.innerText = "PROCESSING...";
-
-            try {
-                // حفظ العملية في Firebase لمراجعة الأدمن
-                await addDoc(collection(db, "users", currentUserId, "deposits"), {
-                    amount: parseFloat(amount),
-                    status: "pending",
-                    timestamp: new Date().toISOString(),
-                    type: "USDT.TRC20"
-                });
-                
-                alert("Deposit request submitted! Please send the exact amount to the address shown.");
-                closePanel('depositPanel');
-                document.getElementById('depAmount').value = "";
-            } catch (e) {
-                alert("Error submitting request.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Confirm Protocol";
+            // التأقق من وجود طلب سحب قيد الانتظار
+            const q = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "pending"));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                alert("You have an active withdrawal request pending approval.");
+                return;
             }
+
+            // التحقق من شرط الـ 5 أيام بعد آخر سحب ناجح
+            const lastSucc = query(collection(db, "users", userData.uid, "withdrawals"), where("status", "==", "completed"), orderBy("timestamp", "desc"), limit(1));
+            const lastSnap = await getDocs(lastSucc);
+            if (!lastSnap.empty) {
+                const lastDate = new Date(lastSnap.docs[0].data().timestamp).getTime();
+                const now = new Date().getTime();
+                const diff = (now - lastDate) / (1000 * 60 * 60 * 24);
+                if (diff < 5 && (userData.investmentClicks || 0) < 5) {
+                    alert(`Cooldown Active: Wait ${Math.ceil(5 - diff)} more days or complete 5 more investments.`);
+                    return;
+                }
+            }
+
+            // التحقق من شرط الـ 3 ساعات بعد الاستثمار
+            if (userData.lastInvestTime) {
+                const lastInv = new Date(userData.lastInvestTime).getTime();
+                const now = new Date().getTime();
+                const hoursSince = (now - lastInv) / (1000 * 60 * 60);
+                if (hoursSince < 3) {
+                    alert(`Protocol Lock: Please wait ${Math.ceil(3 - hoursSince)} hours after your last investment to withdraw.`);
+                    return;
+                }
+            } else {
+                alert("Investment required: You must trigger the investment protocol at least once.");
+                return;
+            }
+
+            openPanel('withdrawPanel');
+        };
+
+        // بدء عملية السحب (طلب الـ PIN)
+        document.getElementById('startWithdrawBtn').addEventListener('click', () => {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const addr = document.getElementById('withdrawAddr').value;
+            
+            if (!amount || amount < 10) { alert("Minimum withdrawal is $10.00"); return; }
+            if (amount > userData.balance) { alert("Insufficient funds in vault."); return; }
+            if (addr.length < 10) { alert("Please enter a valid wallet address."); return; }
+
+            openPanel('pinPanel');
         });
 
+        // التأكيد النهائي بالـ PIN
+        document.getElementById('finalConfirmBtn').addEventListener('click', async () => {
+            const pin = document.getElementById('withdrawPin').value;
+            if (pin !== userData.securePin) {
+                alert("ACCESS DENIED: Incorrect PIN code.");
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const network = document.getElementById('withdrawNetwork').value;
+            const addr = document.getElementById('withdrawAddr').value;
+
+            try {
+                await addDoc(collection(db, "users", userData.uid, "withdrawals"), {
+                    amount: amount,
+                    network: network,
+                    address: addr,
+                    status: "pending",
+                    timestamp: new Date().toISOString(),
+                    type: "Withdrawal"
+                });
+                alert("SUCCESS: Withdrawal request sent to the blockchain queue (2h-96h).");
+                location.reload();
+            } catch (e) { alert("Error processing transaction."); }
+        });
+
+        // الدوال المساعدة (نفس التي لديك)
         window.openPanel = (id) => {
             const el = document.getElementById(id);
             el.style.display = 'flex';
             setTimeout(() => el.classList.add('show-panel'), 10);
         };
-
         window.closePanel = (id) => {
             const el = document.getElementById(id);
             el.classList.remove('show-panel');
             setTimeout(() => el.style.display = 'none', 400);
         };
 
-        // دالة جلب أسعار العملات
+        // جلب بيانات السوق (Bitcoin, etc.)
         async function fetchMarketData() {
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,binancecoin&vs_currencies=usd&include_24hr_change=true');
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd&include_24hr_change=true');
                 const data = await res.json();
                 const assets = [
                     { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', icon: 'fa-bitcoin', color: 'text-orange-500' },
-                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-ethereum', color: 'text-blue-400' },
-                    { id: 'binancecoin', name: 'BNB Smart Chain', symbol: 'BNB', icon: 'fa-coins', color: 'text-yellow-500' }
+                    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', icon: 'fa-blue-400', color: 'text-blue-400' },
+                    { id: 'binancecoin', name: 'BNB Chain', symbol: 'BNB', icon: 'fa-coins', color: 'text-yellow-500' }
                 ];
                 let html = '';
-                assets.forEach(asset => {
-                    const price = data[asset.id].usd;
-                    const change = data[asset.id].usd_24h_change || 0;
-                    html += `
-                    <div class="market-row p-6 flex items-center justify-between">
+                assets.forEach(a => {
+                    const price = data[a.id].usd;
+                    const change = data[a.id].usd_24h_change || 0;
+                    html += `<div class="p-6 flex items-center justify-between border-b border-white/5">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">
-                                <i class="fab ${asset.icon} ${asset.color} text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="font-black text-sm text-white">${asset.name}</p>
-                                <p class="text-[9px] text-slate-500 font-black tracking-widest uppercase">${asset.symbol}</p>
-                            </div>
+                            <i class="fab ${a.icon} ${a.color} text-xl"></i>
+                            <div><p class="font-black text-sm text-white">${a.name}</p><p class="text-[8px] text-slate-500 uppercase tracking-widest">${a.symbol}</p></div>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-sm text-white">$${price.toLocaleString()}</p>
-                            <p class="text-[10px] ${change >= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</p>
+                            <p class="font-black text-sm">$${price.toLocaleString()}</p>
+                            <p class="text-[9px] ${change >= 0 ? 'text-emerald-500' : 'text-red-500'} font-bold">${change.toFixed(2)}%</p>
                         </div>
                     </div>`;
                 });
                 document.getElementById('assetsList').innerHTML = html;
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
         fetchMarketData();
     </script>
