@@ -24,9 +24,23 @@
         .plan-card { border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); filter: grayscale(1); opacity: 0.4; }
         .plan-active { filter: grayscale(0); opacity: 1; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); transform: scale(1.02); }
         .plan-active::before { content: "ACTIVE"; position: absolute; top: 10px; right: -25px; background: var(--primary); color: white; font-size: 8px; font-weight: 900; padding: 2px 30px; transform: rotate(45deg); }
+        .toast-wrap { position: fixed; top: 20px; left: 16px; right: 16px; z-index: 3000; pointer-events: none; }
+        .toast-card { transform: translateY(-140%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .toast-card.show { transform: translateY(0); }
     </style>
 </head>
 <body class="pb-32">
+
+    <div class="toast-wrap">
+        <div id="customToast" class="toast-card glass-panel rounded-3xl p-4 border border-blue-500/30 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div id="toastIcon" class="w-10 h-10 rounded-full bg-blue-500/15 flex items-center justify-center text-blue-400">
+                    <i class="fas fa-circle-info"></i>
+                </div>
+                <p id="toastMsg" class="text-xs font-bold uppercase tracking-wider text-white"></p>
+            </div>
+        </div>
+    </div>
 
     <section class="p-6 pt-12">
         <div class="text-center mb-8">
@@ -53,6 +67,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="stat-card flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20"><i class="fas fa-users text-purple-400"></i></div>
@@ -69,20 +84,28 @@
 
         <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
             <div class="flex justify-between items-center mb-5 px-2">
-                <div class="flex items-center gap-3"><i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i><span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span></div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span>
+                </div>
                 <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Step 0/2</span>
             </div>
+
             <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
-                <div id="btnContent" class="flex items-center gap-3"><i id="btnIcon" class="fas fa-bolt-lightning text-white"></i><span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start</span></div>
+                <div id="btnContent" class="flex items-center gap-3">
+                    <i id="btnIcon" class="fas fa-bolt-lightning text-white"></i>
+                    <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start</span>
+                </div>
                 <div id="loaderBar" class="absolute bottom-0 left-0 h-1 bg-white/40 transition-all duration-150" style="width: 0%"></div>
             </button>
+
             <p class="text-[9px] text-slate-600 mt-4 italic font-bold uppercase tracking-widest">Nodes synch required</p>
         </div>
     </section>
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
-        
+
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -149,7 +172,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp, increment, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -163,72 +187,56 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const functions = getFunctions(app);
+        const runDailyExecution = httpsCallable(functions, "runDailyExecution");
 
-        let currentUserId = null, userData = null, taps = 0;
+        let currentUserId = null;
+        let userData = null;
+        let taps = 0;
+        let phaseOneDone = false;
+        let executionLocked = false;
+
         const execBtn = document.getElementById('execBtn');
         const execText = document.getElementById('execText');
         const tapCount = document.getElementById('tapCount');
         const loaderBar = document.getElementById('loaderBar');
         const btnIcon = document.getElementById('btnIcon');
+        const customToast = document.getElementById('customToast');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        function showToast(message, icon = 'fa-circle-info', color = 'text-blue-400') {
+            toastMsg.innerText = message;
+            toastIcon.className = `w-10 h-10 rounded-full bg-white/5 flex items-center justify-center ${color}`;
+            toastIcon.innerHTML = `<i class="fas ${icon}"></i>`;
+            customToast.classList.add('show');
+            setTimeout(() => customToast.classList.remove('show'), 3200);
+        }
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserId = user.uid;
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        userData = docSnap.data();
-                        const balance = parseFloat(userData.balance || 0);
-                        document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
-                        document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
-                        document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
-                        document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
-                        document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
-                        updatePlanStatus(balance);
-                        checkExecutionAvailability();
-                    }
-                });
-            } else {
+            if (!user) {
                 window.location.replace('login.html');
+                return;
             }
+
+            currentUserId = user.uid;
+
+            onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                if (!docSnap.exists()) return;
+
+                userData = docSnap.data();
+                const balance = parseFloat(userData.balance || 0);
+
+                document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
+                document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
+                document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
+                document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
+
+                updatePlanStatus(balance);
+                checkExecutionAvailability();
+            });
         });
-
-        function isRewardEligible(balance) {
-            return parseFloat(balance || 0) >= 100;
-        }
-
-        async function distributeTeamRewards(parentCode, childProfit, childBalance) {
-            if (!parentCode || childProfit <= 0 || !isRewardEligible(childBalance)) return;
-
-            const generationPercents = [0.10, 0.075, 0.04];
-            let currentCode = parentCode;
-
-            try {
-                for (let i = 0; i < generationPercents.length; i++) {
-                    if (!currentCode) break;
-
-                    const q = query(collection(db, "users"), where("referralId", "==", currentCode));
-                    const snap = await getDocs(q);
-                    if (snap.empty) break;
-
-                    const receiverDoc = snap.docs[0];
-                    const receiverData = receiverDoc.data();
-                    const receiverBalance = parseFloat(receiverData.balance || 0);
-
-                    if (isRewardEligible(receiverBalance)) {
-                        const reward = childProfit * generationPercents[i];
-                        await updateDoc(doc(db, "users", receiverDoc.id), {
-                            balance: increment(reward),
-                            teamEarn: increment(reward),
-                            totalTeamEarned: increment(reward)
-                        });
-                    }
-
-                    currentCode = receiverData.inviteCode || null;
-                }
-            } catch (e) {
-                console.error("Team Reward Sync Failed", e);
-            }
-        }
 
         function getUkDateKey(date) {
             return new Intl.DateTimeFormat('en-CA', {
@@ -260,16 +268,19 @@
         }
 
         function resetButtonUI() {
+            executionLocked = false;
+            phaseOneDone = false;
+            taps = 0;
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
             execText.innerText = "Start Sequence";
             tapCount.innerText = "Ready 0/2";
             loaderBar.style.width = "0%";
             btnIcon.className = "fas fa-bolt-lightning text-white";
-            taps = 0;
         }
 
         function lockButtonUI() {
+            executionLocked = true;
             execBtn.disabled = true;
             execBtn.style.opacity = "0.6";
             execText.innerText = "Completed";
@@ -278,65 +289,78 @@
             btnIcon.className = "fas fa-lock text-white";
         }
 
-        function calculateDailyROI(balance) {
-            if (balance >= 15000) return balance * 0.035;
-            if (balance >= 5000) return balance * 0.030;
-            if (balance >= 2000) return balance * 0.025;
-            if (balance >= 500) return balance * 0.022;
-            if (balance >= 50) return balance * 0.019;
-            return 0;
+        function startPhaseOne() {
+            execBtn.disabled = true;
+            tapCount.innerText = "Syncing...";
+
+            let progress = 0;
+            const timer = setInterval(() => {
+                progress += 5;
+                loaderBar.style.width = `${progress}%`;
+                execText.innerText = `Sync ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    phaseOneDone = true;
+                    taps = 1;
+                    execBtn.disabled = false;
+                    execText.innerText = "Confirm";
+                    tapCount.innerText = "Ready 2/2";
+                    btnIcon.className = "fas fa-check-circle text-white";
+                }
+            }, 100);
         }
 
         execBtn.addEventListener('click', async () => {
-            if (!currentUserId || taps >= 2 || !userData) return;
+            if (!currentUserId || !userData || executionLocked) return;
 
-            taps++;
+            const currentBalance = parseFloat(userData.balance || 0);
+            if (currentBalance < 50) {
+                showToast("Minimum $50 required", "fa-triangle-exclamation", "text-amber-400");
+                return;
+            }
 
-            if (taps === 1) {
-                execBtn.disabled = true;
-                tapCount.innerText = "Syncing...";
-                let progress = 0;
+            if (!phaseOneDone) {
+                startPhaseOne();
+                return;
+            }
 
-                const timer = setInterval(() => {
-                    progress += 5;
-                    loaderBar.style.width = `${progress}%`;
-                    execText.innerText = `Sync ${progress}%`;
+            if (execBtn.disabled) return;
 
-                    if (progress >= 100) {
-                        clearInterval(timer);
-                        execBtn.disabled = false;
-                        execText.innerText = "Confirm";
-                        tapCount.innerText = "Ready 2/2";
-                        btnIcon.className = "fas fa-check-circle text-white";
-                    }
-                }, 100);
+            executionLocked = true;
+            execBtn.disabled = true;
+            execText.innerText = "Processing...";
+            tapCount.innerText = "Authorizing";
+            btnIcon.className = "fas fa-shield-halved text-white";
 
-            } else if (taps === 2) {
-                const bal = parseFloat(userData.balance || 0);
-                const profit = calculateDailyROI(bal);
+            try {
+                const result = await runDailyExecution();
+                const data = result.data || {};
 
-                if (bal < 50) {
-                    alert("Min $50 required");
-                    resetButtonUI();
-                    return;
-                }
+                showToast(
+                    `Success! Yield: $${Number(data.personalProfit || 0).toFixed(2)}`,
+                    "fa-circle-check",
+                    "text-emerald-400"
+                );
 
-                try {
-                    await updateDoc(doc(db, "users", currentUserId), {
-                        balance: increment(profit),
-                        dailyEarn: profit,
-                        totalEarned: increment(profit),
-                        lastExecution: serverTimestamp()
-                    });
+                lockButtonUI();
+            } catch (error) {
+                console.error("Execution failed:", error);
+                executionLocked = false;
+                execBtn.disabled = false;
 
-                    if (userData.inviteCode && isRewardEligible(bal)) {
-                        await distributeTeamRewards(userData.inviteCode, profit, bal);
-                    }
+                const msg =
+                    error?.message ||
+                    error?.details?.message ||
+                    "Execution failed. Please try again.";
 
-                    alert(`Success! Yield: $${profit.toFixed(2)}`);
-                    lockButtonUI();
-                } catch (e) {
-                    console.error(e);
+                showToast(msg, "fa-circle-xmark", "text-red-400");
+
+                if (phaseOneDone) {
+                    execText.innerText = "Confirm";
+                    tapCount.innerText = "Ready 2/2";
+                    btnIcon.className = "fas fa-check-circle text-white";
+                } else {
                     resetButtonUI();
                 }
             }
