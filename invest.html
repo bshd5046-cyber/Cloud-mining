@@ -8,14 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(10, 15, 28, 0.98); }
+        :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
         body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; overflow-x: hidden; background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), #020617; min-height: 100vh; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .stat-card { background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%); border-radius: 24px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); }
-        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 75px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 10px; }
-        .invest-fab { width: 58px; height: 58px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -20px; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); border: 4px solid var(--bg-dark); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 10px; font-weight: 700; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); border: 6px solid var(--bg-dark); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
         .btn-glow { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); transition: all 0.3s ease; }
         .pulse-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
@@ -137,7 +137,11 @@
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-xl text-white"></i></a></div>
+        <div class="relative flex-1 flex justify-center">
+            <a href="invest.html" class="invest-fab">
+                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
+            </a>
+        </div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -161,8 +165,11 @@
         const db = getFirestore(app);
 
         let currentUserId = null, userData = null, taps = 0;
-        const execBtn = document.getElementById('execBtn'), execText = document.getElementById('execText');
-        const tapCount = document.getElementById('tapCount'), loaderBar = document.getElementById('loaderBar'), btnIcon = document.getElementById('btnIcon');
+        const execBtn = document.getElementById('execBtn');
+        const execText = document.getElementById('execText');
+        const tapCount = document.getElementById('tapCount');
+        const loaderBar = document.getElementById('loaderBar');
+        const btnIcon = document.getElementById('btnIcon');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -171,7 +178,7 @@
                     if (docSnap.exists()) {
                         userData = docSnap.data();
                         const balance = parseFloat(userData.balance || 0);
-                        document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 2});
+                        document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
                         document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                         document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                         document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
@@ -180,72 +187,96 @@
                         checkExecutionAvailability();
                     }
                 });
-            } else { window.location.replace('login.html'); }
+            } else {
+                window.location.replace('login.html');
+            }
         });
 
-        async function distributeTeamRewards(parentCode, childProfit) {
-            if (!parentCode || childProfit <= 0) return;
+        function isRewardEligible(balance) {
+            return parseFloat(balance || 0) >= 100;
+        }
+
+        async function distributeTeamRewards(parentCode, childProfit, childBalance) {
+            if (!parentCode || childProfit <= 0 || !isRewardEligible(childBalance)) return;
+
+            const generationPercents = [0.10, 0.075, 0.04];
+            let currentCode = parentCode;
+
             try {
-                // Gen 1 (20%) - تم التعديل إلى referralId بناءً على صورك
-                const q1 = query(collection(db, "users"), where("referralId", "==", parentCode));
-                const snap1 = await getDocs(q1);
-                if (!snap1.empty) {
-                    const d1 = snap1.docs[0];
-                    const reward1 = childProfit * 0.20;
-                    await updateDoc(doc(db, "users", d1.id), {
-                        balance: increment(reward1),
-                        teamEarn: increment(reward1),
-                        totalTeamEarned: increment(reward1)
-                    });
+                for (let i = 0; i < generationPercents.length; i++) {
+                    if (!currentCode) break;
 
-                    // Gen 2 (9%)
-                    const d1Data = d1.data();
-                    if (d1Data.inviteCode) {
-                        const q2 = query(collection(db, "users"), where("referralId", "==", d1Data.inviteCode));
-                        const snap2 = await getDocs(q2);
-                        if (!snap2.empty) {
-                            const d2 = snap2.docs[0];
-                            const reward2 = childProfit * 0.09;
-                            await updateDoc(doc(db, "users", d2.id), {
-                                balance: increment(reward2),
-                                teamEarn: increment(reward2),
-                                totalTeamEarned: increment(reward2)
-                            });
+                    const q = query(collection(db, "users"), where("referralId", "==", currentCode));
+                    const snap = await getDocs(q);
+                    if (snap.empty) break;
 
-                            // Gen 3 (5%)
-                            const d2Data = d2.data();
-                            if (d2Data.inviteCode) {
-                                const q3 = query(collection(db, "users"), where("referralId", "==", d2Data.inviteCode));
-                                const snap3 = await getDocs(q3);
-                                if (!snap3.empty) {
-                                    const d3 = snap3.docs[0];
-                                    const reward3 = childProfit * 0.05;
-                                    await updateDoc(doc(db, "users", d3.id), {
-                                        balance: increment(reward3),
-                                        teamEarn: increment(reward3),
-                                        totalTeamEarned: increment(reward3)
-                                    });
-                                }
-                            }
-                        }
+                    const receiverDoc = snap.docs[0];
+                    const receiverData = receiverDoc.data();
+                    const receiverBalance = parseFloat(receiverData.balance || 0);
+
+                    if (isRewardEligible(receiverBalance)) {
+                        const reward = childProfit * generationPercents[i];
+                        await updateDoc(doc(db, "users", receiverDoc.id), {
+                            balance: increment(reward),
+                            teamEarn: increment(reward),
+                            totalTeamEarned: increment(reward)
+                        });
                     }
+
+                    currentCode = receiverData.inviteCode || null;
                 }
-            } catch (e) { console.error("Team Reward Sync Failed", e); }
+            } catch (e) {
+                console.error("Team Reward Sync Failed", e);
+            }
+        }
+
+        function getUkDateKey(date) {
+            return new Intl.DateTimeFormat('en-CA', {
+                timeZone: 'Europe/London',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(date);
         }
 
         function checkExecutionAvailability() {
-            if (!userData.lastExecution) { resetButtonUI(); return; }
+            if (!userData?.lastExecution) {
+                resetButtonUI();
+                return;
+            }
+
             const now = new Date();
             const lastExecDate = userData.lastExecution.toDate();
-            const lastExecUK = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(lastExecDate);
-            const currentUKDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', day: 'numeric' }).format(now);
-            const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: 'numeric', hour12: false }).format(now));
-            if (currentUKDay !== lastExecUK && ukHour >= 1) resetButtonUI();
+            const lastExecKey = getUkDateKey(lastExecDate);
+            const currentKey = getUkDateKey(now);
+            const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/London',
+                hour: 'numeric',
+                hour12: false
+            }).format(now), 10);
+
+            if (currentKey !== lastExecKey && ukHour >= 1) resetButtonUI();
             else lockButtonUI();
         }
 
-        function resetButtonUI() { execBtn.disabled = false; execBtn.style.opacity = "1"; execText.innerText = "Start Sequence"; tapCount.innerText = "Ready 0/2"; loaderBar.style.width = "0%"; btnIcon.className = "fas fa-bolt-lightning text-white"; taps = 0; }
-        function lockButtonUI() { execBtn.disabled = true; execBtn.style.opacity = "0.6"; execText.innerText = "Completed"; tapCount.innerText = "Locked"; loaderBar.style.width = "100%"; btnIcon.className = "fas fa-lock text-white"; }
+        function resetButtonUI() {
+            execBtn.disabled = false;
+            execBtn.style.opacity = "1";
+            execText.innerText = "Start Sequence";
+            tapCount.innerText = "Ready 0/2";
+            loaderBar.style.width = "0%";
+            btnIcon.className = "fas fa-bolt-lightning text-white";
+            taps = 0;
+        }
+
+        function lockButtonUI() {
+            execBtn.disabled = true;
+            execBtn.style.opacity = "0.6";
+            execText.innerText = "Completed";
+            tapCount.innerText = "Locked";
+            loaderBar.style.width = "100%";
+            btnIcon.className = "fas fa-lock text-white";
+        }
 
         function calculateDailyROI(balance) {
             if (balance >= 15000) return balance * 0.035;
@@ -257,40 +288,64 @@
         }
 
         execBtn.addEventListener('click', async () => {
-            if (!currentUserId || taps >= 2) return;
+            if (!currentUserId || taps >= 2 || !userData) return;
+
             taps++;
+
             if (taps === 1) {
-                execBtn.disabled = true; tapCount.innerText = "Syncing...";
+                execBtn.disabled = true;
+                tapCount.innerText = "Syncing...";
                 let progress = 0;
+
                 const timer = setInterval(() => {
-                    progress += 5; loaderBar.style.width = `${progress}%`; execText.innerText = `Sync ${progress}%`;
-                    if (progress >= 100) { clearInterval(timer); execBtn.disabled = false; execText.innerText = "Confirm"; tapCount.innerText = "Ready 2/2"; btnIcon.className = "fas fa-check-circle text-white"; }
+                    progress += 5;
+                    loaderBar.style.width = `${progress}%`;
+                    execText.innerText = `Sync ${progress}%`;
+
+                    if (progress >= 100) {
+                        clearInterval(timer);
+                        execBtn.disabled = false;
+                        execText.innerText = "Confirm";
+                        tapCount.innerText = "Ready 2/2";
+                        btnIcon.className = "fas fa-check-circle text-white";
+                    }
                 }, 100);
+
             } else if (taps === 2) {
                 const bal = parseFloat(userData.balance || 0);
                 const profit = calculateDailyROI(bal);
-                if (bal < 50) { alert("Min $50 required"); resetButtonUI(); return; }
+
+                if (bal < 50) {
+                    alert("Min $50 required");
+                    resetButtonUI();
+                    return;
+                }
+
                 try {
-                    await updateDoc(doc(db, "users", currentUserId), { 
-                        balance: increment(profit), 
-                        dailyEarn: profit, 
-                        totalEarned: increment(profit), 
-                        lastExecution: serverTimestamp() 
+                    await updateDoc(doc(db, "users", currentUserId), {
+                        balance: increment(profit),
+                        dailyEarn: profit,
+                        totalEarned: increment(profit),
+                        lastExecution: serverTimestamp()
                     });
 
-                    if (userData.inviteCode) {
-                        await distributeTeamRewards(userData.inviteCode, profit);
+                    if (userData.inviteCode && isRewardEligible(bal)) {
+                        await distributeTeamRewards(userData.inviteCode, profit, bal);
                     }
 
                     alert(`Success! Yield: $${profit.toFixed(2)}`);
                     lockButtonUI();
-                } catch (e) { console.error(e); }
+                } catch (e) {
+                    console.error(e);
+                    resetButtonUI();
+                }
             }
         });
 
         function updatePlanStatus(balance) {
             document.querySelectorAll('.plan-card').forEach(plan => {
-                const min = parseFloat(plan.getAttribute('data-min')), max = parseFloat(plan.getAttribute('data-max'));
+                const min = parseFloat(plan.getAttribute('data-min'));
+                const max = parseFloat(plan.getAttribute('data-max'));
                 if (balance >= min && balance <= max) plan.classList.add('plan-active');
                 else plan.classList.remove('plan-active');
             });
