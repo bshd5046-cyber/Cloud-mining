@@ -11,20 +11,14 @@
         :root { --bg-dark: #020617; --primary: #3b82f6; --accent: #8b5cf6; --nav-bg: rgba(7, 10, 22, 0.98); }
         body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 50%), #020617; min-height: 100vh; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Bottom Nav */
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); border: 6px solid #020617; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
-
-        /* Panels */
         .slide-panel { position: fixed; bottom: -100%; left: 0; right: 0; height: auto; min-height: 40vh; background: #0a0f1c; z-index: 2000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem; padding-bottom: 4rem; }
         .slide-panel.active { bottom: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 1500; transition: 0.3s; }
-        
-        /* Custom Loading UI */
         #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #customToast.show { transform: translateY(0); }
     </style>
@@ -59,7 +53,7 @@
         <div class="w-16 h-1 rounded-full bg-slate-800 mx-auto mb-8"></div>
         <h3 class="text-xl font-black mb-6 uppercase tracking-tight">Security Protocol</h3>
         
-        <div class="space-y-4">
+        <div class="space-y-3">
             <button id="resetEmailBtn" class="w-full flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 active:scale-95 transition-all">
                 <div class="flex items-center gap-4">
                     <i class="fas fa-key text-blue-400"></i>
@@ -75,15 +69,28 @@
                 <div class="flex items-center gap-4">
                     <i class="fas fa-envelope-circle-check text-indigo-400"></i>
                     <div class="text-left">
-                        <p class="text-xs font-bold text-white">Identity Verification</p>
-                        <p id="emailStatusText" class="text-[9px] text-slate-500 uppercase tracking-tighter">Account not verified</p>
+                        <p class="text-xs font-bold text-white">Verify Account</p>
+                        <p id="emailStatusText" class="text-[9px] text-slate-500 uppercase tracking-tighter">Pending validation</p>
                     </div>
                 </div>
-                <div id="verifyBadge" class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase">Required</div>
+                <div id="verifyBadge" class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest">Required</div>
             </button>
         </div>
 
-        <button onclick="closeAllPanels()" class="w-full mt-8 py-4 text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em]">Close Terminal</button>
+        <div class="mt-8 p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10">
+            <div class="flex items-start gap-4">
+                <i class="fas fa-headset text-blue-400 mt-1"></i>
+                <div class="text-left">
+                    <p class="text-[11px] font-bold text-white uppercase tracking-wider mb-1">Administrative Support</p>
+                    <p class="text-[10px] text-slate-500 leading-relaxed mb-4">If you wish to change your core identity data or encounter a security bridge, please contact our 24/7 technical division.</p>
+                    <a href="support.html" class="inline-flex items-center gap-2 text-blue-400 font-bold text-[10px] uppercase tracking-widest hover:gap-3 transition-all">
+                        Open Support Terminal <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="closeAllPanels()" class="w-full mt-8 py-4 text-slate-600 font-bold uppercase text-[10px] tracking-[0.3em]">Close Terminal</button>
     </div>
 
     <main id="mainContent" class="opacity-0 transition-opacity duration-700">
@@ -183,7 +190,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -199,16 +206,13 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // نظام التنبيهات الذكي
         function showToast(msg, iconClass = 'fa-info-circle', color = 'text-blue-400') {
             const toast = document.getElementById('customToast');
             const toastMsg = document.getElementById('toastMsg');
             const toastIcon = document.getElementById('toastIcon');
-            
             toastMsg.innerText = msg;
             toastIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
             toastIcon.className = `w-10 h-10 rounded-full flex items-center justify-center bg-white/5 ${color}`;
-            
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
@@ -227,14 +231,19 @@
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
 
-                // فحص حالة التوثيق (Verification)
-                if(user.emailVerified) {
-                    document.getElementById('emailStatusText').innerText = "Account Verified";
-                    document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
-                    document.getElementById('verifyBadge').innerText = "Secure";
-                    document.getElementById('verifyBadge').classList.replace('bg-amber-500/10', 'bg-emerald-500/10');
-                    document.getElementById('verifyBadge').classList.replace('text-amber-500', 'text-emerald-500');
-                }
+                // تحديث واجهة التوثيق إذا كان الإيميل مفعل
+                const updateVerificationUI = () => {
+                    if(user.emailVerified) {
+                        document.getElementById('emailStatusText').innerText = "Account Verified";
+                        document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
+                        document.getElementById('verifyBadge').innerText = "Verified";
+                        document.getElementById('verifyBadge').className = "px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest";
+                        document.getElementById('verifyEmailBtn').disabled = true;
+                        document.getElementById('verifyEmailBtn').style.opacity = "0.6";
+                    }
+                };
+                
+                updateVerificationUI();
 
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
@@ -249,7 +258,6 @@
                         const teamProfit = parseFloat(data.totalTeamEarned || 0);
                         document.getElementById('monthlyTeamEarn').innerText = `+$${teamProfit.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
 
-                        // نظام الـ Tier Status بناءً على الـ $100
                         const tierBadge = document.getElementById('userTierBadge');
                         const statusText = document.getElementById('statusText');
                         const progressBar = document.getElementById('progressBar');
@@ -269,37 +277,40 @@
                             progressBar.style.width = Math.min((balance/100)*100, 100) + "%";
                             progressBar.style.backgroundColor = "#475569";
                         }
-
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                     }
                 });
             } else { window.location.replace("login.html"); }
         });
 
-        // تنفيذ تسجيل الخروج الراقي
-        document.getElementById('confirmLogout').addEventListener('click', () => {
-            showToast("Disconnecting from Server...", "fa-sync fa-spin", "text-red-400");
-            setTimeout(() => {
-                signOut(auth).then(() => window.location.replace("login.html"));
-            }, 1000);
+        // إرسال إيميل التوثيق
+        document.getElementById('verifyEmailBtn').addEventListener('click', () => {
+            const user = auth.currentUser;
+            if (user) {
+                sendEmailVerification(user)
+                    .then(() => {
+                        closeAllPanels();
+                        showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400");
+                    })
+                    .catch((error) => showToast(error.message, "fa-circle-xmark", "text-red-500"));
+            }
         });
 
-        // طلب تغيير كلمة السر
+        document.getElementById('confirmLogout').addEventListener('click', () => {
+            showToast("Disconnecting...", "fa-sync fa-spin", "text-red-400");
+            setTimeout(() => signOut(auth).then(() => window.location.replace("login.html")), 1000);
+        });
+
         document.getElementById('resetEmailBtn').addEventListener('click', () => {
             const user = auth.currentUser;
             if (user && user.email) {
                 sendPasswordResetEmail(auth, user.email)
                     .then(() => {
                         closeAllPanels();
-                        showToast("Reset Link Sent to Email", "fa-paper-plane", "text-emerald-400");
+                        showToast("Reset Link Sent", "fa-key", "text-emerald-400");
                     })
                     .catch((error) => showToast(error.message, "fa-circle-xmark", "text-red-500"));
             }
-        });
-
-        // زر تأكيد الهوية (سنبرمجه لاحقاً بالكود)
-        document.getElementById('verifyEmailBtn').addEventListener('click', () => {
-            showToast("Verification Protocol Coming Soon", "fa-microchip", "text-indigo-400");
         });
     </script>
 </body>
