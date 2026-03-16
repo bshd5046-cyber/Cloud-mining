@@ -16,7 +16,6 @@
             overflow-x: hidden; position: relative;
         }
 
-        /* تحسين إضاءة النجوم لتكون أوضح */
         .starfield-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
             background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 80%), #010208;
@@ -25,7 +24,6 @@
         }
         @keyframes starsMove { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
 
-        /* زيادة توهج العنوان */
         .chrome-title {
             font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 3rem;
             background: linear-gradient(135deg, #fff 20%, #60a5fa 50%, #fff 80%);
@@ -35,14 +33,12 @@
         }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* جعل البطاقة تشع أكثر */
         .stellar-card {
             background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(59, 130, 246, 0.2);
             backdrop-filter: blur(30px); border-radius: 40px; position: relative;
             box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
         }
         
-        /* إطار النيون المتوهج */
         .stellar-card::before {
             content: ""; position: absolute; inset: -1px; border-radius: 41px; z-index: -1;
             background: linear-gradient(135deg, transparent, #3b82f6, transparent);
@@ -50,7 +46,6 @@
         }
         @keyframes borderFlow { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 
-        /* الحقول التقليدية مع إضاءة قوية عند التركيز */
         .bright-input {
             background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
             transition: 0.3s;
@@ -60,13 +55,11 @@
             box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
         }
 
-        /* زر الإحالة الذهبي */
         .referral-field {
             border: 1px dashed #fbbf24 !important;
             box-shadow: 0 0 15px rgba(251, 191, 36, 0.1);
         }
 
-        /* زر Register المشتعل */
         .btn-register {
             background: #ffffff; color: #000; font-weight: 800;
             box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
@@ -84,6 +77,10 @@
 
         #alertBox { transform: translateY(-150%); transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #alertBox.show { transform: translateY(0); }
+
+        .locked-ref {
+            background: rgba(251, 191, 36, 0.08);
+        }
     </style>
 </head>
 <body>
@@ -133,16 +130,16 @@
             <div class="bright-input rounded-2xl p-4 flex items-center">
                 <i class="fas fa-lock text-blue-400/50 mr-4"></i>
                 <input type="password" id="password" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
-                <i class="fas fa-eye eye-icon ml-2 text-xs" onclick="togglePass('password')"></i>
+                <i class="fas fa-eye eye-icon ml-2 text-xs cursor-pointer" onclick="togglePass('password')"></i>
             </div>
 
             <div class="bright-input rounded-2xl p-4 flex items-center">
                 <i class="fas fa-shield-check text-blue-400/50 mr-4"></i>
                 <input type="password" id="confirmPassword" placeholder="Confirm Password" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
-                <i class="fas fa-eye eye-icon ml-2 text-xs" onclick="togglePass('confirmPassword')"></i>
+                <i class="fas fa-eye eye-icon ml-2 text-xs cursor-pointer" onclick="togglePass('confirmPassword')"></i>
             </div>
 
-            <div class="bright-input referral-field rounded-2xl p-4 flex items-center">
+            <div id="inviteWrap" class="bright-input referral-field rounded-2xl p-4 flex items-center">
                 <i class="fas fa-gift text-amber-500 mr-4"></i>
                 <input type="text" id="inviteCode" placeholder="Invite Code (Mandatory)" class="bg-transparent border-none outline-none w-full text-sm font-bold text-amber-500 placeholder:text-amber-900/50">
             </div>
@@ -167,7 +164,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -182,6 +179,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        const inviteInput = document.getElementById('inviteCode');
+        const inviteWrap = document.getElementById('inviteWrap');
+        const signupBtn = document.getElementById('signupBtn');
+
         window.togglePass = (id) => {
             const el = document.getElementById(id);
             el.type = el.type === 'password' ? 'text' : 'password';
@@ -195,36 +196,69 @@
             setTimeout(() => { box.classList.remove('show'); setTimeout(() => box.classList.add('hidden'), 500); }, 3000);
         }
 
-        document.getElementById('signupBtn').addEventListener('click', async () => {
+        function normalizeInvite(code) {
+            return String(code || '').trim().toUpperCase();
+        }
+
+        async function isValidInviteCode(code) {
+            const cleanCode = normalizeInvite(code);
+            if (!cleanCode) return false;
+            const q = query(collection(db, "users"), where("referralId", "==", cleanCode));
+            const snap = await getDocs(q);
+            return !snap.empty;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const referralFromUrl = normalizeInvite(params.get('ref'));
+
+        if (referralFromUrl) {
+            inviteInput.value = referralFromUrl;
+            inviteInput.readOnly = true;
+            inviteWrap.classList.add('locked-ref');
+        }
+
+        signupBtn.addEventListener('click', async () => {
             const name = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
             const confirm = document.getElementById('confirmPassword').value;
-            const invite = document.getElementById('inviteCode').value.trim();
+            const invite = normalizeInvite(inviteInput.value);
             const terms = document.getElementById('terms').checked;
 
-            if (!name || !phone || !email || !pass || !invite) {
+            if (!name || !phone || !email || !pass || !confirm || !invite) {
                 showAlert("Please fill all fields");
                 return;
             }
+
             if (pass !== confirm) {
                 showAlert("Passwords do not match");
                 return;
             }
+
             if (!terms) {
                 showAlert("Please accept the terms and conditions");
                 return;
             }
 
-            const btn = document.getElementById('signupBtn');
-            btn.innerText = "CREATING ACCOUNT...";
-            btn.disabled = true;
+            signupBtn.innerText = "CHECKING INVITE...";
+            signupBtn.disabled = true;
 
             try {
+                const inviteIsReal = await isValidInviteCode(invite);
+
+                if (!inviteIsReal) {
+                    signupBtn.innerText = "REGISTER";
+                    signupBtn.disabled = false;
+                    showAlert("Invalid invite code");
+                    return;
+                }
+
+                signupBtn.innerText = "CREATING ACCOUNT...";
+
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
-                const personalCode = user.uid.substring(0, 5).toUpperCase();
+                const personalCode = user.uid.substring(0, 6).toUpperCase();
 
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
@@ -233,15 +267,37 @@
                     referralId: personalCode,
                     inviteCode: invite,
                     balance: 0,
-                    createdAt: new Date().toISOString()
+                    dailyEarn: 0,
+                    totalEarned: 0,
+                    teamEarn: 0,
+                    totalTeamEarned: 0,
+                    walletAddress: "",
+                    securePin: "",
+                    createdAt: serverTimestamp()
                 });
 
                 showAlert("Account Created Successfully!");
                 setTimeout(() => window.location.href = "index.html", 1500);
             } catch (error) {
-                btn.innerText = "REGISTER";
-                btn.disabled = false;
-                showAlert(error.message);
+                signupBtn.innerText = "REGISTER";
+                signupBtn.disabled = false;
+
+                if (error.code === 'auth/email-already-in-use') {
+                    showAlert("This email is already registered");
+                    return;
+                }
+
+                if (error.code === 'auth/invalid-email') {
+                    showAlert("Invalid email address");
+                    return;
+                }
+
+                if (error.code === 'auth/weak-password') {
+                    showAlert("Password should be at least 6 characters");
+                    return;
+                }
+
+                showAlert("Unable to create account");
             }
         });
     </script>
