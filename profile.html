@@ -252,13 +252,11 @@
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         
-                        // Basic UI Info
                         document.getElementById('userIdDisplay').innerText = data.referralId || "VX-USER";
                         document.getElementById('userName').innerText = data.fullName || "Member";
                         document.getElementById('userPhoneDisplay').innerText = data.phone || "No Phone";
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                         
-                        // Balance Logic
                         const balance = parseFloat(data.balance || 0);
                         document.getElementById('userBalance').innerText = `$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('monthlyTeamEarn').innerText = `+$${parseFloat(data.totalTeamEarned || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -283,17 +281,15 @@
                             progressBar.style.backgroundColor = "#475569";
                         }
 
-                        // Email Verification UI
                         if(user.emailVerified) {
                             document.getElementById('emailStatusText').innerText = "Account Verified";
-                            document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
+                            document.getElementById('emailStatusText').classList.add('text-emerald-400');
                             document.getElementById('verifyBadge').innerText = "Verified";
                             document.getElementById('verifyBadge').className = "px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest";
                             document.getElementById('verifyEmailBtn').disabled = true;
                             document.getElementById('verifyEmailBtn').style.opacity = "0.6";
                         }
 
-                        // Secure PIN UI Logic
                         if (data.securePin) {
                             userHasPin = true;
                             document.getElementById('pinStatusText').innerText = "PIN Status: PROTECTED";
@@ -325,7 +321,6 @@
 
             try {
                 const userRef = doc(db, "users", user.uid);
-                
                 if (userHasPin) {
                     const userDoc = await getDoc(userRef);
                     if (userDoc.data().securePin !== oldPinInput.value) {
@@ -333,43 +328,45 @@
                         return;
                     }
                 }
-
                 await updateDoc(userRef, { securePin: newPinVal });
                 showToast("PIN Securely Saved", "fa-check-double", "text-emerald-400");
-                
-                // Reset inputs
                 oldPinInput.value = "";
                 document.getElementById('newPin').value = "";
                 document.getElementById('confirmPin').value = "";
-                
-            } catch (e) {
-                showToast("Database Error", "fa-bug", "text-red-500");
-            }
+            } catch (e) { showToast("Database Error", "fa-bug", "text-red-500"); }
         });
 
-        // Auth Logic
-        document.getElementById('verifyEmailBtn').addEventListener('click', () => {
+        // Email Verification WITH RELOAD
+        document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             if (user) {
-                sendEmailVerification(user)
-                    .then(() => showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400"))
-                    .catch((err) => showToast("Rate limit reached", "fa-clock", "text-red-400"));
+                try {
+                    await user.reload(); // تنشيط الجلسة لضمان الإرسال
+                    await sendEmailVerification(user);
+                    showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400");
+                } catch (err) {
+                    console.error(err);
+                    showToast("Rate limit or Error", "fa-clock", "text-red-400");
+                }
             }
         });
 
-        document.getElementById('resetEmailBtn').addEventListener('click', () => {
+        // Reset Password
+        document.getElementById('resetEmailBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             if (user && user.email) {
-                sendPasswordResetEmail(auth, user.email)
-                    .then(() => showToast("Reset Link Sent", "fa-key", "text-emerald-400"))
-                    .catch(() => showToast("Error resetting", "fa-xmark", "text-red-500"));
+                try {
+                    await sendPasswordResetEmail(auth, user.email);
+                    showToast("Reset Link Sent", "fa-key", "text-emerald-400");
+                } catch (err) {
+                    showToast("Error resetting", "fa-xmark", "text-red-500");
+                }
             }
         });
 
         document.getElementById('confirmLogout').addEventListener('click', () => {
             signOut(auth).then(() => window.location.replace("login.html"));
         });
-
     </script>
 </body>
 </html>
