@@ -19,7 +19,7 @@
         .slide-panel { position: fixed; bottom: -100%; left: 0; right: 0; height: auto; min-height: 45vh; background: #0a0f1c; z-index: 2000; transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(59, 130, 246, 0.2); border-radius: 2.5rem 2.5rem 0 0; padding: 2rem; padding-bottom: 4rem; }
         .slide-panel.active { bottom: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; z-index: 1500; transition: 0.3s; }
-        #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); pointer-events: none; }
         #customToast.show { transform: translateY(0); }
         input::placeholder { letter-spacing: normal; font-size: 9px; opacity: 0.5; }
     </style>
@@ -281,9 +281,10 @@
                             progressBar.style.backgroundColor = "#475569";
                         }
 
+                        // التحديث المباشر لحالة التوثيق من Firebase
                         if(user.emailVerified) {
                             document.getElementById('emailStatusText').innerText = "Account Verified";
-                            document.getElementById('emailStatusText').classList.add('text-emerald-400');
+                            document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
                             document.getElementById('verifyBadge').innerText = "Verified";
                             document.getElementById('verifyBadge').className = "px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest";
                             document.getElementById('verifyEmailBtn').disabled = true;
@@ -336,17 +337,25 @@
             } catch (e) { showToast("Database Error", "fa-bug", "text-red-500"); }
         });
 
-        // Email Verification WITH RELOAD
+        // Email Verification FIXED
         document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             if (user) {
+                if (user.emailVerified) {
+                    showToast("Already Verified", "fa-check", "text-emerald-400");
+                    return;
+                }
                 try {
-                    await user.reload(); // تنشيط الجلسة لضمان الإرسال
+                    // ضبط اللغة للعربية أو الإنجليزية حسب إعدادات المشروع
+                    auth.languageCode = 'en'; 
                     await sendEmailVerification(user);
                     showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400");
                 } catch (err) {
-                    console.error(err);
-                    showToast("Rate limit or Error", "fa-clock", "text-red-400");
+                    if (err.code === 'auth/too-many-requests') {
+                        showToast("Wait a moment before retrying", "fa-clock", "text-amber-400");
+                    } else {
+                        showToast("Session expired. Please re-login", "fa-triangle-exclamation", "text-red-400");
+                    }
                 }
             }
         });
