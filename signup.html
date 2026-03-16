@@ -3,142 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vertex | Establish Node</title>
+    <title>Vertex | Initialize Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand: #3b82f6; --bg: #010208; --glass: rgba(255, 255, 255, 0.01); }
+        :root { --brand: #3b82f6; --bg: #02040a; }
         body { 
-            background: var(--bg); color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: white; font-family: 'Plus Jakarta Sans', sans-serif; 
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
             overflow-x: hidden; position: relative;
         }
 
-        /* خلفية الفضاء العميق */
-        .deep-space-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 70%), var(--bg);
+        /* خلفية ضوئية متحركة خفيفة */
+        .bg-glow {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 500px; height: 500px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            z-index: -1; filter: blur(60px); animation: pulse 8s infinite alternate;
         }
 
-        /* الاسم الزجاجي اللماع */
-        .glass-title {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 2.5rem;
-            background: linear-gradient(135deg, #fff 30%, #3b82f6 80%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+        @keyframes pulse { from { opacity: 0.4; transform: translate(-50%, -50%) scale(0.8); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(25px); border-radius: 35px; box-shadow: 0 50px 100px rgba(0,0,0,0.8);
         }
 
-        /* حاوية زجاجية مع إطار نيون متدفق */
-        .cyber-card {
-            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(30px); border-radius: 40px; position: relative;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+        .input-box {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .cyber-card::before {
-            content: ""; position: absolute; top: -1px; left: -1px; right: -1px; bottom: -1px;
-            border-radius: 41px; z-index: -1;
-            background: linear-gradient(135deg, transparent, rgba(59, 130, 246, 0.4), transparent);
-            animation: borderRotate 4s linear infinite;
+        .input-box:focus-within {
+            border-color: var(--brand); background: rgba(59, 130, 246, 0.02);
+            transform: translateX(5px);
         }
 
-        @keyframes borderRotate {
-            0% { opacity: 0.3; } 50% { opacity: 0.8; } 100% { opacity: 0.3; }
+        .eye-btn { cursor: pointer; transition: 0.3s; color: rgba(255,255,255,0.3); }
+        .eye-btn:hover { color: var(--brand); }
+
+        .referral-input {
+            border: 1px dashed rgba(245, 158, 11, 0.4) !important;
+            color: #f59e0b !important;
         }
 
-        .floating-input {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.04);
-            transition: 0.4s all ease;
+        .btn-main {
+            background: white; color: black; font-weight: 900;
+            transition: 0.4s; box-shadow: 0 15px 30px rgba(255,255,255,0.1);
         }
 
-        .floating-input:focus-within {
-            border-color: var(--brand); transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
-        }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 20px 40px rgba(59, 130, 246, 0.3); }
 
-        /* حقل الإحالة الذهبي */
-        .referral-glow {
-            border: 1px solid rgba(245, 158, 11, 0.2) !important;
-            background: rgba(245, 158, 11, 0.02) !important;
-        }
-
-        .btn-stellar {
-            background: #ffffff; color: #000; font-weight: 900;
-            letter-spacing: 2px; transition: 0.3s;
-            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.4);
-        }
-
-        .btn-stellar:hover { box-shadow: 0 15px 50px rgba(255, 255, 255, 0.6); transform: translateY(-2px); }
-
-        #alertBox { transform: translateY(-120%); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #alertBox { transform: translateY(-130%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #alertBox.show { transform: translateY(0); }
     </style>
 </head>
 <body>
-    <div class="deep-space-bg"></div>
+    <div class="bg-glow"></div>
 
-    <div id="alertBox" class="fixed top-6 left-6 right-6 z-[200] hidden">
-        <div id="alertBg" class="p-5 rounded-2xl border flex items-center gap-4 shadow-2xl backdrop-blur-3xl bg-black/90">
-            <i id="alertIcon" class="fas text-xl"></i>
-            <p id="alertMsg" class="text-xs font-black uppercase tracking-widest"></p>
+    <div id="alertBox" class="fixed top-6 left-4 right-4 z-[500] hidden">
+        <div id="alertBg" class="p-4 rounded-2xl border border-white/10 bg-black/90 backdrop-blur-2xl flex items-center gap-3">
+            <i id="alertIcon" class="fas fa-ghost text-blue-500"></i>
+            <p id="alertMsg" class="text-[10px] font-black uppercase tracking-widest text-white"></p>
         </div>
     </div>
 
-    <div class="w-full max-w-[460px] p-6 animate-fade-in relative z-10">
-        
+    <div class="w-full max-w-[450px] p-6 relative">
         <div class="text-center mb-10">
-            <h1 class="glass-title">VERTEX</h1>
-            <p class="text-[9px] text-blue-400 font-bold uppercase tracking-[0.5em] mt-2">Initialize New Node</p>
+            <h1 class="text-4xl font-black tracking-tighter italic" style="font-family: 'Orbitron';">VERTEX</h1>
+            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-[0.5em] mt-1">Global Node Initialization</p>
         </div>
 
-        <div class="cyber-card p-8 md:p-10">
-            <div class="space-y-4">
-                <div class="floating-input rounded-2xl flex items-center p-4">
-                    <i class="fas fa-user-astronaut text-blue-500/50 mr-4 w-5"></i>
-                    <input type="text" id="fullName" placeholder="FULL NAME" class="bg-transparent border-none outline-none w-full text-[11px] font-bold tracking-wider">
-                </div>
-
-                <div class="flex gap-2">
-                    <div class="floating-input rounded-2xl flex items-center px-3 py-4 w-28">
-                        <select id="countryCode" class="bg-transparent border-none outline-none w-full text-[10px] font-black text-blue-400">
-                            <option value="+966">🇸🇦 +966</option>
-                            <option value="+971">🇦🇪 +971</option>
-                            <option value="+964">🇮🇶 +964</option>
-                            <option value="+20">🇪🇬 +20</option>
-                        </select>
-                    </div>
-                    <div class="floating-input rounded-2xl flex-1 flex items-center p-4">
-                        <input type="tel" id="phone" placeholder="PHONE NUMBER" class="bg-transparent border-none outline-none w-full text-[11px] font-bold tracking-wider">
-                    </div>
-                </div>
-
-                <div class="floating-input rounded-2xl flex items-center p-4">
-                    <i class="fas fa-envelope text-blue-500/50 mr-4 w-5"></i>
-                    <input type="email" id="email" placeholder="ACCESS EMAIL" class="bg-transparent border-none outline-none w-full text-[11px] font-bold tracking-wider">
-                </div>
-
-                <div class="floating-input rounded-2xl flex items-center p-4">
-                    <i class="fas fa-key text-blue-500/50 mr-4 w-5"></i>
-                    <input type="password" id="password" placeholder="PASSWORD" class="bg-transparent border-none outline-none w-full text-[11px] font-bold tracking-wider">
-                </div>
-
-                <div class="floating-input referral-glow rounded-2xl flex items-center p-4">
-                    <i class="fas fa-ticket text-amber-500 mr-4 w-5"></i>
-                    <input type="text" id="inviteCode" placeholder="MANDATORY INVITE CODE" class="bg-transparent border-none outline-none w-full text-[11px] font-black text-amber-500 placeholder:text-amber-900/50">
-                </div>
-
-                <button id="signupBtn" class="btn-stellar w-full py-5 rounded-2xl text-[11px] mt-6 uppercase active:scale-95">
-                    Establish Node
-                </button>
+        <div class="glass-card p-8 md:p-10 space-y-4">
+            <div class="input-box rounded-2xl p-4 flex items-center">
+                <i class="fas fa-user-ninja text-blue-500/40 mr-4"></i>
+                <input type="text" id="fullName" placeholder="FULL NAME" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
             </div>
 
-            <div class="mt-8 text-center">
-                <p class="text-gray-600 text-[9px] font-black uppercase tracking-widest">
-                    Linked to Network? <a href="login.html" class="text-blue-500 ml-1">Login</a>
-                </p>
+            <div class="flex gap-3">
+                <div class="input-box rounded-2xl p-4 w-32 flex items-center justify-center">
+                    <select id="countryCode" class="bg-transparent border-none outline-none text-[10px] font-black text-blue-400">
+                        <option value="+961">🇱🇧 +961</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+20">🇪🇬 +20</option>
+                        <option value="+962">🇯🇴 +962</option>
+                        <option value="+965">🇰🇼 +965</option>
+                        <option value="+974">🇶🇦 +974</option>
+                        <option value="+973">🇧🇭 +973</option>
+                        <option value="+968">🇴🇲 +968</option>
+                        <option value="+212">🇲🇦 +212</option>
+                        <option value="+213">🇩🇿 +213</option>
+                        <option value="+216">🇹🇳 +216</option>
+                        <option value="+218">🇱🇾 +218</option>
+                        <option value="+249">🇸🇩 +249</option>
+                        <option value="+963">🇸🇾 +963</option>
+                        <option value="+970">🇵🇸 +970</option>
+                        <option value="+964">🇮🇶 +964</option>
+                        <option value="+967">🇾🇪 +967</option>
+                        <option value="+252">🇸🇴 +252</option>
+                        <option value="+222">🇲🇷 +222</option>
+                    </select>
+                </div>
+                <div class="input-box rounded-2xl p-4 flex-1">
+                    <input type="tel" id="phone" placeholder="PHONE" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
+                </div>
+            </div>
+
+            <div class="input-box rounded-2xl p-4 flex items-center">
+                <i class="fas fa-envelope-open text-blue-500/40 mr-4"></i>
+                <input type="email" id="email" placeholder="ACCESS EMAIL" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
+            </div>
+
+            <div class="input-box rounded-2xl p-4 flex items-center">
+                <i class="fas fa-lock text-blue-500/40 mr-4"></i>
+                <input type="password" id="password" placeholder="SECURE PASSWORD" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
+                <i class="fas fa-eye eye-btn ml-2" onclick="togglePass('password')"></i>
+            </div>
+
+            <div class="input-box rounded-2xl p-4 flex items-center">
+                <i class="fas fa-shield-check text-blue-500/40 mr-4"></i>
+                <input type="password" id="confirmPassword" placeholder="CONFIRM PASSWORD" class="bg-transparent border-none outline-none w-full text-xs font-bold tracking-widest">
+                <i class="fas fa-eye eye-btn ml-2" onclick="togglePass('confirmPassword')"></i>
+            </div>
+
+            <div class="input-box referral-input rounded-2xl p-4 flex items-center">
+                <i class="fas fa-id-badge text-amber-500/60 mr-4"></i>
+                <input type="text" id="inviteCode" placeholder="INVITE CODE (REQUIRED)" class="bg-transparent border-none outline-none w-full text-xs font-black placeholder:text-amber-900/40">
+            </div>
+
+            <button id="signupBtn" class="btn-main w-full py-5 rounded-2xl text-[11px] uppercase tracking-[0.2em] mt-6">
+                Establish Node
+            </button>
+
+            <div class="text-center pt-6">
+                <a href="login.html" class="text-gray-600 text-[9px] font-black uppercase tracking-[0.3em] hover:text-white transition">Back to Terminal</a>
             </div>
         </div>
     </div>
@@ -148,6 +148,7 @@
         import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // CONFIG (نفس إعداداتك السابقة)
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -161,24 +162,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        function showAlert(message, type = "error") {
+        // وظيفة إظهار/إخفاء كلمة السر
+        window.togglePass = (id) => {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        };
+
+        function showAlert(message) {
             const box = document.getElementById('alertBox');
-            const bg = document.getElementById('alertBg');
-            const icon = document.getElementById('alertIcon');
             const msg = document.getElementById('alertMsg');
+            msg.innerText = message;
             box.classList.remove('hidden');
             setTimeout(() => box.classList.add('show'), 10);
-            
-            if(type === "error") {
-                bg.style.borderColor = "rgba(239, 68, 68, 0.5)";
-                icon.className = "fas fa-radiation text-red-500 animate-spin";
-                msg.style.color = "#fecaca";
-            } else {
-                bg.style.borderColor = "rgba(34, 197, 94, 0.5)";
-                icon.className = "fas fa-satellite-dish text-green-500";
-                msg.style.color = "#bbf7d0";
-            }
-            msg.innerText = message;
             setTimeout(() => {
                 box.classList.remove('show');
                 setTimeout(() => box.classList.add('hidden'), 500);
@@ -189,41 +184,40 @@
             const name = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
             const invite = document.getElementById('inviteCode').value.trim();
 
-            if (!name || !phone || !email || !password) {
-                showAlert("CRITICAL: ALL CHANNELS MUST BE FILLED");
+            if (!name || !phone || !email || !pass || !invite) {
+                showAlert("Access Denied: Missing Protocols");
                 return;
             }
 
-            // تحقق كود الإحالة الإجباري
-            if (!invite) {
-                showAlert("ACCESS DENIED: VALID INVITE CODE REQUIRED");
+            if (pass !== confirm) {
+                showAlert("Error: Password Mismatch");
                 return;
             }
 
             const btn = document.getElementById('signupBtn');
-            btn.innerText = "INITIALIZING CORE...";
+            btn.innerText = "LINKING CORE...";
             btn.disabled = true;
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
-                const myPersonalCode = user.uid.substring(0, 5).toUpperCase();
+                const personalCode = user.uid.substring(0, 5).toUpperCase();
 
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
-                    phoneNumber: document.getElementById('countryCode').value + phone,
+                    phone: document.getElementById('countryCode').value + phone,
                     email: email,
-                    referralId: myPersonalCode,
+                    referralId: personalCode,
                     inviteCode: invite,
                     balance: 0,
-                    tier: "STARTER",
                     createdAt: new Date().toISOString()
                 });
 
-                showAlert("NODE ESTABLISHED SUCCESSFULLY", "success");
+                showAlert("Success: Node Online");
                 setTimeout(() => window.location.href = "index.html", 1500);
             } catch (error) {
                 btn.innerText = "ESTABLISH NODE";
