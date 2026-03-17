@@ -110,7 +110,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">V1 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$50 - $499 | Team: 0</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V1 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">Under $500 | Team: 0</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
@@ -120,7 +120,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">V2 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$500 - $1,999 | Team: 5</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V2 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$500+ | Team: 5</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
@@ -130,7 +130,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">V3 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999 | Team: 10</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V3 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$2,000+ | Team: 10</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
@@ -140,7 +140,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-atom text-emerald-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">V4 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$5,000 - $9,999 | Team: 20</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V4 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$5,000+ | Team: 20</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
@@ -187,6 +187,7 @@
         let userData = null;
         let phaseOneDone = false;
         let executionLocked = false;
+        let liveActiveTeamCount = 0; // سيتم تحديثه برقم حقيقي من قاعدة البيانات
 
         const execBtn = document.getElementById('execBtn');
         const execText = document.getElementById('execText');
@@ -208,19 +209,33 @@
         onAuthStateChanged(auth, (user) => {
             if (!user) { window.location.replace('login.html'); return; }
             currentUserId = user.uid;
-            onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+            
+            // مراقبة بيانات المستخدم
+            onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
                 if (!docSnap.exists()) return;
                 userData = docSnap.data();
                 const balance = parseFloat(userData.balance || 0);
-                const teamCount = parseInt(userData.teamCount || 0);
+                const userCode = userData.referralId || "";
 
+                // تحديث واجهة الرصيد
                 document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
                 document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                 document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                 document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                 document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
                 
-                updatePlanStatus(balance, teamCount);
+                // حساب عدد الفريق "النشط" حياً من الـ Collection
+                if(userCode) {
+                    const q = query(collection(db, "users"), where("inviteCode", "==", userCode));
+                    const snapshot = await getDocs(q);
+                    liveActiveTeamCount = 0;
+                    snapshot.forEach(member => {
+                        // العضو النشط هو من أودع $100 أو أكثر كما في كود الدعوة
+                        if(parseFloat(member.data().balance || 0) >= 100) liveActiveTeamCount++;
+                    });
+                }
+
+                updatePlanStatus(balance, liveActiveTeamCount);
                 checkExecutionAvailability();
             });
         });
@@ -267,43 +282,32 @@
 
             for (let i = 0; i < commissions.length; i++) {
                 if (!codeToSearch || codeToSearch === "" || codeToSearch === "none") break;
-
                 try {
                     const q = query(collection(db, "users"), where("referralId", "==", codeToSearch));
                     const querySnapshot = await getDocs(q);
-
                     if (!querySnapshot.empty) {
                         const parentDoc = querySnapshot.docs[0];
-                        const parentRef = parentDoc.ref;
-                        const parentData = parentDoc.data();
-                        
                         const commissionAmount = userProfit * commissions[i];
-
-                        await updateDoc(parentRef, {
+                        await updateDoc(parentDoc.ref, {
                             balance: increment(commissionAmount),
                             teamEarn: increment(commissionAmount),
                             totalTeamEarned: increment(commissionAmount)
                         });
-
-                        codeToSearch = parentData.inviteCode;
-                    } else {
-                        break; 
-                    }
-                } catch(e) {
-                    console.error("Affiliate Error:", e);
-                    break;
-                }
+                        codeToSearch = parentDoc.data().inviteCode;
+                    } else break;
+                } catch(e) { console.error(e); break; }
             }
         }
 
-        function updatePlanStatus(balance, teamCount) {
+        // نظام المراحل المحدث بناءً على طلبك
+        function updatePlanStatus(balance, team) {
             let activeId = "";
 
-            if (balance >= 10000 && teamCount >= 30) activeId = "plan-v5";
-            else if (balance >= 5000 && teamCount >= 20) activeId = "plan-v4";
-            else if (balance >= 2000 && teamCount >= 10) activeId = "plan-v3";
-            else if (balance >= 500 && teamCount >= 5) activeId = "plan-v2";
-            else if (balance >= 50) activeId = "plan-v1";
+            if (balance >= 10000 && team >= 30) activeId = "plan-v5";
+            else if (balance >= 5000 && team >= 20) activeId = "plan-v4";
+            else if (balance >= 2000 && team >= 10) activeId = "plan-v3";
+            else if (balance >= 500 && team >= 5) activeId = "plan-v2";
+            else if (balance >= 50) activeId = "plan-v1"; // المرحلة 1 لا تشترط فريق
 
             document.querySelectorAll('.plan-card').forEach(plan => {
                 if (plan.id === activeId) {
@@ -317,7 +321,6 @@
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
             const balance = parseFloat(userData.balance || 0);
-            const teamCount = parseInt(userData.teamCount || 0);
             
             if (balance < 50) { 
                 showToast("Min $50 required", "fa-triangle-exclamation", "text-amber-400"); 
@@ -325,15 +328,16 @@
             }
             if (!phaseOneDone) { startPhaseOne(); return; }
 
+            // تحديد النسبة بناءً على رصيدك وفريقك النشط حالياً
             let rate = 0;
-            if (balance >= 10000 && teamCount >= 30) rate = 0.035;
-            else if (balance >= 5000 && teamCount >= 20) rate = 0.030;
-            else if (balance >= 2000 && teamCount >= 10) rate = 0.025;
-            else if (balance >= 500 && teamCount >= 5) rate = 0.022;
+            if (balance >= 10000 && liveActiveTeamCount >= 30) rate = 0.035;
+            else if (balance >= 5000 && liveActiveTeamCount >= 20) rate = 0.030;
+            else if (balance >= 2000 && liveActiveTeamCount >= 10) rate = 0.025;
+            else if (balance >= 500 && liveActiveTeamCount >= 5) rate = 0.022;
             else if (balance >= 50) rate = 0.019;
 
             if (rate === 0) {
-                showToast("Team requirements not met", "fa-lock", "text-amber-400");
+                showToast("Requirements not met", "fa-lock", "text-amber-400");
                 return;
             }
 
@@ -342,9 +346,7 @@
 
             try {
                 const profit = balance * rate;
-                const userRef = doc(db, "users", currentUserId);
-
-                await updateDoc(userRef, {
+                await updateDoc(doc(db, "users", currentUserId), {
                     balance: increment(profit),
                     dailyEarn: profit,
                     totalEarned: increment(profit),
@@ -352,14 +354,11 @@
                 });
 
                 await processTeamCommission(profit);
-
                 showToast("Success! Capital Yield Credited", "fa-circle-check", "text-emerald-400");
                 lockButtonUI();
             } catch (error) {
-                console.error("Execution Error:", error);
                 executionLocked = false; execBtn.disabled = false;
                 showToast("Execution Denied", "fa-circle-xmark", "text-red-400");
-                execText.innerText = "Retry";
             }
         });
     </script>
