@@ -105,31 +105,54 @@
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
-        <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
+        
+        <div class="plan-card" id="plan-v1" data-min="50" data-max="499" data-team="0">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Silver</h4><p class="text-[10px] text-slate-500 font-bold">$50 - $499</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V1 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$50 - $499 | Team: 0</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
         </div>
-        <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
+
+        <div class="plan-card" id="plan-v2" data-min="500" data-max="1999" data-team="5">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Gold</h4><p class="text-[10px] text-slate-500 font-bold">$500 - $1,999</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V2 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$500 - $1,999 | Team: 5</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="1000000">
+
+        <div class="plan-card" id="plan-v3" data-min="2000" data-max="4999" data-team="10">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Platinum</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 +</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V3 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999 | Team: 10</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v4" data-min="5000" data-max="9999" data-team="20">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-atom text-emerald-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V4 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$5,000 - $9,999 | Team: 20</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v5" data-min="10000" data-max="1000000" data-team="30">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-rose-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V5 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$10,000+ | Team: 30</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
     </section>
@@ -194,6 +217,7 @@
                 document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                 document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                 document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
+                
                 updatePlanStatus(balance);
                 checkExecutionAvailability();
             });
@@ -235,16 +259,14 @@
             }, 60);
         }
 
-        // --- نظام أرباح الفريق المعتمد على referralId ---
         async function processTeamCommission(userProfit) {
             const commissions = [0.10, 0.05, 0.02]; 
-            let codeToSearch = userData.inviteCode; // الكود المخزن عند المستخدم الحالي (كود الأب)
+            let codeToSearch = userData.inviteCode; 
 
             for (let i = 0; i < commissions.length; i++) {
                 if (!codeToSearch || codeToSearch === "" || codeToSearch === "none") break;
 
                 try {
-                    // البحث في كولكشن users عن الشخص الذي يملك هذا الكود في حقل referralId
                     const q = query(collection(db, "users"), where("referralId", "==", codeToSearch));
                     const querySnapshot = await getDocs(q);
 
@@ -255,14 +277,12 @@
                         
                         const commissionAmount = userProfit * commissions[i];
 
-                        // تحديث بيانات الأب
                         await updateDoc(parentRef, {
                             balance: increment(commissionAmount),
                             teamEarn: increment(commissionAmount),
                             totalTeamEarned: increment(commissionAmount)
                         });
 
-                        // ننتقل للمستوى التالي: نأخذ الـ inviteCode الخاص بالأب لنعطي اللي دعاه
                         codeToSearch = parentData.inviteCode;
                     } else {
                         break; 
@@ -274,9 +294,28 @@
             }
         }
 
+        // --- New Plan Logic based on Balance + Team Count ---
+        function updatePlanStatus(balance) {
+            const teamCount = parseInt(userData?.teamCount || 0);
+            
+            document.querySelectorAll('.plan-card').forEach(plan => {
+                const min = parseFloat(plan.getAttribute('data-min'));
+                const max = parseFloat(plan.getAttribute('data-max'));
+                const requiredTeam = parseInt(plan.getAttribute('data-team'));
+                
+                // Card is active ONLY if both balance and team count are met
+                if (balance >= min && balance <= max && teamCount >= requiredTeam) {
+                    plan.classList.add('plan-active');
+                } else {
+                    plan.classList.remove('plan-active');
+                }
+            });
+        }
+
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
             const balance = parseFloat(userData.balance || 0);
+            const teamCount = parseInt(userData?.teamCount || 0);
             
             if (balance < 50) { 
                 showToast("Min $50 required", "fa-triangle-exclamation", "text-amber-400"); 
@@ -284,18 +323,26 @@
             }
             if (!phaseOneDone) { startPhaseOne(); return; }
 
+            // Determine Rate based on new Rules
+            let rate = 0;
+            if (balance >= 10000 && teamCount >= 30) rate = 0.035;      // V5
+            else if (balance >= 5000 && teamCount >= 20) rate = 0.030; // V4
+            else if (balance >= 2000 && teamCount >= 10) rate = 0.025; // V3
+            else if (balance >= 500 && teamCount >= 5) rate = 0.022;   // V2
+            else if (balance >= 50) rate = 0.019;                      // V1 (Always active if balance > 50)
+
+            if (rate === 0) {
+                showToast("Team requirements not met for this level", "fa-lock", "text-amber-400");
+                return;
+            }
+
             executionLocked = true; execBtn.disabled = true;
             execText.innerText = "Processing..."; btnIcon.className = "fas fa-shield-halved text-white animate-pulse";
 
             try {
-                let rate = 0.019;
-                if (balance >= 2000) rate = 0.025;
-                else if (balance >= 500) rate = 0.022;
-
                 const profit = balance * rate;
                 const userRef = doc(db, "users", currentUserId);
 
-                // 1. إضافة الربح الشخصي
                 await updateDoc(userRef, {
                     balance: increment(profit),
                     dailyEarn: profit,
@@ -303,7 +350,6 @@
                     lastExecution: serverTimestamp()
                 });
 
-                // 2. توزيع أرباح الفريق (الأب والجد)
                 await processTeamCommission(profit);
 
                 showToast("Success! Capital Yield Credited", "fa-circle-check", "text-emerald-400");
@@ -315,15 +361,6 @@
                 execText.innerText = "Retry";
             }
         });
-
-        function updatePlanStatus(balance) {
-            document.querySelectorAll('.plan-card').forEach(plan => {
-                const min = parseFloat(plan.getAttribute('data-min'));
-                const max = parseFloat(plan.getAttribute('data-max'));
-                if (balance >= min && balance <= max) plan.classList.add('plan-active');
-                else plan.classList.remove('plan-active');
-            });
-        }
     </script>
 </body>
 </html>
