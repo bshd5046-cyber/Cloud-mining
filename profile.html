@@ -22,6 +22,12 @@
         #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #customToast.show { transform: translateY(0); }
         input::placeholder { letter-spacing: normal; font-size: 9px; opacity: 0.5; }
+        
+        /* Tier Colors */
+        .tier-bronze { border-color: #cd7f3244; color: #cd7f32; background: #cd7f3211; }
+        .tier-silver { border-color: #c0c0c044; color: #c0c0c0; background: #c0c0c011; }
+        .tier-gold { border-color: #ffd70044; color: #ffd700; background: #ffd70011; }
+        .tier-platinum { border-color: #3b82f644; color: #60a5fa; background: #3b82f611; }
     </style>
 </head>
 <body class="pb-32">
@@ -137,7 +143,9 @@
                     </div>
                     <div id="userTierBadge" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter">Checking...</div>
                 </div>
-                <div class="space-y-4"> <div class="space-y-2">
+                
+                <div class="space-y-4"> 
+                    <div class="space-y-2">
                         <div class="flex justify-between text-[9px] font-black uppercase">
                             <span class="text-slate-500">Status Protocol</span>
                             <span id="statusText" class="">Offline</span>
@@ -277,33 +285,58 @@
                         const tierBadge = document.getElementById('userTierBadge');
                         const statusText = document.getElementById('statusText');
                         const progressBar = document.getElementById('progressBar');
-                        
-                        // Speed UI logic
                         const speedBar = document.getElementById('speedBar');
                         const speedValue = document.getElementById('speedValue');
 
-                        if (balance >= 100) {
-                            tierBadge.innerText = "ACTIVE";
-                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border border-emerald-500/20 bg-emerald-500/10 text-emerald-400";
+                        // --- نظام المراحل (Tier Reading System) ---
+                        const userTier = parseInt(data.tier || 0);
+
+                        if (userTier === 1) {
+                            tierBadge.innerText = "BRONZE";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tier-bronze";
+                            statusText.innerText = "Standard Link";
+                            statusText.className = "text-[#cd7f32]";
+                            speedValue.innerText = "12.50 TH/s";
+                            speedBar.style.width = "25%";
+                            progressBar.style.width = "25%";
+                            progressBar.style.backgroundColor = "#cd7f32";
+                        } else if (userTier === 2) {
+                            tierBadge.innerText = "SILVER";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tier-silver";
+                            statusText.innerText = "Enhanced Flow";
+                            statusText.className = "text-[#c0c0c0]";
+                            speedValue.innerText = "45.10 TH/s";
+                            speedBar.style.width = "50%";
+                            progressBar.style.width = "50%";
+                            progressBar.style.backgroundColor = "#c0c0c0";
+                        } else if (userTier === 3) {
+                            tierBadge.innerText = "GOLD";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tier-gold";
+                            statusText.innerText = "Premium Core";
+                            statusText.className = "text-[#ffd700]";
+                            speedValue.innerText = "72.85 TH/s";
+                            speedBar.style.width = "75%";
+                            progressBar.style.width = "75%";
+                            progressBar.style.backgroundColor = "#ffd700";
+                        } else if (userTier >= 4) {
+                            tierBadge.innerText = "QUANTUM";
+                            tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tier-platinum";
                             statusText.innerText = "Quantum Live";
                             statusText.className = "text-emerald-500 animate-pulse";
+                            speedValue.innerText = "98.42 TH/s";
+                            speedBar.style.width = "100%";
                             progressBar.style.width = "100%";
                             progressBar.style.backgroundColor = "#10b981";
-                            
-                            // Quantum Speed Active
-                            speedValue.innerText = "98.42 TH/s";
-                            speedBar.style.width = "95%";
                         } else {
-                            tierBadge.innerText = "NOT ACTIVE";
+                            // Default State (No Tier / Inactive)
+                            tierBadge.innerText = "INACTIVE";
                             tierBadge.className = "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border border-red-500/20 bg-red-500/10 text-red-500";
-                            statusText.innerText = "Min Capital Required ($100)";
+                            statusText.innerText = "Terminal Standby";
                             statusText.className = "text-slate-500";
-                            progressBar.style.width = Math.min((balance/100)*100, 100) + "%";
-                            progressBar.style.backgroundColor = "#475569";
-                            
-                            // Quantum Speed Low
                             speedValue.innerText = "0.00 TH/s";
                             speedBar.style.width = "2%";
+                            progressBar.style.width = Math.min((balance/100)*100, 100) + "%";
+                            progressBar.style.backgroundColor = "#475569";
                         }
 
                         // Email Verification UI
@@ -369,7 +402,7 @@
             }
         });
 
-        // Auth Logic
+        // Email Verification
         document.getElementById('verifyEmailBtn').addEventListener('click', () => {
             const user = auth.currentUser;
             if (user) {
@@ -379,6 +412,7 @@
             }
         });
 
+        // Password Reset
         document.getElementById('resetEmailBtn').addEventListener('click', () => {
             const user = auth.currentUser;
             if (user && user.email) {
@@ -388,6 +422,7 @@
             }
         });
 
+        // Logout
         document.getElementById('confirmLogout').addEventListener('click', () => {
             signOut(auth).then(() => window.location.replace("login.html"));
         });
