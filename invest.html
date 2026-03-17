@@ -105,7 +105,6 @@
 
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
-
         <div class="plan-card" id="plan-silver" data-min="50" data-max="499">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -115,7 +114,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-gold" data-min="500" data-max="1999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -125,7 +123,6 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
         <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -135,36 +132,12 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-
-        <div class="plan-card" id="plan-diamond" data-min="5000" data-max="14999">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-ring text-cyan-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Diamond</h4><p class="text-[10px] text-slate-500 font-bold">$5,000 - $14,999</p></div>
-                </div>
-                <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
-            </div>
-        </div>
-
-        <div class="plan-card" id="plan-elite" data-min="15000" data-max="1000000">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-yellow-500 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Elite</h4><p class="text-[10px] text-slate-500 font-bold">$15,000+</p></div>
-                </div>
-                <div class="text-right"><p class="text-xl font-black text-white">3.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
-            </div>
-        </div>
     </section>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
-        <div class="relative flex-1 flex justify-center">
-            <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt-lightning text-2xl text-white"></i>
-            </a>
-        </div>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
         <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
@@ -172,8 +145,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-functions.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -187,9 +159,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const functions = getFunctions(app);
-        // تم تحديد المنطقة يدوياً لضمان عدم حدوث خطأ 404 أو Internal
-        const runDailyExecution = httpsCallable(functions, "runDailyExecution");
 
         let currentUserId = null;
         let userData = null;
@@ -214,10 +183,7 @@
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.replace('login.html');
-                return;
-            }
+            if (!user) { window.location.replace('login.html'); return; }
             currentUserId = user.uid;
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                 if (!docSnap.exists()) return;
@@ -233,105 +199,76 @@
             });
         });
 
-        function getUkDateKey(date) {
-            return new Intl.DateTimeFormat('en-CA', {
-                timeZone: 'Europe/London',
-                year: 'numeric', month: '2-digit', day: '2-digit'
-            }).format(date);
-        }
-
         function checkExecutionAvailability() {
-            if (!userData?.lastExecution) {
-                resetButtonUI();
-                return;
-            }
+            if (!userData?.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
             const lastExecDate = userData.lastExecution.toDate();
-            if (getUkDateKey(now) !== getUkDateKey(lastExecDate)) resetButtonUI();
-            else lockButtonUI();
+            // توحيد التاريخ للمقارنة (يومياً)
+            const d1 = new Intl.DateTimeFormat('en-CA').format(now);
+            const d2 = new Intl.DateTimeFormat('en-CA').format(lastExecDate);
+            if (d1 !== d2) resetButtonUI(); else lockButtonUI();
         }
 
         function resetButtonUI() {
-            executionLocked = false;
-            phaseOneDone = false;
-            execBtn.disabled = false;
-            execBtn.style.opacity = "1";
-            execText.innerText = "Start Sequence";
-            tapCount.innerText = "Ready 0/2";
-            loaderBar.style.width = "0%";
-            btnIcon.className = "fas fa-bolt-lightning text-white";
+            executionLocked = false; phaseOneDone = false;
+            execBtn.disabled = false; execBtn.style.opacity = "1";
+            execText.innerText = "Start Sequence"; tapCount.innerText = "Ready 0/2";
+            loaderBar.style.width = "0%"; btnIcon.className = "fas fa-bolt-lightning text-white";
         }
 
         function lockButtonUI() {
-            executionLocked = true;
-            execBtn.disabled = true;
-            execBtn.style.opacity = "0.6";
-            execText.innerText = "Completed";
-            tapCount.innerText = "Locked";
-            loaderBar.style.width = "100%";
+            executionLocked = true; execBtn.disabled = true;
+            execBtn.style.opacity = "0.6"; execText.innerText = "Completed Today";
+            tapCount.innerText = "Locked"; loaderBar.style.width = "100%";
             btnIcon.className = "fas fa-lock text-white";
         }
 
         async function startPhaseOne() {
-            execBtn.disabled = true;
-            tapCount.innerText = "Syncing...";
+            execBtn.disabled = true; tapCount.innerText = "Syncing...";
             let progress = 0;
             const timer = setInterval(() => {
-                progress += 2;
-                loaderBar.style.width = `${progress}%`;
+                progress += 2; loaderBar.style.width = `${progress}%`;
                 execText.innerText = `Sync ${progress}%`;
                 if (progress >= 100) {
-                    clearInterval(timer);
-                    phaseOneDone = true;
-                    execBtn.disabled = false;
-                    execText.innerText = "Confirm";
-                    tapCount.innerText = "Ready 2/2";
-                    btnIcon.className = "fas fa-check-circle text-white";
+                    clearInterval(timer); phaseOneDone = true;
+                    execBtn.disabled = false; execText.innerText = "Confirm Yield";
+                    tapCount.innerText = "Ready 2/2"; btnIcon.className = "fas fa-check-circle text-white";
                 }
             }, 30);
         }
 
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
+            const balance = parseFloat(userData.balance || 0);
+            if (balance < 50) { showToast("Min $50 required", "fa-triangle-exclamation", "text-amber-400"); return; }
+            if (!phaseOneDone) { startPhaseOne(); return; }
 
-            const currentBalance = parseFloat(userData.balance || 0);
-            if (currentBalance < 50) {
-                showToast("Minimum $50 required", "fa-triangle-exclamation", "text-amber-400");
-                return;
-            }
-
-            if (!phaseOneDone) {
-                startPhaseOne();
-                return;
-            }
-
-            // تنفيذ العملية النهائية
-            executionLocked = true;
-            execBtn.disabled = true;
-            execText.innerText = "Processing...";
-            tapCount.innerText = "Authorizing";
-            btnIcon.className = "fas fa-shield-halved text-white";
+            executionLocked = true; execBtn.disabled = true;
+            execText.innerText = "Processing..."; btnIcon.className = "fas fa-shield-halved text-white";
 
             try {
-                // تمرير البيانات للدالة لتجنب الـ Internal Error
-                const result = await runDailyExecution({ 
-                    uid: currentUserId,
-                    action: 'daily_yield' 
-                });
+                let rate = 0.019;
+                if (balance >= 15000) rate = 0.035;
+                else if (balance >= 5000) rate = 0.030;
+                else if (balance >= 2000) rate = 0.025;
+                else if (balance >= 500) rate = 0.022;
+
+                const profit = balance * rate;
+                const userRef = doc(db, "users", currentUserId);
                 
+                await updateDoc(userRef, {
+                    balance: balance + profit,
+                    dailyEarn: profit,
+                    totalEarned: (parseFloat(userData.totalEarned) || 0) + profit,
+                    lastExecution: serverTimestamp()
+                });
+
                 showToast("Success! Yield Credited", "fa-circle-check", "text-emerald-400");
                 lockButtonUI();
             } catch (error) {
-                console.error("Error Detail:", error);
-                executionLocked = false;
-                execBtn.disabled = false;
-                
-                // عرض رسالة الخطأ الحقيقية القادمة من السيرفر
-                const errorMsg = error.message || "Execution Failed";
-                showToast(errorMsg, "fa-circle-xmark", "text-red-400");
-                
+                executionLocked = false; execBtn.disabled = false;
+                showToast("Execution Denied", "fa-circle-xmark", "text-red-400");
                 execText.innerText = "Retry";
-                btnIcon.className = "fas fa-rotate-right text-white";
             }
         });
 
