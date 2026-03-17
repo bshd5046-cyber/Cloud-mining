@@ -3,205 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road | VERTEX GAMES</title>
+    <title>Chicken Road Pro | VERTEX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --road-gray: #4b5563; --line-white: rgba(255,255,255,0.5); }
-        body { background-color: #1a2c38; color: white; font-family: sans-serif; overflow: hidden; }
+        body { background-color: #0f212e; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-        /* منطقة الشارع */
-        .road-container {
+        /* الشارع الكبير */
+        .road-scene {
             position: relative;
-            height: 300px;
-            background-color: var(--road-gray);
-            margin-top: 50px;
+            height: 350px;
+            background: #213743;
+            margin-top: 40px;
             display: flex;
-            border-top: 4px solid #374151;
-            border-bottom: 4px solid #374151;
+            border-top: 5px solid #2f4553;
+            border-bottom: 5px solid #2f4553;
             overflow: visible;
         }
 
-        /* الحارات */
         .lane {
             flex: 1;
-            border-right: 2px dashed var(--line-white);
+            border-right: 3px dashed rgba(255,255,255,0.1);
             position: relative;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+
+        /* فقاعات الأرباح */
+        .multiplier-node {
+            width: 70px;
+            height: 70px;
+            background: rgba(15, 33, 46, 0.8);
+            border-radius: 50%;
+            display: flex;
             align-items: center;
-            justify-content: space-around;
-        }
-
-        /* مضاعف الربح */
-        .multiplier-bubble {
-            background: rgba(0,0,0,0.6);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
             color: #9ca3af;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 3px solid #2f4553;
+            transition: 0.3s;
+            z-index: 5;
+        }
+        .multiplier-node.active { 
+            color: #fbbf24; 
+            border-color: #fbbf24; 
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            transform: scale(1.1);
         }
 
-        .multiplier-bubble.active { color: #fbbf24; border-color: #fbbf24; background: rgba(0,0,0,0.8); }
-
-        /* الدجاجة والشاحنة */
+        /* الدجاجة والأنيميشن */
         #chicken {
             position: absolute;
-            font-size: 40px;
-            transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 20;
-            bottom: 20px;
-            left: -50px; /* البداية خارج الشارع */
+            font-size: 55px;
+            z-index: 100;
+            transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            filter: drop-shadow(0 10px 5px rgba(0,0,0,0.3));
         }
 
-        .truck {
+        #chicken-shadow {
             position: absolute;
-            font-size: 45px;
-            top: -60px;
-            transition: top 0.5s ease-in;
-            z-index: 10;
+            width: 40px;
+            height: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50%;
+            bottom: 5px;
+            z-index: 90;
+            transition: 0.5s;
+        }
+
+        /* الشاحنة */
+        .truck-boss {
+            position: absolute;
+            font-size: 80px;
+            top: -150px;
+            transition: top 0.4s ease-in;
+            z-index: 110;
         }
 
         /* لوحة التحكم */
-        .bottom-panel {
-            background-color: #213743;
+        .control-base {
+            background: #213743;
             position: fixed;
             bottom: 0;
             width: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            padding: 30px 20px;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
 
-        .btn-go { background-color: #00e701; color: black; font-weight: 900; border-radius: 8px; flex: 1; height: 50px; }
-        .btn-cash { background-color: #fbbf24; color: black; font-weight: 900; border-radius: 8px; flex: 1; height: 50px; display: none; }
-        
-        .difficulty-bar {
-            display: flex;
-            background: #0f212e;
-            border-radius: 8px;
-            padding: 4px;
+        .btn-action {
+            height: 60px;
+            border-radius: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.2s;
         }
-        .diff-opt { flex: 1; text-align: center; font-size: 10px; padding: 6px; border-radius: 6px; cursor: pointer; color: #64748b; font-weight: bold; }
-        .diff-opt.active { background: #2f4553; color: white; }
+        .btn-go { background: #00e701; color: #012e01; }
+        .btn-cash { background: #fbbf24; color: #3d2b01; }
+        .btn-action:active { transform: scale(0.96); }
+
+        /* تأثير الصدمة */
+        .crash-shake { animation: shake 0.3s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(-1deg); }
+            50% { transform: translate(-1px, 2px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="p-4 flex justify-between items-center bg-[#0f212e]">
-        <span class="font-bold text-xs">CHICKEN <span class="text-red-500 italic">ROAD</span></span>
-        <div class="bg-black/40 px-3 py-1 rounded text-sm font-bold">$ 989,708.78</div>
+    <div class="p-6 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-8 bg-green-500 rounded-full"></div>
+            <h1 class="font-black text-xl italic uppercase">Chicken Road</h1>
+        </div>
+        <div class="bg-[#2f4553] px-4 py-2 rounded-xl border border-white/5">
+            <span class="text-zinc-400 text-[10px] block font-bold">WALLET</span>
+            <span class="font-black text-green-400">$ 12,450.00</span>
+        </div>
     </div>
 
-    <div class="road-container" id="road">
-        <div id="chicken">🐔</div>
-        
-        <div class="lane"><div class="multiplier-bubble" id="m1">4.11x</div></div>
-        <div class="lane"><div class="multiplier-bubble" id="m2">4.64x</div></div>
-        <div class="lane"><div class="multiplier-bubble" id="m3">5.39x</div></div>
-        <div class="lane"><div class="multiplier-bubble" id="m4">6.50x</div></div>
-        <div class="lane"><div class="multiplier-bubble" id="m5">8.36x</div></div>
-        <div class="lane" style="border-right: none;"><div class="multiplier-bubble" id="m6">12.08x</div></div>
+    <div class="road-scene" id="gameArea">
+        <div id="chicken-container" style="position: absolute; left: -80px; bottom: 80px; transition: 0.5s;">
+            <div id="chicken-shadow"></div>
+            <div id="chicken">🐔</div>
+        </div>
+
+        <div class="lane"><div class="multiplier-node" id="node-0">3.50x</div></div>
+        <div class="lane"><div class="multiplier-node" id="node-1">7.20x</div></div>
+        <div class="lane"><div class="multiplier-node" id="node-2">15.0x</div></div>
+        <div class="lane" style="border: none;"><div class="multiplier-node" id="node-3">30.0x</div></div>
     </div>
 
-    <div class="bottom-panel">
-        <div class="difficulty-bar">
-            <div class="diff-opt">LOW</div>
-            <div class="diff-opt active">MEDIUM</div>
-            <div class="diff-opt">HIGH</div>
-            <div class="diff-opt">EXTREME</div>
+    <div class="control-base">
+        <div class="flex gap-4">
+            <button onclick="handleAction()" id="primaryBtn" class="btn-action btn-go flex-[2]">Bet / Start</button>
+            <button onclick="cashout()" id="cashBtn" class="btn-action btn-cash flex-1 hidden">Cashout</button>
         </div>
-
-        <div class="flex gap-3">
-            <button onclick="startGame()" id="goBtn" class="btn-go uppercase">Go</button>
-            <button onclick="cashout()" id="cashBtn" class="btn-cash uppercase">Cash Out</button>
-        </div>
+        <p class="text-center text-[10px] text-zinc-500 mt-4 font-bold tracking-widest uppercase">Select difficulty & cross the road</p>
     </div>
 
     <script>
-        const chicken = document.getElementById('chicken');
-        const goBtn = document.getElementById('goBtn');
-        const cashBtn = document.getElementById('cashBtn');
-        let currentLane = -1;
-        let isGameActive = false;
+        let currentStep = -1;
+        let isPlaying = false;
+        const chickenCont = document.getElementById('chicken-container');
+        const chickenEmoji = document.getElementById('chicken');
+        const shadow = document.getElementById('chicken-shadow');
+        const pBtn = document.getElementById('primaryBtn');
+        const cBtn = document.getElementById('cashBtn');
 
-        function startGame() {
-            if (isGameActive) {
-                moveChicken();
+        // وظائف الصوت (محاكاة)
+        const playSound = (type) => {
+            // هنا يمكنك إضافة ملفات mp3 حقيقية
+            console.log("Playing sound: " + type);
+        };
+
+        function handleAction() {
+            if (!isPlaying) {
+                startNewGame();
             } else {
-                // بدء لعبة جديدة
-                isGameActive = true;
-                currentLane = -1;
-                chicken.innerHTML = "🐔";
-                chicken.style.left = "-50px";
-                chicken.style.bottom = "20px";
-                goBtn.innerText = "Jump";
-                cashBtn.style.display = "block";
-                resetMultipliers();
-                moveChicken();
+                jumpNext();
             }
         }
 
-        function moveChicken() {
-            currentLane++;
-            if (currentLane < 6) {
-                const lanes = document.querySelectorAll('.lane');
-                const targetLane = lanes[currentLane];
-                const laneRect = targetLane.getBoundingClientRect();
-                
-                // تحريك الدجاجة لمنتصف الحارة
-                chicken.style.left = (targetLane.offsetLeft + (targetLane.offsetWidth / 2) - 20) + "px";
-                chicken.style.bottom = "120px"; // ترتفع قليلاً لتكون فوق علامة الطريق
-
-                // فحص الخطر (احتمالية ظهور شاحنة)
-                if (Math.random() < 0.2) { // 20% نسبة الخسارة
-                    setTimeout(() => spawnTruck(currentLane), 300);
-                } else {
-                    document.getElementById(`m${currentLane+1}`).classList.add('active');
-                }
-            } else {
-                alert("You crossed the road! MAX WIN!");
-                cashout();
-            }
+        function startNewGame() {
+            isPlaying = true;
+            currentStep = -1;
+            resetNodes();
+            chickenEmoji.innerHTML = "🐔";
+            chickenCont.style.left = "-80px";
+            pBtn.innerText = "Jump!";
+            cBtn.classList.remove('hidden');
+            jumpNext();
         }
 
-        function spawnTruck(laneIndex) {
-            const lanes = document.querySelectorAll('.lane');
-            const truck = document.createElement('div');
-            truck.className = 'truck';
-            truck.innerHTML = "🚚"; // أو صورة شاحنة
-            lanes[laneIndex].appendChild(truck);
+        function jumpNext() {
+            if (currentStep >= 3) return;
             
+            currentStep++;
+            playSound('jump');
+            
+            // حساب مكان الحارة
+            const lanes = document.querySelectorAll('.lane');
+            const targetLane = lanes[currentStep];
+            const targetX = targetLane.offsetLeft + (targetLane.offsetWidth / 2) - 40;
+
+            // أنيميشن القفزة القوية
+            chickenEmoji.style.transform = "translateY(-80px) scale(1.2)";
+            shadow.style.transform = "scale(0.5)";
+            shadow.style.opacity = "0.2";
+            
+            chickenCont.style.left = targetX + "px";
+
             setTimeout(() => {
-                truck.style.top = "100px"; // الشاحنة تصدم الدجاجة
-                chicken.innerHTML = "💥";
-                isGameActive = false;
-                setTimeout(() => {
-                    alert("GAME OVER!");
+                chickenEmoji.style.transform = "translateY(0) scale(1)";
+                shadow.style.transform = "scale(1)";
+                shadow.style.opacity = "1";
+                
+                checkSurvival(currentStep, targetLane);
+            }, 400);
+        }
+
+        function checkSurvival(step, laneElement) {
+            const risk = 0.25; // نسبة المخاطرة 25%
+            
+            if (Math.random() < risk) {
+                hitByTruck(laneElement);
+            } else {
+                document.getElementById(`node-${step}`).classList.add('active');
+                playSound('success');
+                if (step === 3) {
+                    setTimeout(() => alert("GOD MODE! You crossed the road!"), 300);
                     resetGame();
-                }, 500);
+                }
+            }
+        }
+
+        function hitByTruck(laneElement) {
+            const truck = document.createElement('div');
+            truck.className = 'truck-boss';
+            truck.innerHTML = "🚛";
+            laneElement.appendChild(truck);
+
+            setTimeout(() => {
+                truck.style.top = "80px";
+                playSound('crash');
+                document.body.classList.add('crash-shake');
+                
+                setTimeout(() => {
+                    chickenEmoji.innerHTML = "🍗";
+                    isPlaying = false;
+                    alert("BOOM! Game Over");
+                    resetGame();
+                }, 200);
             }, 50);
         }
 
         function cashout() {
-            alert("Cashed out successfully!");
+            playSound('cashout');
+            alert("Money Secured!");
             resetGame();
         }
 
         function resetGame() {
-            isGameActive = false;
-            goBtn.innerText = "Go";
-            cashBtn.style.display = "none";
-            chicken.style.left = "-50px";
-            document.querySelectorAll('.truck').forEach(t => t.remove());
-            resetMultipliers();
+            isPlaying = false;
+            pBtn.innerText = "Bet / Start";
+            cBtn.classList.add('hidden');
+            document.body.classList.remove('crash-shake');
+            document.querySelectorAll('.truck-boss').forEach(t => t.remove());
+            setTimeout(() => { chickenCont.style.left = "-80px"; }, 1000);
         }
 
-        function resetMultipliers() {
-            document.querySelectorAll('.multiplier-bubble').forEach(m => m.classList.remove('active'));
+        function resetNodes() {
+            document.querySelectorAll('.multiplier-node').forEach(n => n.classList.remove('active'));
         }
     </script>
 </body>
