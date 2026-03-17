@@ -20,7 +20,6 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
             overflow-x: hidden;
-            /* خلفية استثمارية عميقة متناسقة مع البروفايل */
             background: 
                 radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
                 radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
@@ -30,7 +29,6 @@
 
         #mainContent { display: none; }
 
-        /* Glassmorphism Panels */
         .glass-panel { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(25px); 
@@ -38,7 +36,6 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        /* المنيو السفلي الموحد */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -63,30 +60,23 @@
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        /* تأثيرات الدعم */
-        .support-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .support-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
         .support-card:active { transform: scale(0.95); }
         
-        .icon-glow {
-            position: relative;
-        }
+        .icon-glow { position: relative; }
         .icon-glow::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: inherit;
-            filter: blur(15px);
-            opacity: 0.4;
-            z-index: -1;
+            content: ''; position: absolute; inset: 0;
+            background: inherit; filter: blur(15px); opacity: 0.4; z-index: -1;
         }
 
         details summary::-webkit-details-marker { display: none; }
-        
-        /* تجميل الأسئلة الشائعة */
-        .faq-item {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
+        .faq-item { border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
         .faq-item:last-child { border-bottom: none; }
+
+        /* AI Chat Styles */
+        #aiChatPanel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(100%); }
+        #aiChatPanel.active { transform: translateY(0); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-32">
@@ -103,20 +93,20 @@
         <div class="px-6 space-y-5">
             <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Direct Channels</h3>
             
-            <a href="https://t.me/YourUsername" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
+            <div onclick="toggleAIChat(true)" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
                 <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 bg-[#229ED9]/10 rounded-2xl flex items-center justify-center text-[#229ED9] border border-[#229ED9]/20">
-                        <i class="fab fa-telegram-plane text-2xl"></i>
+                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
+                        <i class="fas fa-robot text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-black text-white text-lg tracking-tight">Cloud Support</h4>
-                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Online Now</p>
+                        <h4 class="font-black text-white text-lg tracking-tight">AI Assistant</h4>
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Instant Response</p>
                     </div>
                 </div>
                 <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
                     <i class="fas fa-chevron-right text-[10px] text-slate-600"></i>
                 </div>
-            </a>
+            </div>
 
             <a href="https://wa.me/YourNumber" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
                 <div class="flex items-center gap-5">
@@ -169,6 +159,43 @@
         </div>
     </div>
 
+    <div id="aiChatPanel" class="fixed inset-0 bg-[#020617] z-[2000] hidden flex-col">
+        <div class="p-6 pt-12 border-b border-white/5 flex items-center justify-between glass-panel">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleAIChat(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                    <i class="fas fa-chevron-left text-slate-400"></i>
+                </button>
+                <div>
+                    <h2 class="font-black text-white uppercase tracking-tighter italic">Vertex <span class="text-blue-500">AI Node</span></h2>
+                    <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">Active Intelligence</p>
+                </div>
+            </div>
+            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+        </div>
+
+        <div id="chatBody" class="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col no-scrollbar">
+            <div class="bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start">
+                <p class="text-sm text-blue-100 font-medium tracking-tight">Welcome to Vertex Support. I am your automated technical node. How can I assist your protocol today?</p>
+            </div>
+        </div>
+
+        <div class="p-4 flex gap-2 overflow-x-auto no-scrollbar">
+            <button onclick="sendQuickQuery('How to Deposit?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Deposit Info</button>
+            <button onclick="sendQuickQuery('Withdrawal Speed?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Withdrawal</button>
+            <button onclick="sendQuickQuery('Bonus System?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Bonuses</button>
+        </div>
+
+        <div class="p-6 pb-10 glass-panel border-t border-white/5">
+            <div class="relative">
+                <input type="text" id="chatInput" placeholder="Enter System Query..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-sm text-white focus:outline-none focus:border-blue-500 transition-all">
+                <button onclick="handleUserInput()" class="absolute right-2 top-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                    <i class="fas fa-paper-plane text-xs text-white"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
@@ -202,6 +229,60 @@
                 window.location.replace('login.html');
             }
         });
+
+        // --- AI CHAT LOGIC ---
+        window.toggleAIChat = function(show) {
+            const panel = document.getElementById('aiChatPanel');
+            if(show) {
+                panel.classList.remove('hidden');
+                setTimeout(() => panel.classList.add('active'), 10);
+            } else {
+                panel.classList.remove('active');
+                setTimeout(() => panel.classList.add('hidden'), 400);
+            }
+        }
+
+        window.sendQuickQuery = function(text) {
+            document.getElementById('chatInput').value = text;
+            handleUserInput();
+        }
+
+        window.handleUserInput = function() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            addMsg(msg, 'user');
+            input.value = '';
+
+            // Bot Response
+            setTimeout(() => {
+                const response = getBotResponse(msg);
+                addMsg(response, 'bot');
+            }, 600);
+        }
+
+        function addMsg(text, type) {
+            const body = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            if(type === 'user') {
+                div.className = "bg-white/5 border border-white/10 p-5 rounded-[2rem] rounded-tr-none max-w-[85%] self-end ml-auto text-sm font-medium text-slate-200";
+            } else {
+                div.className = "bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start text-sm text-blue-100 font-medium";
+            }
+            div.innerText = text;
+            body.appendChild(div);
+            body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function getBotResponse(input) {
+            const q = input.toLowerCase();
+            if(q.includes('deposit')) return "To deposit: Go to Wallet section, select USDT-TRC20, and send funds to your generated address. Activation is instant after 3 confirmations.";
+            if(q.includes('withdraw')) return "Withdrawals are processed automatically via smart-contract. Average time is 5-30 minutes to your registered TRC20 wallet.";
+            if(q.includes('bonus')) return "Our referral system offers 10% on direct invites and tiered bonuses for team growth. Check the 'Profile' tab for your link.";
+            if(q.includes('status') || q.includes('work')) return "All investment nodes are currently operational. System latency: 24ms. Operational 24/7.";
+            return "I have logged your query. For specialized human assistance, please use our VIP Priority WhatsApp channel.";
+        }
     </script>
 </body>
 </html>
