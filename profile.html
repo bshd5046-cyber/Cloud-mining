@@ -137,7 +137,8 @@
                     </div>
                     <div id="userTierBadge" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-tighter">Checking...</div>
                 </div>
-                <div class="space-y-4"> <div class="space-y-2">
+                <div class="space-y-4"> 
+                    <div class="space-y-2">
                         <div class="flex justify-between text-[9px] font-black uppercase">
                             <span class="text-slate-500">Status Protocol</span>
                             <span id="statusText" class="">Offline</span>
@@ -187,18 +188,7 @@
                     <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
                 </button>
 
-                <a href="games.html" class="w-full flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 no-underline">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 text-xl"><i class="fas fa-gamepad"></i></div>
-                        <div class="text-left">
-                            <p class="text-[15px] font-bold text-white">Game Center</p>
-                            <p class="text-[11px] text-slate-500">Play & Win Rewards</p>
-                        </div>
-                    </div>
-                    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
-                </a>
-
-                <a href="invite.html" class="flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 no-underline">
+                <a href="invite.html" class="w-full flex items-center justify-between p-6 border-b border-white/5 active:bg-white/5 no-underline">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl"><i class="fas fa-users"></i></div>
                         <div class="text-left">
@@ -269,18 +259,14 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('mainContent').classList.replace('opacity-0', 'opacity-100');
-
                 onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        
-                        // Basic UI Info
                         document.getElementById('userIdDisplay').innerText = data.referralId || "VX-USER";
                         document.getElementById('userName').innerText = data.fullName || "Member";
                         document.getElementById('userPhoneDisplay').innerText = data.phone || "No Phone";
                         document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${data.fullName}&background=1e293b&color=3b82f6&bold=true`;
                         
-                        // Balance Logic
                         const balance = parseFloat(data.balance || 0);
                         document.getElementById('userBalance').innerText = `$${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('monthlyTeamEarn').innerText = `+$${parseFloat(data.totalTeamEarned || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -288,8 +274,6 @@
                         const tierBadge = document.getElementById('userTierBadge');
                         const statusText = document.getElementById('statusText');
                         const progressBar = document.getElementById('progressBar');
-                        
-                        // Speed UI logic
                         const speedBar = document.getElementById('speedBar');
                         const speedValue = document.getElementById('speedValue');
 
@@ -300,8 +284,6 @@
                             statusText.className = "text-emerald-500 animate-pulse";
                             progressBar.style.width = "100%";
                             progressBar.style.backgroundColor = "#10b981";
-                            
-                            // Quantum Speed Active
                             speedValue.innerText = "98.42 TH/s";
                             speedBar.style.width = "95%";
                         } else {
@@ -311,13 +293,10 @@
                             statusText.className = "text-slate-500";
                             progressBar.style.width = Math.min((balance/100)*100, 100) + "%";
                             progressBar.style.backgroundColor = "#475569";
-                            
-                            // Quantum Speed Low
                             speedValue.innerText = "0.00 TH/s";
                             speedBar.style.width = "2%";
                         }
 
-                        // Email Verification UI
                         if(user.emailVerified) {
                             document.getElementById('emailStatusText').innerText = "Account Verified";
                             document.getElementById('emailStatusText').classList.replace('text-slate-500', 'text-emerald-400');
@@ -327,7 +306,6 @@
                             document.getElementById('verifyEmailBtn').style.opacity = "0.6";
                         }
 
-                        // Secure PIN UI Logic
                         if (data.securePin) {
                             userHasPin = true;
                             document.getElementById('pinStatusText').innerText = "PIN Status: PROTECTED";
@@ -340,7 +318,6 @@
             } else { window.location.replace("login.html"); }
         });
 
-        // Save PIN Functionality
         document.getElementById('savePinBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             const oldPinInput = document.getElementById('oldPin');
@@ -351,7 +328,6 @@
                 showToast("PIN must be 6 digits", "fa-shield-halved", "text-amber-400");
                 return;
             }
-
             if (newPinVal !== confirmPinVal) {
                 showToast("New PINs mismatch", "fa-xmark", "text-red-400");
                 return;
@@ -359,7 +335,6 @@
 
             try {
                 const userRef = doc(db, "users", user.uid);
-                
                 if (userHasPin) {
                     const userDoc = await getDoc(userRef);
                     if (userDoc.data().securePin !== oldPinInput.value) {
@@ -367,26 +342,22 @@
                         return;
                     }
                 }
-
                 await updateDoc(userRef, { securePin: newPinVal });
                 showToast("PIN Securely Saved", "fa-check-double", "text-emerald-400");
-                
                 oldPinInput.value = "";
                 document.getElementById('newPin').value = "";
                 document.getElementById('confirmPin').value = "";
-                
             } catch (e) {
                 showToast("Database Error", "fa-bug", "text-red-500");
             }
         });
 
-        // Auth Logic
         document.getElementById('verifyEmailBtn').addEventListener('click', () => {
             const user = auth.currentUser;
             if (user) {
                 sendEmailVerification(user)
                     .then(() => showToast("Verification Link Sent!", "fa-paper-plane", "text-indigo-400"))
-                    .catch((err) => showToast("Rate limit reached", "fa-clock", "text-red-400"));
+                    .catch(() => showToast("Rate limit reached", "fa-clock", "text-red-400"));
             }
         });
 
@@ -402,7 +373,6 @@
         document.getElementById('confirmLogout').addEventListener('click', () => {
             signOut(auth).then(() => window.location.replace("login.html"));
         });
-
     </script>
 </body>
 </html>
