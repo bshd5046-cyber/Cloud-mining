@@ -3,150 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIP Casino | VERTEX PREMIER</title>
+    <title>Vertex Games | VERTEX PREMIER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --casino-gold: #D4AF37; 
-            --luxury-black: #050505;
-            --glass-gold: rgba(212, 175, 55, 0.1);
+            --bg-dark: #020617;
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
         }
         body { 
-            background-color: var(--luxury-black); 
+            background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
-            background: 
-                radial-gradient(circle at 50% -20%, #2a2105 0%, transparent 60%),
-                linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+            /* التدرج اللوني الخلفي من الهوية الأصلية */
+            background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.15) 0%, transparent 60%), #020617;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow-x: hidden; /* لمنع ظهور شريط التمرير الأفقي للجسم بالكامل */
         }
 
-        /* تصميم الكروت بنمط الكازينو */
-        .casino-card { 
-            background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 24px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .casino-card::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.1), transparent);
-            pointer-events: none;
-        }
-        .casino-card:active { transform: translateY(4px); border-color: var(--casino-gold); }
-
-        /* زر الرجوع */
-        .back-btn {
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
+        /* حاوية السحب الأفقي (Carousel Container) */
+        .games-carousel {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow-x: auto; /* السماح بالتمرير الأفقي */
+            scroll-snap-type: x mandatory; /* جعل الكروت "تلتصق" عند التمرير */
+            -webkit-overflow-scrolling: touch; /* تمرير ناعم على iOS */
+            padding-bottom: 20px; /* مساحة تحت الكروت */
+            padding-left: 24px; /* مطابقة حاشية الصفحة P-6 */
+        }
+        /* إخفاء شريط التمرير */
+        .games-carousel::-webkit-scrollbar { display: none; }
+
+        /* تصميم كرت اللعبة الأفقي */
+        .game-card {
+            flex: 0 0 80%; /* عرض الكرت 80% من الشاشة لإظهار طرف الكرت التالي */
+            max-width: 320px;
+            margin-right: 16px; /* المسافة بين الكروت */
+            scroll-snap-align: center; /* التصاق الكرت في المنتصف عند التوقف */
+            background: linear-gradient(145deg, rgba(10, 10, 10, 0.8), rgba(20, 20, 20, 0.8));
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        /* تأثير عند الضغط */
+        .game-card:active { transform: scale(0.97); border-color: var(--primary-blue); }
+
+        /* إضاءة خلفية ناعمة للكروت من الألوان الأصلية */
+        .glow-blue { box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1); }
+        .glow-purple { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1); }
+
+        /* زر الرجوع iOS Style */
+        .back-btn {
+            width: 45px; height: 45px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
             backdrop-filter: blur(10px);
             transition: 0.2s;
         }
-        .back-btn:active { background: rgba(212, 175, 55, 0.2); transform: translateX(-5px); }
+        .back-btn:active { background: rgba(59, 130, 246, 0.2); transform: translateX(-3px); }
 
-        /* تذهيب النصوص */
-        .gold-gradient-text {
-            background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+        /* تذهيب خفيف للنص ليعطي شعور الفخامة مع اللون الأزرق */
+        .silver-gradient-text {
+            background: linear-gradient(to right, #ffffff, #a1a1aa);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .play-btn {
-            background: linear-gradient(135deg, #D4AF37 0%, #8A6E2F 100%);
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-            color: #000;
+        /* زر اللعب بالألوان الأصلية */
+        .play-btn-main {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            color: #ffffff;
             font-weight: 800;
+            transition: 0.2s;
         }
+        .play-btn-main:active { opacity: 0.8; transform: scale(0.98); }
     </style>
 </head>
-<body class="p-6">
+<body class="pt-6 pb-6">
 
-    <div class="flex justify-between items-center mb-10 mt-4">
+    <div class="flex justify-between items-center mb-10 px-6 mt-4">
         <a href="profile.html" class="back-btn">
             <i class="fas fa-chevron-left text-white text-lg"></i>
         </a>
         <div class="text-right">
-            <p class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">VIP Lounge</p>
-            <h1 class="text-xl font-black gold-gradient-text uppercase">Casino Royale</h1>
+            <p class="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Premium Arcade</p>
+            <h1 class="text-2xl font-black silver-gradient-text uppercase tracking-tighter">Vertex Games</h1>
         </div>
     </div>
 
-    <div class="mb-10">
-        <div class="bg-gradient-to-br from-zinc-900 to-black p-6 rounded-[30px] border border-zinc-800 flex justify-between items-center shadow-2xl">
+    <div class="px-6 mb-10">
+        <div class="bg-white/[0.02] backdrop-blur-md p-6 rounded-[30px] border border-white/[0.05] flex justify-between items-center shadow-2xl">
             <div>
-                <p class="text-[10px] text-zinc-500 font-bold uppercase mb-1">Available Credits</p>
+                <p class="text-[10px] text-zinc-500 font-bold uppercase mb-1">Game Credits</p>
                 <h2 class="text-2xl font-black text-white">$ 12,450.00</h2>
             </div>
-            <div class="w-14 h-14 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
-                <i class="fas fa-coins text-amber-500 text-2xl"></i>
+            <div class="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20">
+                <i class="fas fa-coins text-blue-500 text-2xl"></i>
             </div>
         </div>
     </div>
 
-    <div class="space-y-6 pb-10">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="h-[2px] w-8 bg-amber-500"></div>
-            <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Main Lobby</h3>
-        </div>
+    <div class="px-6 flex items-center gap-3 mb-6">
+        <div class="h-[2px] w-8 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+        <h3 class="text-xs font-black uppercase tracking-widest text-zinc-400">Exclusive Terminals</h3>
+    </div>
 
-        <div class="casino-card p-6">
-            <div class="flex justify-between items-start mb-6">
-                <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                    <i class="fas fa-rocket text-3xl text-blue-400"></i>
+    <div class="games-carousel">
+
+        <div class="game-card p-8 glow-blue">
+            <div class="flex justify-between items-start mb-10">
+                <div class="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center border border-blue-500/20">
+                    <i class="fas fa-rocket text-4xl text-blue-400"></i>
                 </div>
-                <span class="bg-zinc-800 text-[9px] font-black px-3 py-1 rounded-full text-zinc-400 uppercase tracking-tighter">Instant Win</span>
+                <span class="bg-zinc-800 text-[9px] font-black px-3 py-1 rounded-full text-zinc-400 uppercase tracking-tighter">Instant</span>
             </div>
-            <h4 class="text-xl font-bold mb-1">Quantum Crash</h4>
-            <p class="text-xs text-zinc-500 mb-6">Multipliers up to <span class="text-green-500 font-bold">x5000</span></p>
-            <button onclick="location.href='crash.html'" class="play-btn w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
-                Start Betting
+            <div class="mb-8">
+                <h4 class="text-2xl font-extrabold text-white mb-1 tracking-tight">Quantum Crash</h4>
+                <p class="text-xs text-zinc-500">Multipliers up to <span class="text-blue-400 font-bold">x5000</span></p>
+            </div>
+            <button onclick="location.href='crash.html'" class="play-btn-main w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
+                Initialize Terminal
             </button>
         </div>
 
-        <div class="casino-card p-6 border-purple-500/20">
-            <div class="flex justify-between items-start mb-6">
-                <div class="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20">
-                    <i class="fas fa-bomb text-3xl text-purple-400"></i>
+        <div class="game-card p-8 glow-purple">
+            <div class="flex justify-between items-start mb-10">
+                <div class="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center border border-purple-500/20">
+                    <i class="fas fa-bomb text-4xl text-purple-400"></i>
                 </div>
                 <span class="bg-zinc-800 text-[9px] font-black px-3 py-1 rounded-full text-zinc-400 uppercase tracking-tighter">Strategy</span>
             </div>
-            <h4 class="text-xl font-bold mb-1">Cyber Mines</h4>
-            <p class="text-xs text-zinc-500 mb-6">Clear the field & take the gold</p>
-            <button onclick="location.href='mines.html'" class="play-btn w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
-                Enter Minefield
+            <div class="mb-8">
+                <h4 class="text-2xl font-extrabold text-white mb-1 tracking-tight">Cyber Mines</h4>
+                <p class="text-xs text-zinc-500">Uncover <span class="text-purple-400 font-bold">hidden assets</span></p>
+            </div>
+            <button onclick="location.href='mines.html'" class="play-btn-main w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
+                Access Grid
             </button>
         </div>
 
-        <div class="casino-card p-6 border-amber-500/20">
-            <div class="flex justify-between items-start mb-6">
-                <div class="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20">
-                    <i class="fas fa-dharmachakra text-3xl text-amber-500"></i>
+        <div class="game-card p-8 glow-blue">
+            <div class="flex justify-between items-start mb-10">
+                <div class="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10">
+                    <i class="fas fa-dharmachakra text-4xl silver-gradient-text"></i>
                 </div>
-                <span class="bg-amber-500/20 text-[9px] font-black px-3 py-1 rounded-full text-amber-500 uppercase tracking-tighter">Daily Bonus</span>
+                <span class="bg-blue-500/10 text-[9px] font-black px-3 py-1 rounded-full text-blue-400 uppercase tracking-tighter">Daily</span>
             </div>
-            <h4 class="text-xl font-bold mb-1">Lucky Spin</h4>
-            <p class="text-xs text-zinc-500 mb-6">Spin the wheel of fortune</p>
-            <button onclick="location.href='wheel.html'" class="play-btn w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
-                Spin Now
+            <div class="mb-8">
+                <h4 class="text-2xl font-extrabold text-white mb-1 tracking-tight">Lucky Spin</h4>
+                <p class="text-xs text-zinc-500">Win <span class="text-white font-bold">Free Tickets</span> daily</p>
+            </div>
+            <button onclick="location.href='wheel.html'" class="play-btn-main w-full py-4 rounded-2xl uppercase text-[11px] tracking-widest">
+                Spin Wheel
             </button>
         </div>
 
     </div>
-
-    <div class="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-500/5 to-transparent pointer-events-none"></div>
+    <div class="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-blue-500/5 to-transparent pointer-events-none"></div>
 
 </body>
 </html>
