@@ -3,256 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Jump | VERTEX GAMES</title>
+    <title>Chicken Road | VERTEX GAMES</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg-body: #0f212e; 
-            --bg-card: #213743;
-            --stake-green: #00e701;
-            --stake-gold: #facc15;
-        }
-        body { 
-            background-color: var(--bg-body); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: #ffffff;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+        :root { --road-gray: #4b5563; --line-white: rgba(255,255,255,0.5); }
+        body { background-color: #1a2c38; color: white; font-family: sans-serif; overflow: hidden; }
 
-        /* حاوية اللعبة العمودية */
-        .game-track {
-            display: flex;
-            flex-direction: column-reverse; /* لجعل البداية من الأسفل */
-            gap: 12px;
-            width: 100%;
-            max-width: 350px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .step-row {
-            height: 60px;
-            background-color: var(--bg-card);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* منطقة الشارع */
+        .road-container {
             position: relative;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-            opacity: 0.5;
+            height: 300px;
+            background-color: var(--road-gray);
+            margin-top: 50px;
+            display: flex;
+            border-top: 4px solid #374151;
+            border-bottom: 4px solid #374151;
+            overflow: visible;
         }
 
-        .step-row.active {
-            opacity: 1;
-            border-color: rgba(255,255,255,0.1);
-            background-color: #2f4553;
-            cursor: pointer;
+        /* الحارات */
+        .lane {
+            flex: 1;
+            border-right: 2px dashed var(--line-white);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
         }
 
-        .step-row.completed {
-            background-color: #1a2c38;
-            opacity: 1;
+        /* مضاعف الربح */
+        .multiplier-bubble {
+            background: rgba(0,0,0,0.6);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #9ca3af;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* الدجاجة التي تنط */
-        .chicken-player {
-            font-size: 2rem;
+        .multiplier-bubble.active { color: #fbbf24; border-color: #fbbf24; background: rgba(0,0,0,0.8); }
+
+        /* الدجاجة والشاحنة */
+        #chicken {
             position: absolute;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 40px;
+            transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 20;
+            bottom: 20px;
+            left: -50px; /* البداية خارج الشارع */
+        }
+
+        .truck {
+            position: absolute;
+            font-size: 45px;
+            top: -60px;
+            transition: top 0.5s ease-in;
             z-index: 10;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
         }
 
         /* لوحة التحكم */
-        .bet-panel {
-            background-color: var(--bg-card);
-            padding: 24px;
-            border-radius: 24px 24px 0 0;
+        .bottom-panel {
+            background-color: #213743;
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-        }
-
-        .jump-btn {
-            background: linear-gradient(135deg, var(--stake-green) 0%, #00bc01 100%);
-            color: #000;
             width: 100%;
-            padding: 18px;
-            border-radius: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0, 231, 1, 0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .jump-btn:active { transform: scale(0.95); }
-
-        .multiplier-tag {
-            position: absolute;
-            right: 15px;
-            font-weight: 800;
-            font-size: 0.7rem;
-            color: var(--stake-gold);
-            background: rgba(0,0,0,0.3);
-            padding: 2px 8px;
-            border-radius: 20px;
+        .btn-go { background-color: #00e701; color: black; font-weight: 900; border-radius: 8px; flex: 1; height: 50px; }
+        .btn-cash { background-color: #fbbf24; color: black; font-weight: 900; border-radius: 8px; flex: 1; height: 50px; display: none; }
+        
+        .difficulty-bar {
+            display: flex;
+            background: #0f212e;
+            border-radius: 8px;
+            padding: 4px;
         }
+        .diff-opt { flex: 1; text-align: center; font-size: 10px; padding: 6px; border-radius: 6px; cursor: pointer; color: #64748b; font-weight: bold; }
+        .diff-opt.active { background: #2f4553; color: white; }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
 
-    <div class="p-6 flex justify-between items-center">
-        <a href="games.html" class="text-zinc-400"><i class="fas fa-chevron-left"></i></a>
-        <h1 class="font-black italic text-xl tracking-tighter uppercase">Chicken <span class="text-yellow-400">Jump</span></h1>
-        <div class="w-8"></div>
+    <div class="p-4 flex justify-between items-center bg-[#0f212e]">
+        <span class="font-bold text-xs">CHICKEN <span class="text-red-500 italic">ROAD</span></span>
+        <div class="bg-black/40 px-3 py-1 rounded text-sm font-bold">$ 989,708.78</div>
     </div>
 
-    <div class="flex-1 overflow-y-auto pb-80 pt-10" id="gameViewport">
-        <div class="game-track" id="track">
-            </div>
+    <div class="road-container" id="road">
+        <div id="chicken">🐔</div>
+        
+        <div class="lane"><div class="multiplier-bubble" id="m1">4.11x</div></div>
+        <div class="lane"><div class="multiplier-bubble" id="m2">4.64x</div></div>
+        <div class="lane"><div class="multiplier-bubble" id="m3">5.39x</div></div>
+        <div class="lane"><div class="multiplier-bubble" id="m4">6.50x</div></div>
+        <div class="lane"><div class="multiplier-bubble" id="m5">8.36x</div></div>
+        <div class="lane" style="border-right: none;"><div class="multiplier-bubble" id="m6">12.08x</div></div>
     </div>
 
-    <div id="chicken" class="chicken-player" style="display: none;">🐥</div>
-
-    <div class="bet-panel">
-        <div class="flex justify-between items-end mb-4">
-            <div>
-                <p class="text-[10px] font-bold text-zinc-500 uppercase">Current Win</p>
-                <p id="currentProfit" class="text-2xl font-black text-white">$ 0.00</p>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] font-bold text-zinc-500 uppercase">Multiplier</p>
-                <p id="currentMult" class="text-xl font-black text-green-400">1.00x</p>
-            </div>
+    <div class="bottom-panel">
+        <div class="difficulty-bar">
+            <div class="diff-opt">LOW</div>
+            <div class="diff-opt active">MEDIUM</div>
+            <div class="diff-opt">HIGH</div>
+            <div class="diff-opt">EXTREME</div>
         </div>
 
-        <button onclick="handleMainAction()" id="actionBtn" class="jump-btn">
-            Place Bet
-        </button>
+        <div class="flex gap-3">
+            <button onclick="startGame()" id="goBtn" class="btn-go uppercase">Go</button>
+            <button onclick="cashout()" id="cashBtn" class="btn-cash uppercase">Cash Out</button>
+        </div>
     </div>
 
     <script>
-        const track = document.getElementById('track');
         const chicken = document.getElementById('chicken');
-        const actionBtn = document.getElementById('actionBtn');
-        let currentStep = -1;
+        const goBtn = document.getElementById('goBtn');
+        const cashBtn = document.getElementById('cashBtn');
+        let currentLane = -1;
         let isGameActive = false;
-        let betAmount = 10;
-        let multipliers = [1.2, 1.5, 1.9, 2.4, 3.1, 4.2, 5.8, 8.0, 11.5, 15.0];
-
-        function createTrack() {
-            track.innerHTML = '';
-            for (let i = 0; i < 10; i++) {
-                const row = document.createElement('div');
-                row.className = `step-row row-${i}`;
-                row.innerHTML = `<span class="multiplier-tag">${multipliers[i]}x</span>`;
-                track.appendChild(row);
-            }
-        }
-
-        function handleMainAction() {
-            if (!isGameActive) {
-                startGame();
-            } else {
-                jump();
-            }
-        }
 
         function startGame() {
-            isGameActive = true;
-            currentStep = -1;
-            createTrack();
-            updateActiveRow();
-            
-            // وضع الدجاجة في البداية
-            chicken.style.display = 'block';
-            positionChicken(-1);
-            
-            actionBtn.innerText = "Jump!";
-            actionBtn.style.background = "linear-gradient(135deg, #facc15 0%, #eab308 100%)";
-        }
-
-        function positionChicken(step) {
-            if (step === -1) {
-                // وضع البداية تحت أول صف
-                chicken.style.bottom = "240px";
-                chicken.style.left = "50%";
-                chicken.style.transform = "translateX(-50%)";
+            if (isGameActive) {
+                moveChicken();
             } else {
-                const targetRow = document.querySelector(`.row-${step}`);
-                const rect = targetRow.getBoundingClientRect();
-                chicken.style.top = (rect.top + 10) + "px";
-                chicken.style.left = "50%";
+                // بدء لعبة جديدة
+                isGameActive = true;
+                currentLane = -1;
+                chicken.innerHTML = "🐔";
+                chicken.style.left = "-50px";
+                chicken.style.bottom = "20px";
+                goBtn.innerText = "Jump";
+                cashBtn.style.display = "block";
+                resetMultipliers();
+                moveChicken();
             }
         }
 
-        function jump() {
-            if (!isGameActive) return;
+        function moveChicken() {
+            currentLane++;
+            if (currentLane < 6) {
+                const lanes = document.querySelectorAll('.lane');
+                const targetLane = lanes[currentLane];
+                const laneRect = targetLane.getBoundingClientRect();
+                
+                // تحريك الدجاجة لمنتصف الحارة
+                chicken.style.left = (targetLane.offsetLeft + (targetLane.offsetWidth / 2) - 20) + "px";
+                chicken.style.bottom = "120px"; // ترتفع قليلاً لتكون فوق علامة الطريق
 
-            // محاكاة احتمالية الخسارة (مثل ستيك)
-            const isSafe = Math.random() > 0.15; // 85% نسبة النجاح في القفزة
-
-            if (isSafe) {
-                currentStep++;
-                if (currentStep < 10) {
-                    positionChicken(currentStep);
-                    const rows = document.querySelectorAll('.step-row');
-                    rows[currentStep].classList.add('completed');
-                    
-                    // تحديث الأرقام
-                    const mult = multipliers[currentStep];
-                    document.getElementById('currentMult').innerText = mult + "x";
-                    document.getElementById('currentProfit').innerText = "$" + (betAmount * mult).toFixed(2);
-                    
-                    if (currentStep === 9) victory();
-                    else updateActiveRow();
+                // فحص الخطر (احتمالية ظهور شاحنة)
+                if (Math.random() < 0.2) { // 20% نسبة الخسارة
+                    setTimeout(() => spawnTruck(currentLane), 300);
+                } else {
+                    document.getElementById(`m${currentLane+1}`).classList.add('active');
                 }
             } else {
-                fail();
+                alert("You crossed the road! MAX WIN!");
+                cashout();
             }
         }
 
-        function updateActiveRow() {
-            const rows = document.querySelectorAll('.step-row');
-            rows.forEach(r => r.classList.remove('active'));
-            if (currentStep + 1 < 10) {
-                rows[currentStep + 1].classList.add('active');
-            }
-        }
-
-        function fail() {
-            isGameActive = false;
-            chicken.innerHTML = "🍗"; // تتحول الدجاجة لأكل عند الخسارة
+        function spawnTruck(laneIndex) {
+            const lanes = document.querySelectorAll('.lane');
+            const truck = document.createElement('div');
+            truck.className = 'truck';
+            truck.innerHTML = "🚚"; // أو صورة شاحنة
+            lanes[laneIndex].appendChild(truck);
+            
             setTimeout(() => {
-                alert("Game Over! The chicken failed the jump.");
-                resetGame();
-            }, 500);
+                truck.style.top = "100px"; // الشاحنة تصدم الدجاجة
+                chicken.innerHTML = "💥";
+                isGameActive = false;
+                setTimeout(() => {
+                    alert("GAME OVER!");
+                    resetGame();
+                }, 500);
+            }, 50);
         }
 
-        function victory() {
-            isGameActive = false;
-            alert("Amazing! You reached the top!");
+        function cashout() {
+            alert("Cashed out successfully!");
             resetGame();
         }
 
         function resetGame() {
             isGameActive = false;
-            chicken.style.display = 'none';
-            chicken.innerHTML = "🐥";
-            actionBtn.innerText = "Place Bet";
-            actionBtn.style.background = "linear-gradient(135deg, #00e701 0%, #00bc01 100%)";
-            document.getElementById('currentMult').innerText = "1.00x";
-            document.getElementById('currentProfit').innerText = "$ 0.00";
-            createTrack();
+            goBtn.innerText = "Go";
+            cashBtn.style.display = "none";
+            chicken.style.left = "-50px";
+            document.querySelectorAll('.truck').forEach(t => t.remove());
+            resetMultipliers();
         }
 
-        createTrack();
+        function resetMultipliers() {
+            document.querySelectorAll('.multiplier-bubble').forEach(m => m.classList.remove('active'));
+        }
     </script>
 </body>
 </html>
