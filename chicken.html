@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Game | VERTEX GAMES</title>
+    <title>Chicken Jump | VERTEX GAMES</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -19,236 +19,240 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff;
             min-height: 100vh;
+            overflow: hidden;
         }
 
-        /* حاوية الأطباق */
-        .chicken-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            perspective: 1000px;
+        /* حاوية اللعبة العمودية */
+        .game-track {
+            display: flex;
+            flex-direction: column-reverse; /* لجعل البداية من الأسفل */
+            gap: 12px;
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        .plate-item {
-            aspect-ratio: 1;
+        .step-row {
+            height: 60px;
             background-color: var(--bg-card);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            opacity: 0.5;
         }
 
-        .plate-item:hover { background-color: #2f4553; transform: translateY(-2px); }
-        .plate-item.active { transform: scale(0.95); }
-
-        /* أيقونة الطبق المغطى */
-        .plate-cover {
-            font-size: 1.5rem;
-            color: #557086;
+        .step-row.active {
+            opacity: 1;
+            border-color: rgba(255,255,255,0.1);
+            background-color: #2f4553;
+            cursor: pointer;
         }
 
-        /* تأثير كشف الدجاجة */
-        .revealed-chicken {
-            background: radial-gradient(circle, #facc15 0%, #a16207 100%) !important;
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .step-row.completed {
+            background-color: #1a2c38;
+            opacity: 1;
         }
 
-        /* تأثير كشف العظمة */
-        .revealed-bone {
-            background-color: #071824 !important;
-            opacity: 0.6;
+        /* الدجاجة التي تنط */
+        .chicken-player {
+            font-size: 2rem;
+            position: absolute;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
         }
 
-        @keyframes popIn {
-            0% { transform: scale(0); rotate: -20deg; }
-            100% { transform: scale(1); rotate: 0deg; }
+        /* لوحة التحكم */
+        .bet-panel {
+            background-color: var(--bg-card);
+            padding: 24px;
+            border-radius: 24px 24px 0 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
         }
 
-        /* لوحة التحكم الجانبية (Stake Style) */
-        .control-panel {
-            background-color: #213743;
-            padding: 20px;
-            border-radius: 15px;
-        }
-
-        .custom-input {
-            background-color: #0f212e;
-            border: 2px solid #2f4553;
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            outline: none;
-            font-weight: 800;
-        }
-
-        .bet-button {
-            background-color: var(--stake-green);
+        .jump-btn {
+            background: linear-gradient(135deg, var(--stake-green) 0%, #00bc01 100%);
             color: #000;
             width: 100%;
             padding: 18px;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.2s;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0, 231, 1, 0.3);
         }
 
-        .bet-button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .cashout-button { background-color: var(--stake-gold); color: #000; }
+        .jump-btn:active { transform: scale(0.95); }
+
+        .multiplier-tag {
+            position: absolute;
+            right: 15px;
+            font-weight: 800;
+            font-size: 0.7rem;
+            color: var(--stake-gold);
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="flex flex-col">
 
-    <div class="flex items-center gap-4 mb-8">
-        <a href="games.html" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1 class="text-xl font-black uppercase tracking-tighter">Chicken <span class="text-yellow-400">Royale</span></h1>
+    <div class="p-6 flex justify-between items-center">
+        <a href="games.html" class="text-zinc-400"><i class="fas fa-chevron-left"></i></a>
+        <h1 class="font-black italic text-xl tracking-tighter uppercase">Chicken <span class="text-yellow-400">Jump</span></h1>
+        <div class="w-8"></div>
     </div>
 
-    <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <div class="lg:col-span-2 order-2 lg:order-1">
-            <div class="chicken-grid" id="chickenGrid">
-                </div>
-        </div>
+    <div class="flex-1 overflow-y-auto pb-80 pt-10" id="gameViewport">
+        <div class="game-track" id="track">
+            </div>
+    </div>
 
-        <div class="order-1 lg:order-2">
-            <div class="control-panel">
-                <div class="mb-6">
-                    <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest block mb-2">Bet Amount</label>
-                    <div class="relative">
-                        <input type="number" id="betAmount" class="custom-input" value="10.00">
-                        <span class="absolute right-3 top-3 text-zinc-500 font-bold text-xs uppercase">USD</span>
-                    </div>
-                </div>
+    <div id="chicken" class="chicken-player" style="display: none;">🐥</div>
 
-                <div class="mb-8">
-                    <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest block mb-2">Bones Count</label>
-                    <select id="bonesCount" class="custom-input appearance-none">
-                        <option value="1">1 Bone</option>
-                        <option value="3" selected>3 Bones</option>
-                        <option value="5">5 Bones</option>
-                        <option value="10">10 Bones</option>
-                        <option value="24">24 Bones</option>
-                    </select>
-                </div>
-
-                <div id="gameActions">
-                    <button onclick="startGame()" id="mainBtn" class="bet-button">Bet</button>
-                </div>
-
-                <div class="mt-6 grid grid-cols-2 gap-2">
-                    <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                        <p class="text-[8px] text-zinc-500 font-bold uppercase">Profit</p>
-                        <p id="profitDisplay" class="text-sm font-black text-white">$ 0.00</p>
-                    </div>
-                    <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                        <p class="text-[8px] text-zinc-500 font-bold uppercase">Multiplier</p>
-                        <p id="multiplierDisplay" class="text-sm font-black text-zinc-400">1.00x</p>
-                    </div>
-                </div>
+    <div class="bet-panel">
+        <div class="flex justify-between items-end mb-4">
+            <div>
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Current Win</p>
+                <p id="currentProfit" class="text-2xl font-black text-white">$ 0.00</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-zinc-500 uppercase">Multiplier</p>
+                <p id="currentMult" class="text-xl font-black text-green-400">1.00x</p>
             </div>
         </div>
 
+        <button onclick="handleMainAction()" id="actionBtn" class="jump-btn">
+            Place Bet
+        </button>
     </div>
 
     <script>
-        const grid = document.getElementById('chickenGrid');
-        const mainBtn = document.getElementById('mainBtn');
+        const track = document.getElementById('track');
+        const chicken = document.getElementById('chicken');
+        const actionBtn = document.getElementById('actionBtn');
+        let currentStep = -1;
         let isGameActive = false;
-        let bonesPositions = [];
-        let revealedCount = 0;
+        let betAmount = 10;
+        let multipliers = [1.2, 1.5, 1.9, 2.4, 3.1, 4.2, 5.8, 8.0, 11.5, 15.0];
 
-        // إنشاء الـ 25 طبقاً
-        function initGrid() {
-            grid.innerHTML = '';
-            for (let i = 0; i < 25; i++) {
-                const item = document.createElement('div');
-                item.className = 'plate-item';
-                item.innerHTML = '<i class="fas fa-utensils plate-cover"></i>';
-                item.onclick = () => revealPlate(i, item);
-                grid.appendChild(item);
+        function createTrack() {
+            track.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const row = document.createElement('div');
+                row.className = `step-row row-${i}`;
+                row.innerHTML = `<span class="multiplier-tag">${multipliers[i]}x</span>`;
+                track.appendChild(row);
+            }
+        }
+
+        function handleMainAction() {
+            if (!isGameActive) {
+                startGame();
+            } else {
+                jump();
             }
         }
 
         function startGame() {
-            if (isGameActive) {
-                cashout();
-                return;
-            }
-
-            // إعداد اللعبة
-            const boneCount = parseInt(document.getElementById('bonesCount').value);
-            bonesPositions = [];
-            while(bonesPositions.length < boneCount) {
-                let r = Math.floor(Math.random() * 25);
-                if(!bonesPositions.includes(r)) bonesPositions.push(r);
-            }
-
             isGameActive = true;
-            revealedCount = 0;
-            initGrid();
+            currentStep = -1;
+            createTrack();
+            updateActiveRow();
             
-            mainBtn.innerText = "Cashout";
-            mainBtn.classList.add('cashout-button');
-            document.getElementById('multiplierDisplay').innerText = "1.00x";
-            document.getElementById('multiplierDisplay').classList.add('text-yellow-400');
+            // وضع الدجاجة في البداية
+            chicken.style.display = 'block';
+            positionChicken(-1);
+            
+            actionBtn.innerText = "Jump!";
+            actionBtn.style.background = "linear-gradient(135deg, #facc15 0%, #eab308 100%)";
         }
 
-        function revealPlate(index, element) {
-            if (!isGameActive || element.classList.contains('revealed')) return;
-
-            element.classList.add('revealed', 'active');
-            
-            if (bonesPositions.includes(index)) {
-                // خسارة - ظهرت عظمة
-                element.innerHTML = '<i class="fas fa-bone text-white text-2xl"></i>';
-                element.className = 'plate-item revealed-bone';
-                gameOver();
+        function positionChicken(step) {
+            if (step === -1) {
+                // وضع البداية تحت أول صف
+                chicken.style.bottom = "240px";
+                chicken.style.left = "50%";
+                chicken.style.transform = "translateX(-50%)";
             } else {
-                // ربح - ظهرت دجاجة
-                element.innerHTML = '<i class="fas fa-drumstick-bite text-black text-2xl"></i>';
-                element.className = 'plate-item revealed-chicken';
-                revealedCount++;
-                updateMultiplier();
+                const targetRow = document.querySelector(`.row-${step}`);
+                const rect = targetRow.getBoundingClientRect();
+                chicken.style.top = (rect.top + 10) + "px";
+                chicken.style.left = "50%";
             }
         }
 
-        function updateMultiplier() {
-            // محاكاة حساب الملاي (Multiplier)
-            let currentMult = (1 + (revealedCount * 0.2)).toFixed(2);
-            document.getElementById('multiplierDisplay').innerText = currentMult + "x";
-            let bet = parseFloat(document.getElementById('betAmount').value);
-            document.getElementById('profitDisplay').innerText = "$ " + (bet * currentMult).toFixed(2);
+        function jump() {
+            if (!isGameActive) return;
+
+            // محاكاة احتمالية الخسارة (مثل ستيك)
+            const isSafe = Math.random() > 0.15; // 85% نسبة النجاح في القفزة
+
+            if (isSafe) {
+                currentStep++;
+                if (currentStep < 10) {
+                    positionChicken(currentStep);
+                    const rows = document.querySelectorAll('.step-row');
+                    rows[currentStep].classList.add('completed');
+                    
+                    // تحديث الأرقام
+                    const mult = multipliers[currentStep];
+                    document.getElementById('currentMult').innerText = mult + "x";
+                    document.getElementById('currentProfit').innerText = "$" + (betAmount * mult).toFixed(2);
+                    
+                    if (currentStep === 9) victory();
+                    else updateActiveRow();
+                }
+            } else {
+                fail();
+            }
         }
 
-        function cashout() {
-            alert("Congratulations! You cashed out!");
-            resetGame();
+        function updateActiveRow() {
+            const rows = document.querySelectorAll('.step-row');
+            rows.forEach(r => r.classList.remove('active'));
+            if (currentStep + 1 < 10) {
+                rows[currentStep + 1].classList.add('active');
+            }
         }
 
-        function gameOver() {
+        function fail() {
             isGameActive = false;
+            chicken.innerHTML = "🍗"; // تتحول الدجاجة لأكل عند الخسارة
             setTimeout(() => {
-                alert("BONE! Better luck next time.");
+                alert("Game Over! The chicken failed the jump.");
                 resetGame();
-            }, 300);
+            }, 500);
+        }
+
+        function victory() {
+            isGameActive = false;
+            alert("Amazing! You reached the top!");
+            resetGame();
         }
 
         function resetGame() {
             isGameActive = false;
-            mainBtn.innerText = "Bet";
-            mainBtn.classList.remove('cashout-button');
-            document.getElementById('multiplierDisplay').classList.remove('text-yellow-400');
-            initGrid();
+            chicken.style.display = 'none';
+            chicken.innerHTML = "🐥";
+            actionBtn.innerText = "Place Bet";
+            actionBtn.style.background = "linear-gradient(135deg, #00e701 0%, #00bc01 100%)";
+            document.getElementById('currentMult').innerText = "1.00x";
+            document.getElementById('currentProfit').innerText = "$ 0.00";
+            createTrack();
         }
 
-        initGrid();
+        createTrack();
     </script>
 </body>
 </html>
