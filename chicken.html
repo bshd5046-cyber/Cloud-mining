@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chicken Game | VERTEX PREMIER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #020617; --primary: #3b82f6; --stake-green: #00e701; --stake-gray: #2f4553; }
+        body { 
+            background-color: var(--bg-dark); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* حاوية اللعبة (Grid) */
+        .chicken-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            background-color: var(--stake-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 4px solid rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .grid-item:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .grid-item.revealed { background-color: #0f212e; cursor: default; }
+
+        /* أيقونات الدجاج والعظم */
+        .icon-chicken { color: #facc15; font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.5)); }
+        .icon-bone { color: #64748b; font-size: 1.5rem; }
+
+        /* لوحة التحكم السفلي (Stake Style) */
+        .bet-panel {
+            background-color: #0f212e;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .bet-input-box {
+            background-color: var(--bg-dark);
+            border: 2px solid var(--stake-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+        }
+
+        .bet-btn {
+            background-color: var(--stake-green);
+            color: #000;
+            font-weight: 800;
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        .bet-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+        .back-nav {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body class="pb-80">
+
+    <nav class="back-nav">
+        <a href="games.html" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h1 class="font-bold text-lg">Chicken <span class="text-yellow-400">Classic</span></h1>
+    </nav>
+
+    <div class="px-6 flex justify-between mb-8">
+        <div class="bg-white/5 px-4 py-2 rounded-lg border border-white/5">
+            <p class="text-[9px] text-zinc-500 uppercase font-black">Multiplier</p>
+            <p class="text-sm font-bold text-green-400">1.00x</p>
+        </div>
+        <div class="bg-white/5 px-4 py-2 rounded-lg border border-white/5 text-right">
+            <p class="text-[9px] text-zinc-500 uppercase font-black">Next Win</p>
+            <p class="text-sm font-bold text-white">$ 0.00</p>
+        </div>
+    </div>
+
+    <div class="px-6">
+        <div class="chicken-grid" id="gameGrid">
+            </div>
+    </div>
+
+    <div class="bet-panel">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="text-[10px] text-zinc-400 font-bold uppercase ml-1">Bet Amount</label>
+                <div class="bet-input-box mt-1">
+                    <input type="number" value="0.00" class="bg-transparent w-full py-3 outline-none font-bold text-sm">
+                    <span class="text-zinc-500 font-bold text-xs">USD</span>
+                </div>
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-400 font-bold uppercase ml-1">Bones</label>
+                <select id="boneCount" class="bg-zinc-900 border-2 border-zinc-700 w-full py-3 px-2 rounded-lg mt-1 outline-none text-sm font-bold">
+                    <option value="1">1 Bone</option>
+                    <option value="3" selected>3 Bones</option>
+                    <option value="5">5 Bones</option>
+                    <option value="10">10 Bones</option>
+                    <option value="24">24 Bones</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="bet-btn" onclick="startGame()">Bet</button>
+    </div>
+
+    <script>
+        const grid = document.getElementById('gameGrid');
+        let isGameActive = false;
+
+        // إنشاء المربعات الـ 25
+        function createGrid() {
+            grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.dataset.index = i;
+                item.onclick = () => revealSquare(item);
+                grid.appendChild(item);
+            }
+        }
+
+        function startGame() {
+            createGrid();
+            isGameActive = true;
+            const btn = document.querySelector('.bet-btn');
+            btn.innerText = "Cashout";
+            btn.style.backgroundColor = "#fbbf24"; // تحويل اللون للأصفر عند اللعب
+        }
+
+        function revealSquare(element) {
+            if (!isGameActive || element.classList.contains('revealed')) return;
+
+            element.classList.add('revealed');
+            
+            // محاكاة منطق اللعبة (عشوائي حالياً)
+            const isChicken = Math.random() > 0.2; // 80% دجاجة
+            
+            if (isChicken) {
+                element.innerHTML = '<i class="fas fa-drumstick-bite icon-chicken animate-bounce"></i>';
+                // هنا يتم تحديث الـ Multiplier
+            } else {
+                element.innerHTML = '<i class="fas fa-bone icon-bone"></i>';
+                element.style.backgroundColor = "#ff4d4d20";
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            isGameActive = false;
+            alert("BONE! Game Over");
+            const btn = document.querySelector('.bet-btn');
+            btn.innerText = "Bet";
+            btn.style.backgroundColor = "#00e701";
+        }
+
+        // تشغيل الشبكة عند التحميل
+        createGrid();
+    </script>
+</body>
+</html>
