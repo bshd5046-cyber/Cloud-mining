@@ -145,7 +145,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -203,7 +203,6 @@
             if (!userData?.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
             const lastExecDate = userData.lastExecution.toDate();
-            // توحيد التاريخ للمقارنة (يومياً)
             const d1 = new Intl.DateTimeFormat('en-CA').format(now);
             const d2 = new Intl.DateTimeFormat('en-CA').format(lastExecDate);
             if (d1 !== d2) resetButtonUI(); else lockButtonUI();
@@ -237,6 +236,32 @@
             }, 30);
         }
 
+        // --- نظام أرباح الفريق المطور ---
+        async function processTeamCommission(userProfit) {
+            const commissions = [0.10, 0.05, 0.02]; // مستويات: 10%، 5%، 2%
+            let parentId = userData.referredBy; // يجب التأكد من وجود هذا الحقل عند التسجيل
+
+            for (let i = 0; i < commissions.length; i++) {
+                if (!parentId || parentId === "none" || parentId === "") break;
+
+                const parentRef = doc(db, "users", parentId);
+                const parentSnap = await getDoc(parentRef);
+
+                if (parentSnap.exists()) {
+                    const amount = userProfit * commissions[i];
+                    await updateDoc(parentRef, {
+                        balance: increment(amount),
+                        teamEarn: amount, // أرباح اليوم من الفريق
+                        totalTeamEarned: increment(amount)
+                    });
+                    // الانتقال للقائد الأعلى (المستوى التالي)
+                    parentId = parentSnap.data().referredBy;
+                } else {
+                    break;
+                }
+            }
+        }
+
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
             const balance = parseFloat(userData.balance || 0);
@@ -256,16 +281,21 @@
                 const profit = balance * rate;
                 const userRef = doc(db, "users", currentUserId);
                 
+                // 1. تحديث بيانات المستخدم الحالي (الربح الشخصي)
                 await updateDoc(userRef, {
-                    balance: balance + profit,
+                    balance: increment(profit),
                     dailyEarn: profit,
-                    totalEarned: (parseFloat(userData.totalEarned) || 0) + profit,
+                    totalEarned: increment(profit),
                     lastExecution: serverTimestamp()
                 });
 
-                showToast("Success! Yield Credited", "fa-circle-check", "text-emerald-400");
+                // 2. تشغيل نظام عمولات الفريق
+                await processTeamCommission(profit);
+
+                showToast("Success! Personal & Team Yield Credited", "fa-circle-check", "text-emerald-400");
                 lockButtonUI();
             } catch (error) {
+                console.error("Execution Error:", error);
                 executionLocked = false; execBtn.disabled = false;
                 showToast("Execution Denied", "fa-circle-xmark", "text-red-400");
                 execText.innerText = "Retry";
