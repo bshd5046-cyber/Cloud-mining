@@ -19,23 +19,23 @@
             background-color: var(--bg-dark); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #ffffff; 
-            overflow-x: hidden;
             background: 
                 radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
                 radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
                 #020617;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
-        #mainContent { display: none; }
-
+        /* Glass Panel */
         .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
+            background: rgba(15, 23, 42, 0.7); 
             backdrop-filter: blur(25px); 
             border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
+        /* Bottom Nav */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -60,119 +60,109 @@
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        .support-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
-        .support-card:active { transform: scale(0.95); }
-        
-        .icon-glow { position: relative; }
-        .icon-glow::after {
-            content: ''; position: absolute; inset: 0;
-            background: inherit; filter: blur(15px); opacity: 0.4; z-index: -1;
+        /* AI Panel Fixes */
+        #aiChatPanel { 
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: #020617;
+            display: none;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(100%);
         }
+        #aiChatPanel.active { transform: translateY(0); display: flex; }
 
-        details summary::-webkit-details-marker { display: none; }
-        .faq-item { border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
-        .faq-item:last-child { border-bottom: none; }
+        .chat-scroll {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            scroll-behavior: smooth;
+        }
+        .chat-scroll::-webkit-scrollbar { display: none; }
 
-        #aiChatPanel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(100%); }
-        #aiChatPanel.active { transform: translateY(0); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .typing-dot {
+            width: 4px; height: 4px; background: #3b82f6; border-radius: 50%;
+            animation: typing 1s infinite ease-in-out;
+        }
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="mainContent" class="animate-fadeIn">
-        <header class="p-8 pt-16 text-center">
-            <div class="w-24 h-24 bg-blue-600/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-blue-500/20 shadow-2xl shadow-blue-500/20 icon-glow">
-                <i class="fas fa-headset text-4xl text-blue-500"></i>
+    <div id="mainContent" class="p-6 space-y-8 pt-12">
+        <header class="text-center">
+            <div class="w-20 h-20 bg-blue-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-blue-500/20 shadow-xl">
+                <i class="fas fa-headset text-3xl text-blue-500"></i>
             </div>
-            <h1 class="text-4xl font-black italic tracking-tighter uppercase mb-2">Support <span class="text-blue-500">Center</span></h1>
-            <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Protocol Assistance 24/7</p>
+            <h1 class="text-3xl font-black italic tracking-tighter uppercase">Support <span class="text-blue-500">Center</span></h1>
+            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[0.4em]">Protocol Node 24/7</p>
         </header>
 
-        <div class="px-6 space-y-5">
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">AI Terminal</h3>
-            
-            <div onclick="toggleAIChat(true)" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
-                <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500 border border-blue-500/20">
-                        <i class="fas fa-robot text-2xl"></i>
+        <div class="space-y-4">
+            <div onclick="toggleAIChat(true)" class="glass-panel p-6 rounded-[2rem] flex items-center justify-between cursor-pointer active:scale-95 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500 border border-blue-500/20">
+                        <i class="fas fa-robot text-xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-black text-white text-lg tracking-tight">System AI Node</h4>
-                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Instant Resolution</p>
+                        <h4 class="font-black text-white text-md tracking-tight">System AI Node</h4>
+                        <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">Active Resolution</p>
                     </div>
                 </div>
-                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                    <i class="fas fa-chevron-right text-[10px] text-slate-600"></i>
-                </div>
+                <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
             </div>
-
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4 mt-6">Protocol FAQ</h3>
             
-            <div class="glass-panel rounded-[2.5rem] overflow-hidden mb-10">
-                <details class="group faq-item">
-                    <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
-                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Withdrawal Timeline</span>
-                        <i class="fas fa-clock text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
-                    </summary>
-                    <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
-                        Request processing: 2 to 96 hours. Post-approval, funds are settled within 5 business days.
+            <a href="https://wa.me/YourNumber" class="glass-panel p-6 rounded-[2rem] flex items-center justify-between block">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-green-500 border border-green-500/20">
+                        <i class="fab fa-whatsapp text-xl"></i>
                     </div>
-                </details>
-
-                <details class="group faq-item">
-                    <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
-                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Network Protocols</span>
-                        <i class="fas fa-shield-halved text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
-                    </summary>
-                    <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
-                        Supported: BEP20 / TRC20. Vertex is not responsible for assets sent via incorrect networks or addresses.
+                    <div>
+                        <h4 class="font-black text-white text-md tracking-tight">VIP WhatsApp</h4>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Human Support</p>
                     </div>
-                </details>
-
-                <details class="group faq-item">
-                    <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
-                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Investment Nature</span>
-                        <i class="fas fa-chart-line text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
-                    </summary>
-                    <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
-                        Vertex Premier is a long-term cloud mining and investment ecosystem designed for sustainable scaling.
-                    </div>
-                </details>
-            </div>
+                </div>
+                <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+            </a>
         </div>
     </div>
 
-    <div id="aiChatPanel" class="fixed inset-0 bg-[#020617] z-[2000] hidden flex-col">
-        <div class="p-6 pt-12 border-b border-white/5 flex items-center justify-between glass-panel">
+    <div id="aiChatPanel">
+        <div class="p-6 pt-12 border-b border-white/5 flex items-center justify-between glass-panel shrink-0">
             <div class="flex items-center gap-4">
                 <button onclick="toggleAIChat(false)" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                    <i class="fas fa-chevron-left text-slate-400"></i>
+                    <i class="fas fa-arrow-left text-slate-400"></i>
                 </button>
                 <div>
                     <h2 class="font-black text-white uppercase tracking-tighter italic">Vertex <span class="text-blue-500">AI Node</span></h2>
+                    <p class="text-[8px] text-emerald-500 font-bold uppercase tracking-widest">Secure Connection</p>
                 </div>
             </div>
-            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_#10b981]"></div>
         </div>
 
-        <div id="chatBody" class="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col no-scrollbar">
-            <div class="bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start">
-                <p class="text-sm text-blue-100 font-medium tracking-tight">Vertex AI online. State your query regarding Deposits, Withdrawals, or System Protocols.</p>
+        <div id="chatBody" class="chat-scroll space-y-4">
+            <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-3xl rounded-tl-none max-w-[85%] text-sm text-blue-100">
+                Welcome to Vertex Intelligence. State your system query regarding Protocols, Networks, or Timelines.
             </div>
         </div>
 
-        <div class="p-4 flex gap-2 overflow-x-auto no-scrollbar">
-            <button onclick="sendQuickQuery('Withdrawal rules?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Withdrawal Rules</button>
-            <button onclick="sendQuickQuery('Deposit network?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Networks</button>
-            <button onclick="sendQuickQuery('Long term?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Strategy</button>
+        <div class="px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-t border-white/5 bg-[#020617]/50">
+            <button onclick="sendQuickQuery('Withdrawal rules?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Withdrawal</button>
+            <button onclick="sendQuickQuery('Network info?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Networks</button>
+            <button onclick="sendQuickQuery('Deposit protocol?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Deposit</button>
         </div>
 
-        <div class="p-6 pb-10 glass-panel border-t border-white/5">
-            <div class="relative">
-                <input type="text" id="chatInput" placeholder="Enter System Query..." 
-                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-sm text-white focus:outline-none focus:border-blue-500 transition-all">
-                <button onclick="handleUserInput()" class="absolute right-2 top-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+        <div class="p-4 pb-10 glass-panel shrink-0">
+            <div class="relative flex items-center gap-2">
+                <input type="text" id="chatInput" placeholder="Command..." 
+                    class="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:outline-none focus:border-blue-500 transition-all">
+                <button onclick="handleUserInput()" class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 active:scale-90 transition-all">
                     <i class="fas fa-paper-plane text-xs text-white"></i>
                 </button>
             </div>
@@ -189,62 +179,78 @@
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    <script>
+        // UI Control
+        function toggleAIChat(show) {
+            const panel = document.getElementById('aiChatPanel');
+            if(show) {
+                panel.style.display = 'flex';
+                setTimeout(() => panel.classList.add('active'), 10);
+            } else {
+                panel.classList.remove('active');
+                setTimeout(() => panel.style.display = 'none', 400);
+            }
+        }
 
-        // ... Firebase Config (نفس الكود الخاص بك) ...
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
-            authDomain: "cloud-mining-6f190.firebaseapp.com",
-            projectId: "cloud-mining-6f190",
-            storageBucket: "cloud-mining-6f190.firebasestorage.app",
-            messagingSenderId: "144227180849",
-            appId: "1:144227180849:web:ccbda447d074efbbddd010"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        // Chat Engine
+        function addMsg(text, type) {
+            const body = document.getElementById('chatBody');
+            const wrapper = document.createElement('div');
+            wrapper.className = type === 'user' ? "flex justify-end" : "flex justify-start";
+            
+            const div = document.createElement('div');
+            div.className = type === 'user' 
+                ? "bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tr-none max-w-[85%] text-sm text-slate-200"
+                : "bg-blue-600/10 border border-blue-500/20 p-4 rounded-3xl rounded-tl-none max-w-[85%] text-sm text-blue-100";
+            
+            div.innerText = text;
+            wrapper.appendChild(div);
+            body.appendChild(wrapper);
+            
+            // Auto scroll to bottom
+            body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+        }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) document.getElementById('mainContent').style.display = 'block';
-            else window.location.replace('login.html');
-        });
+        function handleUserInput() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
 
-        // AI Logic
-        window.toggleAIChat = (show) => {
-            const p = document.getElementById('aiChatPanel');
-            if(show) { p.classList.remove('hidden'); setTimeout(()=>p.classList.add('active'), 10); }
-            else { p.classList.remove('active'); setTimeout(()=>p.classList.add('hidden'), 400); }
-        };
+            addMsg(msg, 'user');
+            input.value = '';
+            
+            // Artificial delay for realism
+            setTimeout(() => {
+                const response = getBotResponse(msg);
+                addMsg(response, 'bot');
+            }, 800);
+        }
 
-        window.sendQuickQuery = (t) => { document.getElementById('chatInput').value = t; handleUserInput(); };
-
-        window.handleUserInput = () => {
-            const i = document.getElementById('chatInput');
-            const m = i.value.trim();
-            if(!m) return;
-            addMsg(m, 'user');
-            i.value = '';
-            setTimeout(() => addMsg(getBotResponse(m), 'bot'), 600);
-        };
-
-        function addMsg(t, type) {
-            const b = document.getElementById('chatBody');
-            const d = document.createElement('div');
-            d.className = type === 'user' ? "bg-white/5 border border-white/10 p-5 rounded-[2rem] rounded-tr-none max-w-[85%] self-end ml-auto text-sm font-medium text-slate-200" : "bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start text-sm text-blue-100 font-medium";
-            d.innerText = t;
-            b.appendChild(d);
-            b.scrollTo({ top: b.scrollHeight, behavior: 'smooth' });
+        function sendQuickQuery(text) {
+            addMsg(text, 'user');
+            setTimeout(() => {
+                addMsg(getBotResponse(text), 'bot');
+            }, 600);
         }
 
         function getBotResponse(input) {
             const q = input.toLowerCase();
-            if(q.includes('withdraw') || q.includes('سحب')) return "Withdrawal Protocol: Processing takes 2-96 hours. Once approved, funds arrive within 5 business days. Please ensure your wallet is active.";
-            if(q.includes('deposit') || q.includes('ايداع')) return "Deposit Protocol: Exclusively TRC20 network. Vertex is not liable for assets sent via BEP20 or incorrect addresses. Verify node before execution.";
-            if(q.includes('network') || q.includes('شبكة')) return "System supports BEP20 and TRC20. Warning: Transferring to a wrong network/address results in permanent asset loss. No recovery possible.";
-            if(q.includes('long') || q.includes('مدى')) return "Vertex Premier is a strategic long-term cloud mining ecosystem. We prioritize security and sustainable growth over short-term volatility.";
-            return "Query logged. For high-level human intervention, contact our VIP Technical Node via WhatsApp.";
+            if(q.includes('withdraw') || q.includes('سحب')) return "Withdrawal Protocol: 2-96 hours processing. Post-approval settlement within 5 business days.";
+            if(q.includes('deposit') || q.includes('ايداع')) return "Deposit Protocol: Exclusively TRC20 network. Vertex is not responsible for funds on incorrect networks.";
+            if(q.includes('network') || q.includes('شبكة')) return "Systems: BEP20 & TRC20 supported. Verify address node before confirming transfer.";
+            if(q.includes('long') || q.includes('مدى')) return "Strategy: Long-term sustainable cloud mining. Operational 24/7/365.";
+            return "Query logged. For high-level human assistance, contact VIP Node via WhatsApp.";
         }
+
+        // Enter key support
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleUserInput();
+        });
+
+        // Firebase Auth check (Minimal)
+        window.onload = () => {
+            document.getElementById('mainContent').style.display = 'block';
+        };
     </script>
 </body>
 </html>
