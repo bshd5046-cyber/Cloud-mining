@@ -106,7 +106,7 @@
     <section class="px-6 space-y-3 pb-10">
         <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
         
-        <div class="plan-card" id="plan-v1" data-min="50" data-max="499" data-team="0">
+        <div class="plan-card" id="plan-v1">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
@@ -116,7 +116,7 @@
             </div>
         </div>
 
-        <div class="plan-card" id="plan-v2" data-min="500" data-max="1999" data-team="5">
+        <div class="plan-card" id="plan-v2">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <div class="plan-card" id="plan-v3" data-min="2000" data-max="4999" data-team="10">
+        <div class="plan-card" id="plan-v3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
@@ -136,7 +136,7 @@
             </div>
         </div>
 
-        <div class="plan-card" id="plan-v4" data-min="5000" data-max="9999" data-team="20">
+        <div class="plan-card" id="plan-v4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-atom text-emerald-400 text-xl"></i></div>
@@ -146,7 +146,7 @@
             </div>
         </div>
 
-        <div class="plan-card" id="plan-v5" data-min="10000" data-max="1000000" data-team="30">
+        <div class="plan-card" id="plan-v5">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-rose-400 text-xl"></i></div>
@@ -212,13 +212,15 @@
                 if (!docSnap.exists()) return;
                 userData = docSnap.data();
                 const balance = parseFloat(userData.balance || 0);
+                const teamCount = parseInt(userData.teamCount || 0);
+
                 document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
                 document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                 document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                 document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                 document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
                 
-                updatePlanStatus(balance);
+                updatePlanStatus(balance, teamCount);
                 checkExecutionAvailability();
             });
         });
@@ -294,11 +296,9 @@
             }
         }
 
-        function updatePlanStatus(balance) {
-            const teamCount = parseInt(userData?.teamCount || 0);
+        function updatePlanStatus(balance, teamCount) {
             let activeId = "";
 
-            // تحديد المرحلة النشطة بناءً على نفس منطق الربح
             if (balance >= 10000 && teamCount >= 30) activeId = "plan-v5";
             else if (balance >= 5000 && teamCount >= 20) activeId = "plan-v4";
             else if (balance >= 2000 && teamCount >= 10) activeId = "plan-v3";
@@ -317,7 +317,7 @@
         execBtn.addEventListener('click', async () => {
             if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
             const balance = parseFloat(userData.balance || 0);
-            const teamCount = parseInt(userData?.teamCount || 0);
+            const teamCount = parseInt(userData.teamCount || 0);
             
             if (balance < 50) { 
                 showToast("Min $50 required", "fa-triangle-exclamation", "text-amber-400"); 
@@ -333,7 +333,7 @@
             else if (balance >= 50) rate = 0.019;
 
             if (rate === 0) {
-                showToast("Team requirements not met for this level", "fa-lock", "text-amber-400");
+                showToast("Team requirements not met", "fa-lock", "text-amber-400");
                 return;
             }
 
