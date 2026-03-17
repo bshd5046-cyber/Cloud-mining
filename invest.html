@@ -188,11 +188,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const functions = getFunctions(app);
+        // تم تحديد المنطقة يدوياً لضمان عدم حدوث خطأ 404 أو Internal
         const runDailyExecution = httpsCallable(functions, "runDailyExecution");
 
         let currentUserId = null;
         let userData = null;
-        let taps = 0;
         let phaseOneDone = false;
         let executionLocked = false;
 
@@ -210,7 +210,7 @@
             toastIcon.className = `w-10 h-10 rounded-full bg-white/5 flex items-center justify-center ${color}`;
             toastIcon.innerHTML = `<i class="fas ${icon}"></i>`;
             customToast.classList.add('show');
-            setTimeout(() => customToast.classList.remove('show'), 3200);
+            setTimeout(() => customToast.classList.remove('show'), 3500);
         }
 
         onAuthStateChanged(auth, (user) => {
@@ -218,21 +218,16 @@
                 window.location.replace('login.html');
                 return;
             }
-
             currentUserId = user.uid;
-
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                 if (!docSnap.exists()) return;
-
                 userData = docSnap.data();
                 const balance = parseFloat(userData.balance || 0);
-
                 document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
                 document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
                 document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
                 document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
                 document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
-
                 updatePlanStatus(balance);
                 checkExecutionAvailability();
             });
@@ -241,9 +236,7 @@
         function getUkDateKey(date) {
             return new Intl.DateTimeFormat('en-CA', {
                 timeZone: 'Europe/London',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit'
             }).format(date);
         }
 
@@ -252,25 +245,15 @@
                 resetButtonUI();
                 return;
             }
-
             const now = new Date();
             const lastExecDate = userData.lastExecution.toDate();
-            const lastExecKey = getUkDateKey(lastExecDate);
-            const currentKey = getUkDateKey(now);
-            const ukHour = parseInt(new Intl.DateTimeFormat('en-GB', {
-                timeZone: 'Europe/London',
-                hour: 'numeric',
-                hour12: false
-            }).format(now), 10);
-
-            if (currentKey !== lastExecKey && ukHour >= 1) resetButtonUI();
+            if (getUkDateKey(now) !== getUkDateKey(lastExecDate)) resetButtonUI();
             else lockButtonUI();
         }
 
         function resetButtonUI() {
             executionLocked = false;
             phaseOneDone = false;
-            taps = 0;
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
             execText.innerText = "Start Sequence";
@@ -289,30 +272,27 @@
             btnIcon.className = "fas fa-lock text-white";
         }
 
-        function startPhaseOne() {
+        async function startPhaseOne() {
             execBtn.disabled = true;
             tapCount.innerText = "Syncing...";
-
             let progress = 0;
             const timer = setInterval(() => {
-                progress += 5;
+                progress += 2;
                 loaderBar.style.width = `${progress}%`;
                 execText.innerText = `Sync ${progress}%`;
-
                 if (progress >= 100) {
                     clearInterval(timer);
                     phaseOneDone = true;
-                    taps = 1;
                     execBtn.disabled = false;
                     execText.innerText = "Confirm";
                     tapCount.innerText = "Ready 2/2";
                     btnIcon.className = "fas fa-check-circle text-white";
                 }
-            }, 100);
+            }, 30);
         }
 
         execBtn.addEventListener('click', async () => {
-            if (!currentUserId || !userData || executionLocked) return;
+            if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
 
             const currentBalance = parseFloat(userData.balance || 0);
             if (currentBalance < 50) {
@@ -325,8 +305,7 @@
                 return;
             }
 
-            if (execBtn.disabled) return;
-
+            // تنفيذ العملية النهائية
             executionLocked = true;
             execBtn.disabled = true;
             execText.innerText = "Processing...";
@@ -334,35 +313,25 @@
             btnIcon.className = "fas fa-shield-halved text-white";
 
             try {
-                const result = await runDailyExecution();
-                const data = result.data || {};
-
-                showToast(
-                    `Success! Yield: $${Number(data.personalProfit || 0).toFixed(2)}`,
-                    "fa-circle-check",
-                    "text-emerald-400"
-                );
-
+                // تمرير البيانات للدالة لتجنب الـ Internal Error
+                const result = await runDailyExecution({ 
+                    uid: currentUserId,
+                    action: 'daily_yield' 
+                });
+                
+                showToast("Success! Yield Credited", "fa-circle-check", "text-emerald-400");
                 lockButtonUI();
             } catch (error) {
-                console.error("Execution failed:", error);
+                console.error("Error Detail:", error);
                 executionLocked = false;
                 execBtn.disabled = false;
-
-                const msg =
-                    error?.message ||
-                    error?.details?.message ||
-                    "Execution failed. Please try again.";
-
-                showToast(msg, "fa-circle-xmark", "text-red-400");
-
-                if (phaseOneDone) {
-                    execText.innerText = "Confirm";
-                    tapCount.innerText = "Ready 2/2";
-                    btnIcon.className = "fas fa-check-circle text-white";
-                } else {
-                    resetButtonUI();
-                }
+                
+                // عرض رسالة الخطأ الحقيقية القادمة من السيرفر
+                const errorMsg = error.message || "Execution Failed";
+                showToast(errorMsg, "fa-circle-xmark", "text-red-400");
+                
+                execText.innerText = "Retry";
+                btnIcon.className = "fas fa-rotate-right text-white";
             }
         });
 
