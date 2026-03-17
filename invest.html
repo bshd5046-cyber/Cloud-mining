@@ -123,7 +123,7 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="150000">
+        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="1000000">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
@@ -235,17 +235,17 @@
             }, 60);
         }
 
-        // --- نظام عمولة الفريق المحدث بناءً على كود الدعوة ---
+        // --- نظام أرباح الفريق المعتمد على referralId ---
         async function processTeamCommission(userProfit) {
-            const commissions = [0.10, 0.05, 0.02]; // مستويات الربح 10%، 5%، 2%
-            let currentInviteCode = userData.inviteCode; // الكود الذي استخدمه المستخدم الحالي للتسجيل
+            const commissions = [0.10, 0.05, 0.02]; 
+            let codeToSearch = userData.inviteCode; // الكود المخزن عند المستخدم الحالي (كود الأب)
 
             for (let i = 0; i < commissions.length; i++) {
-                if (!currentInviteCode || currentInviteCode === "none" || currentInviteCode === "") break;
+                if (!codeToSearch || codeToSearch === "" || codeToSearch === "none") break;
 
                 try {
-                    // البحث عن المستخدم (الأب) الذي يملك هذا الـ referralId
-                    const q = query(collection(db, "users"), where("referralId", "==", currentInviteCode));
+                    // البحث في كولكشن users عن الشخص الذي يملك هذا الكود في حقل referralId
+                    const q = query(collection(db, "users"), where("referralId", "==", codeToSearch));
                     const querySnapshot = await getDocs(q);
 
                     if (!querySnapshot.empty) {
@@ -253,23 +253,23 @@
                         const parentRef = parentDoc.ref;
                         const parentData = parentDoc.data();
                         
-                        const amount = userProfit * commissions[i];
+                        const commissionAmount = userProfit * commissions[i];
 
-                        // تحديث رصيد الأب
+                        // تحديث بيانات الأب
                         await updateDoc(parentRef, {
-                            balance: increment(amount),
-                            teamEarn: increment(amount), // يضاف لربح الفريق اليومي
-                            totalTeamEarned: increment(amount)
+                            balance: increment(commissionAmount),
+                            teamEarn: increment(commissionAmount),
+                            totalTeamEarned: increment(commissionAmount)
                         });
 
-                        // ننتقل للمستوى الأعلى: من الذي دعا هذا الأب؟
-                        currentInviteCode = parentData.inviteCode;
+                        // ننتقل للمستوى التالي: نأخذ الـ inviteCode الخاص بالأب لنعطي اللي دعاه
+                        codeToSearch = parentData.inviteCode;
                     } else {
-                        break; // لا يوجد أب مسجل بهذا الكود
+                        break; 
                     }
-                } catch(e) { 
-                    console.error("Affiliate Logic Error:", e); 
-                    break; 
+                } catch(e) {
+                    console.error("Affiliate Error:", e);
+                    break;
                 }
             }
         }
@@ -288,17 +288,14 @@
             execText.innerText = "Processing..."; btnIcon.className = "fas fa-shield-halved text-white animate-pulse";
 
             try {
-                let rate = 0.019; // Silver
-                if (balance >= 15000) rate = 0.035;
-                else if (balance >= 5000) rate = 0.030;
-                else if (balance >= 2000) rate = 0.025; // Platinum
-                else if (balance >= 500) rate = 0.022; // Gold
+                let rate = 0.019;
+                if (balance >= 2000) rate = 0.025;
+                else if (balance >= 500) rate = 0.022;
 
                 const profit = balance * rate;
                 const userRef = doc(db, "users", currentUserId);
 
-                // 1. تصفير أرباح الفريق اليومية للمستخدم الحالي عند أول تنفيذ (اختياري حسب رغبتك)
-                // هنا نقوم فقط بإضافة الربح الشخصي
+                // 1. إضافة الربح الشخصي
                 await updateDoc(userRef, {
                     balance: increment(profit),
                     dailyEarn: profit,
@@ -306,7 +303,7 @@
                     lastExecution: serverTimestamp()
                 });
 
-                // 2. معالجة عمولات الفريق (الأب، الجد، الخ)
+                // 2. توزيع أرباح الفريق (الأب والجد)
                 await processTeamCommission(profit);
 
                 showToast("Success! Capital Yield Credited", "fa-circle-check", "text-emerald-400");
