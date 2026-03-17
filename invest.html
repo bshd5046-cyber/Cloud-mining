@@ -123,11 +123,11 @@
                 <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
         </div>
-        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="4999">
+        <div class="plan-card" id="plan-platinum" data-min="2000" data-max="150000">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
-                    <div><h4 class="text-sm font-black uppercase italic">Platinum</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 - $4,999</p></div>
+                    <div><h4 class="text-sm font-black uppercase italic">Platinum</h4><p class="text-[10px] text-slate-500 font-bold">$2,000 +</p></div>
                 </div>
                 <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
             </div>
@@ -145,7 +145,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, getDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDocs, collection, query, where, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -203,8 +203,8 @@
             if (!userData?.lastExecution) { resetButtonUI(); return; }
             const now = new Date();
             const lastExecDate = userData.lastExecution.toDate();
-            // مقارنة دقيقة بالتاريخ لمنع التجاوز
-            if (now.toDateString() !== lastExecDate.toDateString()) resetButtonUI(); else lockButtonUI();
+            if (now.toDateString() !== lastExecDate.toDateString()) resetButtonUI(); 
+            else lockButtonUI();
         }
 
         function resetButtonUI() {
@@ -235,25 +235,42 @@
             }, 60);
         }
 
+        // --- نظام عمولة الفريق المحدث بناءً على كود الدعوة ---
         async function processTeamCommission(userProfit) {
-            const commissions = [0.10, 0.05, 0.02]; 
-            let parentId = userData.referredBy;
+            const commissions = [0.10, 0.05, 0.02]; // مستويات الربح 10%، 5%، 2%
+            let currentInviteCode = userData.inviteCode; // الكود الذي استخدمه المستخدم الحالي للتسجيل
 
             for (let i = 0; i < commissions.length; i++) {
-                if (!parentId || parentId === "none" || parentId === "") break;
+                if (!currentInviteCode || currentInviteCode === "none" || currentInviteCode === "") break;
+
                 try {
-                    const parentRef = doc(db, "users", parentId);
-                    const parentSnap = await getDoc(parentRef);
-                    if (parentSnap.exists()) {
+                    // البحث عن المستخدم (الأب) الذي يملك هذا الـ referralId
+                    const q = query(collection(db, "users"), where("referralId", "==", currentInviteCode));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const parentDoc = querySnapshot.docs[0];
+                        const parentRef = parentDoc.ref;
+                        const parentData = parentDoc.data();
+                        
                         const amount = userProfit * commissions[i];
+
+                        // تحديث رصيد الأب
                         await updateDoc(parentRef, {
                             balance: increment(amount),
-                            teamEarn: amount,
+                            teamEarn: increment(amount), // يضاف لربح الفريق اليومي
                             totalTeamEarned: increment(amount)
                         });
-                        parentId = parentSnap.data().referredBy;
-                    } else break;
-                } catch(e) { console.error("Affiliate error", e); break; }
+
+                        // ننتقل للمستوى الأعلى: من الذي دعا هذا الأب؟
+                        currentInviteCode = parentData.inviteCode;
+                    } else {
+                        break; // لا يوجد أب مسجل بهذا الكود
+                    }
+                } catch(e) { 
+                    console.error("Affiliate Logic Error:", e); 
+                    break; 
+                }
             }
         }
 
@@ -271,15 +288,17 @@
             execText.innerText = "Processing..."; btnIcon.className = "fas fa-shield-halved text-white animate-pulse";
 
             try {
-                let rate = 0.019;
+                let rate = 0.019; // Silver
                 if (balance >= 15000) rate = 0.035;
                 else if (balance >= 5000) rate = 0.030;
-                else if (balance >= 2000) rate = 0.025;
-                else if (balance >= 500) rate = 0.022;
+                else if (balance >= 2000) rate = 0.025; // Platinum
+                else if (balance >= 500) rate = 0.022; // Gold
 
                 const profit = balance * rate;
                 const userRef = doc(db, "users", currentUserId);
 
+                // 1. تصفير أرباح الفريق اليومية للمستخدم الحالي عند أول تنفيذ (اختياري حسب رغبتك)
+                // هنا نقوم فقط بإضافة الربح الشخصي
                 await updateDoc(userRef, {
                     balance: increment(profit),
                     dailyEarn: profit,
@@ -287,7 +306,9 @@
                     lastExecution: serverTimestamp()
                 });
 
+                // 2. معالجة عمولات الفريق (الأب، الجد، الخ)
                 await processTeamCommission(profit);
+
                 showToast("Success! Capital Yield Credited", "fa-circle-check", "text-emerald-400");
                 lockButtonUI();
             } catch (error) {
