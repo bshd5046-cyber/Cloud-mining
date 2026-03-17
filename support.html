@@ -73,7 +73,6 @@
         .faq-item { border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
         .faq-item:last-child { border-bottom: none; }
 
-        /* AI Chat Styles */
         #aiChatPanel { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateY(100%); }
         #aiChatPanel.active { transform: translateY(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -91,7 +90,7 @@
         </header>
 
         <div class="px-6 space-y-5">
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Direct Channels</h3>
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">AI Terminal</h3>
             
             <div onclick="toggleAIChat(true)" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
                 <div class="flex items-center gap-5">
@@ -99,8 +98,8 @@
                         <i class="fas fa-robot text-2xl"></i>
                     </div>
                     <div>
-                        <h4 class="font-black text-white text-lg tracking-tight">AI Assistant</h4>
-                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Instant Response</p>
+                        <h4 class="font-black text-white text-lg tracking-tight">System AI Node</h4>
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Instant Resolution</p>
                     </div>
                 </div>
                 <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
@@ -108,51 +107,36 @@
                 </div>
             </div>
 
-            <a href="https://wa.me/YourNumber" class="support-card glass-panel rounded-[2.5rem] p-7 flex items-center justify-between">
-                <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 bg-[#25D366]/10 rounded-2xl flex items-center justify-center text-[#25D366] border border-[#25D366]/20">
-                        <i class="fab fa-whatsapp text-2xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-black text-white text-lg tracking-tight">VIP Priority</h4>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Technical Node</p>
-                    </div>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                    <i class="fas fa-chevron-right text-[10px] text-slate-600"></i>
-                </div>
-            </a>
-
-            <div class="glass-panel rounded-[2.5rem] p-7 flex items-center gap-6">
-                <div class="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 border border-indigo-500/20">
-                    <i class="fas fa-envelope-open-text text-2xl"></i>
-                </div>
-                <div>
-                    <h4 class="font-black text-white tracking-tight">Official Mail</h4>
-                    <p class="text-xs text-slate-400 font-medium">support@vertex-premier.io</p>
-                </div>
-            </div>
-
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4 mt-10">Knowledge Base</h3>
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4 mt-6">Protocol FAQ</h3>
             
             <div class="glass-panel rounded-[2.5rem] overflow-hidden mb-10">
                 <details class="group faq-item">
                     <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
-                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Authorize Deposits</span>
-                        <i class="fas fa-plus text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
+                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Withdrawal Timeline</span>
+                        <i class="fas fa-clock text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
                     </summary>
                     <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
-                        Access terminal, select deposit protocol, and execute USDT-TRC20 transfer to your unique node address.
+                        Request processing: 2 to 96 hours. Post-approval, funds are settled within 5 business days.
                     </div>
                 </details>
 
                 <details class="group faq-item">
                     <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
-                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Withdrawal Speed</span>
-                        <i class="fas fa-plus text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
+                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Network Protocols</span>
+                        <i class="fas fa-shield-halved text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
                     </summary>
                     <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
-                        Automated smart-contracts process withdrawals within 5-30 minutes. Network congestion may apply.
+                        Supported: BEP20 / TRC20. Vertex is not responsible for assets sent via incorrect networks or addresses.
+                    </div>
+                </details>
+
+                <details class="group faq-item">
+                    <summary class="flex items-center justify-between p-7 cursor-pointer list-none active:bg-white/5 transition-all">
+                        <span class="font-black text-[13px] text-slate-200 uppercase tracking-tight">Investment Nature</span>
+                        <i class="fas fa-chart-line text-[10px] text-blue-500 transition-transform group-open:rotate-45"></i>
+                    </summary>
+                    <div class="px-7 pb-7 text-xs text-slate-500 leading-relaxed font-semibold uppercase tracking-wider">
+                        Vertex Premier is a long-term cloud mining and investment ecosystem designed for sustainable scaling.
                     </div>
                 </details>
             </div>
@@ -167,22 +151,21 @@
                 </button>
                 <div>
                     <h2 class="font-black text-white uppercase tracking-tighter italic">Vertex <span class="text-blue-500">AI Node</span></h2>
-                    <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-widest">Active Intelligence</p>
                 </div>
             </div>
-            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
         </div>
 
         <div id="chatBody" class="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col no-scrollbar">
             <div class="bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start">
-                <p class="text-sm text-blue-100 font-medium tracking-tight">Welcome to Vertex Support. I am your automated technical node. How can I assist your protocol today?</p>
+                <p class="text-sm text-blue-100 font-medium tracking-tight">Vertex AI online. State your query regarding Deposits, Withdrawals, or System Protocols.</p>
             </div>
         </div>
 
         <div class="p-4 flex gap-2 overflow-x-auto no-scrollbar">
-            <button onclick="sendQuickQuery('How to Deposit?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Deposit Info</button>
-            <button onclick="sendQuickQuery('Withdrawal Speed?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Withdrawal</button>
-            <button onclick="sendQuickQuery('Bonus System?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest text-slate-400">Bonuses</button>
+            <button onclick="sendQuickQuery('Withdrawal rules?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Withdrawal Rules</button>
+            <button onclick="sendQuickQuery('Deposit network?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Networks</button>
+            <button onclick="sendQuickQuery('Long term?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest text-slate-400">Strategy</button>
         </div>
 
         <div class="p-6 pb-10 glass-panel border-t border-white/5">
@@ -210,6 +193,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // ... Firebase Config (نفس الكود الخاص بك) ...
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
             authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -218,70 +202,48 @@
             messagingSenderId: "144227180849",
             appId: "1:144227180849:web:ccbda447d074efbbddd010"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('mainContent').style.display = 'block';
-            } else {
-                window.location.replace('login.html');
-            }
+            if (user) document.getElementById('mainContent').style.display = 'block';
+            else window.location.replace('login.html');
         });
 
-        // --- AI CHAT LOGIC ---
-        window.toggleAIChat = function(show) {
-            const panel = document.getElementById('aiChatPanel');
-            if(show) {
-                panel.classList.remove('hidden');
-                setTimeout(() => panel.classList.add('active'), 10);
-            } else {
-                panel.classList.remove('active');
-                setTimeout(() => panel.classList.add('hidden'), 400);
-            }
-        }
+        // AI Logic
+        window.toggleAIChat = (show) => {
+            const p = document.getElementById('aiChatPanel');
+            if(show) { p.classList.remove('hidden'); setTimeout(()=>p.classList.add('active'), 10); }
+            else { p.classList.remove('active'); setTimeout(()=>p.classList.add('hidden'), 400); }
+        };
 
-        window.sendQuickQuery = function(text) {
-            document.getElementById('chatInput').value = text;
-            handleUserInput();
-        }
+        window.sendQuickQuery = (t) => { document.getElementById('chatInput').value = t; handleUserInput(); };
 
-        window.handleUserInput = function() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if(!msg) return;
+        window.handleUserInput = () => {
+            const i = document.getElementById('chatInput');
+            const m = i.value.trim();
+            if(!m) return;
+            addMsg(m, 'user');
+            i.value = '';
+            setTimeout(() => addMsg(getBotResponse(m), 'bot'), 600);
+        };
 
-            addMsg(msg, 'user');
-            input.value = '';
-
-            // Bot Response
-            setTimeout(() => {
-                const response = getBotResponse(msg);
-                addMsg(response, 'bot');
-            }, 600);
-        }
-
-        function addMsg(text, type) {
-            const body = document.getElementById('chatBody');
-            const div = document.createElement('div');
-            if(type === 'user') {
-                div.className = "bg-white/5 border border-white/10 p-5 rounded-[2rem] rounded-tr-none max-w-[85%] self-end ml-auto text-sm font-medium text-slate-200";
-            } else {
-                div.className = "bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start text-sm text-blue-100 font-medium";
-            }
-            div.innerText = text;
-            body.appendChild(div);
-            body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+        function addMsg(t, type) {
+            const b = document.getElementById('chatBody');
+            const d = document.createElement('div');
+            d.className = type === 'user' ? "bg-white/5 border border-white/10 p-5 rounded-[2rem] rounded-tr-none max-w-[85%] self-end ml-auto text-sm font-medium text-slate-200" : "bg-blue-600/10 border border-blue-500/20 p-5 rounded-[2rem] rounded-tl-none max-w-[85%] self-start text-sm text-blue-100 font-medium";
+            d.innerText = t;
+            b.appendChild(d);
+            b.scrollTo({ top: b.scrollHeight, behavior: 'smooth' });
         }
 
         function getBotResponse(input) {
             const q = input.toLowerCase();
-            if(q.includes('deposit')) return "To deposit: Go to Wallet section, select USDT-TRC20, and send funds to your generated address. Activation is instant after 3 confirmations.";
-            if(q.includes('withdraw')) return "Withdrawals are processed automatically via smart-contract. Average time is 5-30 minutes to your registered TRC20 wallet.";
-            if(q.includes('bonus')) return "Our referral system offers 10% on direct invites and tiered bonuses for team growth. Check the 'Profile' tab for your link.";
-            if(q.includes('status') || q.includes('work')) return "All investment nodes are currently operational. System latency: 24ms. Operational 24/7.";
-            return "I have logged your query. For specialized human assistance, please use our VIP Priority WhatsApp channel.";
+            if(q.includes('withdraw') || q.includes('سحب')) return "Withdrawal Protocol: Processing takes 2-96 hours. Once approved, funds arrive within 5 business days. Please ensure your wallet is active.";
+            if(q.includes('deposit') || q.includes('ايداع')) return "Deposit Protocol: Exclusively TRC20 network. Vertex is not liable for assets sent via BEP20 or incorrect addresses. Verify node before execution.";
+            if(q.includes('network') || q.includes('شبكة')) return "System supports BEP20 and TRC20. Warning: Transferring to a wrong network/address results in permanent asset loss. No recovery possible.";
+            if(q.includes('long') || q.includes('مدى')) return "Vertex Premier is a strategic long-term cloud mining ecosystem. We prioritize security and sustainable growth over short-term volatility.";
+            return "Query logged. For high-level human intervention, contact our VIP Technical Node via WhatsApp.";
         }
     </script>
 </body>
