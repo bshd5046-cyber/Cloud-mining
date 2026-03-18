@@ -1,46 +1,1166 @@
-async function rejectWithdrawalRequest(requestId, reason = "") {
-    const requestRef = doc(db, "withdrawalRequests", requestId);
-
-    await runTransaction(db, async (transaction) => {
-        const requestSnap = await transaction.get(requestRef);
-
-        if (!requestSnap.exists()) {
-            throw new Error("Request not found");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wallet | VERTEX PREMIER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --primary: #3b82f6;
+            --nav-bg: rgba(7, 10, 22, 0.98);
         }
 
-        const requestData = requestSnap.data();
-
-        if (String(requestData.status || '').toLowerCase() !== 'pending') {
-            throw new Error("Request already processed");
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
 
-        const userRef = doc(db, "users", requestData.uid);
-        const userSnap = await transaction.get(userRef);
-
-        if (!userSnap.exists()) {
-            throw new Error("User not found");
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #ffffff;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.16) 0%, transparent 40%),
+                radial-gradient(circle at 100% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 30%),
+                #020617;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
 
-        const currentBalance = Number(userSnap.data().balance || 0);
-        const amount = Number(requestData.amount || 0);
+        .bottom-nav {
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            height: 85px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: 15px;
+        }
 
-        transaction.update(userRef, {
-            balance: currentBalance + amount
+        .invest-fab {
+            width: 68px;
+            height: 68px;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            top: -28px;
+            border: 6px solid #020617;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .invest-fab:active {
+            transform: scale(0.96);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #475569;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .crypto-card {
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(135deg, rgba(30, 64, 175, 0.52) 0%, rgba(124, 58, 237, 0.48) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.15);
+        }
+
+        .crypto-card::before {
+            content: "";
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            filter: blur(10px);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.62);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 1.5rem;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.18);
+            background: rgba(255,255,255,0.03);
+        }
+
+        .tx-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .slide-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            align-items: flex-end;
+        }
+
+        .panel-content {
+            width: 100%;
+            background: #070b16;
+            border-radius: 3rem 3rem 0 0;
+            padding: 2.5rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            transform: translateY(100%);
+            transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .show-panel {
+            display: flex !important;
+        }
+
+        .show-panel .panel-content {
+            transform: translateY(0);
+        }
+
+        #qrcode {
+            padding: 12px;
+            background: white;
+            border-radius: 1.25rem;
+            width: fit-content;
+            margin: 0 auto;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+        }
+
+        #qrcode img {
+            margin: 0 auto;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #22c55e;
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+        }
+
+        .mini-pill {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .action-btn {
+            transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-ready {
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.22);
+        }
+
+        .copy-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .address-box {
+            position: relative;
+        }
+
+        .address-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            padding: 6px 9px;
+            border-radius: 999px;
+        }
+
+        .pulse-soft {
+            animation: pulseSoft 2.2s infinite;
+        }
+
+        .field {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            border-radius: 1rem;
+            padding: 16px;
+            outline: none;
+        }
+
+        .field::placeholder {
+            color: #64748b;
+        }
+
+        .field:focus {
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .status-pending {
+            color: #f59e0b;
+        }
+
+        .status-approved {
+            color: #22c55e;
+        }
+
+        .status-rejected,
+        .status-cancelled {
+            color: #ef4444;
+        }
+
+        .cancel-btn {
+            margin-top: 8px;
+            padding: 6px 10px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            border-radius: 999px;
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.18);
+        }
+
+        @keyframes pulseSoft {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.16); }
+            70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div id="mainContent">
+        <div class="px-8 pt-16 flex justify-between items-center">
+            <div>
+                <p class="text-[10px] uppercase tracking-[0.28em] text-slate-500 font-black">Secure Wallet</p>
+                <h1 class="text-3xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Vault</span></h1>
+            </div>
+            <div class="flex items-center gap-2 mini-pill px-3 py-2 rounded-full pulse-soft">
+                <span class="status-dot"></span>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200">Live</span>
+            </div>
+        </div>
+
+        <div class="px-6 mt-8">
+            <div class="crypto-card p-8">
+                <div class="flex justify-between items-start gap-4">
+                    <div>
+                        <p class="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Secured Balance</p>
+                        <h2 id="userBalance" class="text-5xl font-black mt-3 tracking-tighter">$0.00</h2>
+                    </div>
+                    <div class="mini-pill px-3 py-2 rounded-xl text-right shrink-0">
+                        <p class="text-[8px] uppercase tracking-[0.2em] text-slate-400 font-black">Network</p>
+                        <p class="text-[11px] font-black text-blue-300">USDT TRC20</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-end">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.25em] text-slate-400 font-black mb-2">Account Holder</p>
+                        <p id="userName" class="text-sm font-black tracking-widest italic uppercase text-slate-100">---</p>
+                    </div>
+                    <p id="userTier" class="text-[9px] font-black text-blue-400 border border-blue-400/30 px-2 py-1 rounded-md uppercase">Tier 1</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 mt-5 grid grid-cols-2 gap-4">
+            <div class="stat-card rounded-[1.8rem] p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-black">Wallet Type</p>
+                        <p class="text-sm font-black text-white mt-2">Custodial</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card rounded-[1.8rem] p-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] uppercase tracking-[0.2em] text-slate-500 font-black">Status</p>
+                        <p class="text-sm font-black text-emerald-400 mt-2">Protected</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6 mt-6 flex gap-4">
+            <button id="depositTrigger" class="action-btn flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest shadow-lg shadow-blue-600/20">
+                <i class="fas fa-arrow-down mr-2"></i>Deposit
+            </button>
+            <button id="withdrawTrigger" class="action-btn flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">
+                <i class="fas fa-arrow-up mr-2"></i>Withdraw
+            </button>
+        </div>
+
+        <div class="px-6 mt-10">
+            <div class="flex justify-between items-center mb-6 px-2">
+                <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600">Live Ledger</h3>
+                <span class="text-[9px] uppercase tracking-[0.24em] text-blue-400 font-black">Auto Sync</span>
+            </div>
+
+            <div id="transactionHistory" class="glass-panel rounded-[2.5rem] p-4 space-y-3">
+                <p class="text-center text-[10px] text-slate-500 py-4">SYNCING...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="depositPanel" class="slide-panel">
+        <div class="panel-content text-center">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black uppercase italic text-blue-500">Fast Deposit</h3>
+                <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white text-xl">&times;</button>
+            </div>
+
+            <div class="mini-pill rounded-2xl p-3 mb-5 flex justify-between items-center">
+                <div class="text-left">
+                    <p class="text-[9px] font-black tracking-[0.24em] uppercase text-slate-500">Accepted Asset</p>
+                    <p class="text-sm font-black text-white mt-1">USDT (TRC20)</p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+            </div>
+
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Send only via TRON network</p>
+
+            <div id="qrcode" class="mb-6"></div>
+
+            <div class="address-box bg-black/40 border border-white/10 p-4 rounded-2xl mb-4 break-all">
+                <span class="address-badge">Wallet</span>
+                <p id="depositAddrText" class="text-xs font-mono text-blue-300 italic pr-16">Waiting for system...</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6 text-left">
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Minimum</p>
+                    <p class="text-sm font-black text-white mt-2">1 USDT</p>
+                </div>
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Credit</p>
+                    <p class="text-sm font-black text-emerald-400 mt-2">Automatic</p>
+                </div>
+            </div>
+
+            <button id="copyBtn" class="action-btn w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest copy-disabled" disabled>
+                Copy Address
+            </button>
+            <p class="text-[9px] text-red-400 font-bold mt-4 uppercase italic">Do not send unsupported assets to this address</p>
+        </div>
+    </div>
+
+    <div id="withdrawPanel" class="slide-panel">
+        <div class="panel-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black uppercase italic text-blue-500">Withdrawal Request</h3>
+                <button id="closeWithdraw" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white text-xl">&times;</button>
+            </div>
+
+            <div class="mini-pill rounded-2xl p-4 mb-5">
+                <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Available Balance</p>
+                <p id="withdrawAvailableBalance" class="text-2xl font-black mt-2">$0.00</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Wallet Address</label>
+                    <input id="withdrawAddress" type="text" class="field" placeholder="Enter destination wallet address">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Amount (USDT)</label>
+                    <input id="withdrawAmount" type="number" min="1" step="0.01" class="field" placeholder="Enter amount">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Notes (optional)</label>
+                    <textarea id="withdrawNote" class="field min-h-[110px] resize-none" placeholder="Optional note"></textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-5 mb-5 text-left">
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Processing</p>
+                    <p class="text-sm font-black text-emerald-400 mt-2">Automatic</p>
+                </div>
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Balance Rule</p>
+                    <p class="text-sm font-black text-white mt-2">Deduct On Submit</p>
+                </div>
+            </div>
+
+            <button id="submitWithdrawBtn" class="action-btn w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest">
+                Submit Withdrawal Request
+            </button>
+
+            <p class="text-[9px] text-slate-500 font-bold mt-4 uppercase italic text-center">
+                Requests are processed automatically. Make sure the wallet address is correct. Incorrect address submissions cannot be reversed.
+            </p>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import {
+            getFirestore,
+            doc,
+            onSnapshot,
+            collection,
+            query,
+            orderBy,
+            limit,
+            serverTimestamp,
+            runTransaction
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const SECURITY_ENABLED_FIELD = 'securityEnabled';
+        const SECURITY_PIN_FIELD = 'securityPin';
+
+        let currentAddr = "";
+        let qrGenerated = false;
+        let currentUser = null;
+        let currentUserData = null;
+
+        const copyBtn = document.getElementById('copyBtn');
+        const depositAddrText = document.getElementById('depositAddrText');
+        const depositPanel = document.getElementById('depositPanel');
+        const depositTrigger = document.getElementById('depositTrigger');
+        const closeDep = document.getElementById('closeDep');
+        const withdrawTrigger = document.getElementById('withdrawTrigger');
+        const withdrawPanel = document.getElementById('withdrawPanel');
+        const closeWithdraw = document.getElementById('closeWithdraw');
+        const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
+        const withdrawAddress = document.getElementById('withdrawAddress');
+        const withdrawAmount = document.getElementById('withdrawAmount');
+        const withdrawNote = document.getElementById('withdrawNote');
+        const withdrawAvailableBalance = document.getElementById('withdrawAvailableBalance');
+
+        function setCopyState(enabled) {
+            copyBtn.disabled = !enabled;
+            copyBtn.classList.toggle('copy-disabled', !enabled);
+            copyBtn.classList.toggle('copy-ready', enabled);
+        }
+
+        function enableAddressUI(address) {
+            currentAddr = address || "";
+            depositAddrText.innerText = currentAddr || "Waiting for system...";
+            depositAddrText.classList.toggle('italic', !currentAddr);
+            setCopyState(!!currentAddr);
+
+            if (currentAddr && !qrGenerated) {
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), {
+                    text: currentAddr,
+                    width: 160,
+                    height: 160
+                });
+                qrGenerated = true;
+            }
+        }
+
+        function openDepositPanel() {
+            depositPanel.classList.add('show-panel');
+        }
+
+        function closeDepositPanel() {
+            depositPanel.classList.remove('show-panel');
+        }
+
+        function openWithdrawPanel() {
+            withdrawAvailableBalance.innerText = formatCurrency(currentUserData?.balance || 0);
+            withdrawPanel.classList.add('show-panel');
+        }
+
+        function closeWithdrawPanel() {
+            withdrawPanel.classList.remove('show-panel');
+        }
+
+        function formatCurrency(amount) {
+            return `$${parseFloat(amount || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
+
+        function formatType(item) {
+            if (item.type) return item.type;
+            if (item._source === 'withdrawal') return 'Withdrawal';
+            if (item._source === 'deposit') return 'Deposit';
+            if (item.txId || item.token === 'USDT') return 'Deposit';
+            return 'Transaction';
+        }
+
+        function detectTransactionKind(item, typeLabel) {
+            const lower = String(typeLabel || '').toLowerCase();
+            if (lower.includes('withdraw')) return 'withdrawal';
+            if (lower.includes('deposit')) return 'deposit';
+            if (item._source === 'withdrawal') return 'withdrawal';
+            if (item._source === 'deposit') return 'deposit';
+            if (item.txId || item.token === 'USDT') return 'deposit';
+            return 'withdrawal';
+        }
+
+        function transactionIcon(kind) {
+            if (kind === 'deposit') {
+                return `
+                    <div class="tx-icon bg-emerald-500/10 text-emerald-400">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="tx-icon bg-red-500/10 text-red-400">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            `;
+        }
+
+        function formatDateLabel(timestamp) {
+            if (!timestamp) return 'Processing';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function getStatusClass(status) {
+            const s = String(status || '').toLowerCase();
+            if (s === 'approved' || s === 'completed') return 'status-approved';
+            if (s === 'rejected' || s === 'failed') return 'status-rejected';
+            if (s === 'cancelled') return 'status-cancelled';
+            return 'status-pending';
+        }
+
+        function hasSecuritySetup() {
+            return !!(
+                currentUserData &&
+                currentUserData[SECURITY_ENABLED_FIELD] === true &&
+                String(currentUserData[SECURITY_PIN_FIELD] || '').length === 6
+            );
+        }
+
+        async function verifyWithdrawalPin() {
+            const savedPin = String(currentUserData?.[SECURITY_PIN_FIELD] || '');
+
+            if (!savedPin || savedPin.length !== 6) {
+                Swal.fire({
+                    title: 'Security Setup Required',
+                    text: 'Please complete your profile security settings and create your 6-digit code first.',
+                    icon: 'warning',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+                return false;
+            }
+
+            const result = await Swal.fire({
+                title: 'Security Verification',
+                input: 'password',
+                inputLabel: 'Enter your 6-digit security code',
+                inputPlaceholder: '••••••',
+                inputAttributes: {
+                    maxlength: 6,
+                    autocapitalize: 'off',
+                    autocorrect: 'off',
+                    inputmode: 'numeric'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verify',
+                cancelButtonText: 'Cancel',
+                background: '#0f172a',
+                color: '#fff',
+                preConfirm: (value) => {
+                    const pin = String(value || '').trim();
+                    if (!/^\d{6}$/.test(pin)) {
+                        Swal.showValidationMessage('Please enter a valid 6-digit code');
+                        return false;
+                    }
+                    return pin;
+                }
+            });
+
+            if (!result.isConfirmed) return false;
+
+            if (result.value !== savedPin) {
+                Swal.fire({
+                    title: 'Invalid Code',
+                    text: 'The 6-digit security code is incorrect.',
+                    icon: 'error',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+                return false;
+            }
+
+            return true;
+        }
+
+        async function copyAddress(address) {
+            if (!address) return false;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(address);
+                    return true;
+                }
+
+                const textArea = document.createElement('textarea');
+                textArea.value = address;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return successful;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function cancelWithdrawalRequest(requestId) {
+            if (!currentUser || !requestId) return;
+
+            const requestRef = doc(db, "withdrawalRequests", requestId);
+            const userWithdrawalRef = doc(db, "users", currentUser.uid, "withdrawals", requestId);
+            const userRef = doc(db, "users", currentUser.uid);
+
+            await runTransaction(db, async (transaction) => {
+                const requestSnap = await transaction.get(requestRef);
+                const userWithdrawalSnap = await transaction.get(userWithdrawalRef);
+                const userSnap = await transaction.get(userRef);
+
+                if (!requestSnap.exists()) {
+                    throw new Error("Withdrawal request not found");
+                }
+
+                if (!userWithdrawalSnap.exists()) {
+                    throw new Error("User withdrawal record not found");
+                }
+
+                if (!userSnap.exists()) {
+                    throw new Error("User not found");
+                }
+
+                const requestData = requestSnap.data();
+                const userData = userSnap.data();
+
+                if (String(requestData.uid || '') !== String(currentUser.uid)) {
+                    throw new Error("You cannot cancel this request");
+                }
+
+                if (String(requestData.status || '').toLowerCase() !== 'pending') {
+                    throw new Error("Only pending requests can be cancelled");
+                }
+
+                const amount = Number(requestData.amount || 0);
+                const currentBalance = Number(userData.balance || 0);
+
+                transaction.update(userRef, {
+                    balance: currentBalance + amount
+                });
+
+                transaction.update(requestRef, {
+                    status: 'cancelled',
+                    cancelledAt: serverTimestamp(),
+                    cancelledBy: currentUser.uid
+                });
+
+                transaction.update(userWithdrawalRef, {
+                    status: 'cancelled',
+                    cancelledAt: serverTimestamp(),
+                    cancelledBy: currentUser.uid
+                });
+            });
+        }
+
+        window.handleCancelWithdrawal = async (requestId) => {
+            const result = await Swal.fire({
+                title: 'Cancel Request?',
+                text: 'This will return the amount back to your balance.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Cancel Request',
+                cancelButtonText: 'Keep Request',
+                background: '#0f172a',
+                color: '#fff'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                await cancelWithdrawalRequest(requestId);
+
+                Swal.fire({
+                    title: 'Cancelled',
+                    text: 'Your withdrawal request has been cancelled and the balance was restored.',
+                    icon: 'success',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            } catch (error) {
+                Swal.fire({
+                    title: 'Cancel Failed',
+                    text: error.message || 'Something went wrong',
+                    icon: 'error',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            }
+        };
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                currentUser = user;
+
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    const data = snap.data();
+
+                    if (data) {
+                        currentUserData = data;
+                        document.getElementById('userBalance').innerText = formatCurrency(data.balance || 0);
+                        document.getElementById('userName').innerText = data.fullName || "USER";
+                        document.getElementById('userTier').innerText = data.tier || "Tier 1";
+                        withdrawAvailableBalance.innerText = formatCurrency(data.balance || 0);
+
+                        if (data.depositAddress) {
+                            enableAddressUI(data.depositAddress);
+                        } else {
+                            enableAddressUI("");
+                        }
+                    }
+                });
+
+                fetchCombinedHistory(user.uid);
+            } else {
+                window.location.replace('login.html');
+            }
         });
 
-        transaction.update(requestRef, {
-            status: "rejected",
-            adminNote: reason,
-            reviewedAt: serverTimestamp(),
-            reviewedBy: "admin"
+        function fetchCombinedHistory(uid) {
+            const historyContainer = document.getElementById('transactionHistory');
+
+            const depositsQuery = query(
+                collection(db, "users", uid, "deposits"),
+                orderBy("timestamp", "desc"),
+                limit(5)
+            );
+
+            const withdrawalsQuery = query(
+                collection(db, "users", uid, "withdrawals"),
+                orderBy("timestamp", "desc"),
+                limit(10)
+            );
+
+            onSnapshot(depositsQuery, (depSnap) => {
+                onSnapshot(withdrawalsQuery, (withSnap) => {
+                    let allItems = [];
+
+                    depSnap.forEach(d => allItems.push({ ...d.data(), id: d.id, _source: 'deposit' }));
+                    withSnap.forEach(d => allItems.push({ ...d.data(), id: d.id, _source: 'withdrawal' }));
+
+                    allItems.sort((a, b) => {
+                        const timeA = a.timestamp?.seconds || 0;
+                        const timeB = b.timestamp?.seconds || 0;
+                        return timeB - timeA;
+                    });
+
+                    const limitedItems = allItems.slice(0, 12);
+
+                    if (limitedItems.length === 0) {
+                        historyContainer.innerHTML = `
+                            <div class="text-center py-6">
+                                <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 text-slate-500">
+                                    <i class="fas fa-clock-rotate-left"></i>
+                                </div>
+                                <p class="text-[10px] opacity-40 font-black tracking-[0.18em] uppercase">No Recent Activity</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+
+                    limitedItems.forEach(item => {
+                        const typeLabel = formatType(item);
+                        const kind = detectTransactionKind(item, typeLabel);
+                        const isDeposit = kind === 'deposit';
+                        const colorClass = isDeposit ? 'text-emerald-400' : 'text-red-400';
+                        const prefix = isDeposit ? '+' : '-';
+                        const status = item.status || 'Completed';
+                        const dateLabel = formatDateLabel(item.timestamp);
+                        const amount = parseFloat(item.amount || 0).toFixed(2);
+                        const statusClass = getStatusClass(status);
+                        const canCancel = item._source === 'withdrawal' && String(status).toLowerCase() === 'pending';
+
+                        html += `
+                            <div class="history-item p-4 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    ${transactionIcon(kind)}
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[11px] font-black uppercase tracking-wide text-white truncate">${typeLabel}</p>
+                                        <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                            <span class="text-[8px] font-black uppercase tracking-[0.18em] ${statusClass}">${status}</span>
+                                            <span class="text-[8px] text-slate-600">•</span>
+                                            <span class="text-[8px] font-bold text-slate-500">${dateLabel}</span>
+                                        </div>
+                                        ${canCancel ? `<button class="cancel-btn" onclick="handleCancelWithdrawal('${item.id}')">Cancel Request</button>` : ``}
+                                    </div>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="text-[14px] font-black ${colorClass}">${prefix}$${amount}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    historyContainer.innerHTML = html;
+                });
+            });
+        }
+
+        depositTrigger.onclick = () => {
+            openDepositPanel();
+        };
+
+        closeDep.onclick = () => {
+            closeDepositPanel();
+        };
+
+        depositPanel.addEventListener('click', (e) => {
+            if (e.target === depositPanel) {
+                closeDepositPanel();
+            }
         });
 
-        const userWithdrawalRef = doc(db, "users", requestData.uid, "withdrawals", requestId);
-        transaction.update(userWithdrawalRef, {
-            status: "rejected",
-            adminNote: reason,
-            reviewedAt: serverTimestamp(),
-            reviewedBy: "admin"
+        withdrawTrigger.onclick = async () => {
+            if (!currentUser || !currentUserData) {
+                Swal.fire({
+                    title: 'Please Wait',
+                    text: 'User data is still loading',
+                    icon: 'warning',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            if (!hasSecuritySetup()) {
+                const result = await Swal.fire({
+                    title: 'Security Setup Required',
+                    text: 'You must enable profile security and set your 6-digit code before submitting a withdrawal.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Go to Profile',
+                    cancelButtonText: 'Close',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+
+                if (result.isConfirmed) {
+                    window.location.href = 'profile.html';
+                }
+                return;
+            }
+
+            openWithdrawPanel();
+        };
+
+        closeWithdraw.onclick = () => {
+            closeWithdrawPanel();
+        };
+
+        withdrawPanel.addEventListener('click', (e) => {
+            if (e.target === withdrawPanel) {
+                closeWithdrawPanel();
+            }
         });
-    });
-}
+
+        copyBtn.onclick = async () => {
+            if (!currentAddr) {
+                Swal.fire({
+                    title: 'Unavailable',
+                    text: 'Wallet address is not ready yet',
+                    icon: 'warning',
+                    timer: 1700,
+                    showConfirmButton: false,
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            const copied = await copyAddress(currentAddr);
+
+            if (copied) {
+                Swal.fire({
+                    title: 'Copied!',
+                    text: 'Wallet address copied to clipboard',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Copy Failed',
+                    text: 'Please copy the address manually',
+                    icon: 'error',
+                    timer: 1800,
+                    showConfirmButton: false,
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            }
+        };
+
+        submitWithdrawBtn.onclick = async () => {
+            try {
+                if (!currentUser || !currentUserData) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'User data is not ready',
+                        icon: 'error',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                if (!hasSecuritySetup()) {
+                    Swal.fire({
+                        title: 'Security Setup Required',
+                        text: 'Please complete your profile security settings and create your 6-digit code first.',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                const walletAddress = withdrawAddress.value.trim();
+                const amount = Number(withdrawAmount.value);
+                const note = withdrawNote.value.trim();
+
+                if (!walletAddress) {
+                    Swal.fire({
+                        title: 'Missing Address',
+                        text: 'Please enter destination wallet address',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                if (!amount || amount <= 0) {
+                    Swal.fire({
+                        title: 'Invalid Amount',
+                        text: 'Please enter a valid withdrawal amount',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                const pinVerified = await verifyWithdrawalPin();
+                if (!pinVerified) return;
+
+                submitWithdrawBtn.disabled = true;
+                submitWithdrawBtn.innerText = 'Submitting...';
+
+                const adminRef = doc(collection(db, "withdrawalRequests"));
+                const userWithdrawalRef = doc(db, "users", currentUser.uid, "withdrawals", adminRef.id);
+                const userRef = doc(db, "users", currentUser.uid);
+
+                await runTransaction(db, async (transaction) => {
+                    const userSnap = await transaction.get(userRef);
+
+                    if (!userSnap.exists()) {
+                        throw new Error("User not found");
+                    }
+
+                    const freshUserData = userSnap.data();
+                    const availableBalance = Number(freshUserData.balance || 0);
+
+                    if (amount > availableBalance) {
+                        throw new Error("Withdrawal amount exceeds your available balance");
+                    }
+
+                    const requestPayload = {
+                        uid: currentUser.uid,
+                        email: currentUser.email || '',
+                        fullName: freshUserData.fullName || 'USER',
+                        username: freshUserData.username || '',
+                        phone: freshUserData.phone || '',
+                        tier: freshUserData.tier || 'Tier 1',
+                        userBalanceAtRequest: availableBalance,
+                        amount: amount,
+                        token: 'USDT',
+                        network: 'TRC20',
+                        walletAddress: walletAddress,
+                        note: note,
+                        status: 'pending',
+                        type: 'Withdrawal',
+                        createdAt: serverTimestamp(),
+                        timestamp: serverTimestamp(),
+                        depositAddress: freshUserData.depositAddress || '',
+                        reviewedAt: null,
+                        reviewedBy: '',
+                        adminNote: '',
+                        securityVerified: true
+                    };
+
+                    transaction.update(userRef, {
+                        balance: availableBalance - amount
+                    });
+
+                    transaction.set(adminRef, {
+                        ...requestPayload,
+                        requestId: adminRef.id
+                    });
+
+                    transaction.set(userWithdrawalRef, {
+                        ...requestPayload,
+                        requestId: adminRef.id
+                    });
+                });
+
+                withdrawAddress.value = '';
+                withdrawAmount.value = '';
+                withdrawNote.value = '';
+
+                closeWithdrawPanel();
+
+                Swal.fire({
+                    title: 'Request Submitted',
+                    text: 'Your withdrawal request has been created successfully.',
+                    icon: 'success',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+
+            } catch (error) {
+                Swal.fire({
+                    title: 'Submission Failed',
+                    text: error.message || 'Something went wrong',
+                    icon: 'error',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            } finally {
+                submitWithdrawBtn.disabled = false;
+                submitWithdrawBtn.innerText = 'Submit Withdrawal Request';
+            }
+        };
+
+        setCopyState(false);
+    </script>
+</body>
+</html>
