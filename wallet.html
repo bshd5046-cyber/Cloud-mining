@@ -23,7 +23,8 @@
         .panel-content { width: 100%; background: #070b16; border-radius: 3rem 3rem 0 0; padding: 2.5rem; border-top: 1px solid rgba(59, 130, 246, 0.2); transform: translateY(100%); transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
-        #qrcode img { margin: 0 auto; border: 8px solid white; border-radius: 1rem; }
+        #qrcode { padding: 10px; background: white; border-radius: 1rem; width: fit-content; margin: 0 auto; }
+        #qrcode img { margin: 0 auto; }
     </style>
 </head>
 <body class="pb-32">
@@ -64,16 +65,16 @@
                 <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white text-xl">&times;</button>
             </div>
             
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Scan QR or Copy Address (USDT TRC20)</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">USDT TRC20 Network Only</p>
             
-            <div id="qrcode" class="mb-6 flex justify-center"></div>
+            <div id="qrcode" class="mb-6"></div>
 
             <div class="bg-black/40 border border-white/10 p-4 rounded-2xl mb-6 break-all">
-                <p id="depositAddrText" class="text-xs font-mono text-blue-300">Generating Address...</p>
+                <p id="depositAddrText" class="text-xs font-mono text-blue-300 italic">Waiting for system...</p>
             </div>
 
-            <button onclick="copyDepositAddr()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest">Copy Address</button>
-            <p class="text-[9px] text-red-400 font-bold mt-4 uppercase">Minimum: 1 USDT | Auto-Syncing</p>
+            <button id="copyBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest">Copy Address</button>
+            <p class="text-[9px] text-red-400 font-bold mt-4 uppercase italic">Minimum: 1 USDT | Automated Verification</p>
         </div>
     </div>
 
@@ -103,20 +104,31 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         let currentAddr = "";
+        let qrGenerated = false;
 
         onAuthStateChanged(auth, user => {
             if (user) {
-                // مراقبة رصيد المستخدم وعنوانه بشكل حي
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     const data = snap.data();
                     if (data) {
-                        document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toFixed(2)}`;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = data.fullName || "USER";
                         
                         if (data.depositAddress) {
                             currentAddr = data.depositAddress;
                             document.getElementById('depositAddrText').innerText = currentAddr;
-                            generateQR(currentAddr);
+                            document.getElementById('depositAddrText').classList.remove('italic');
+                            
+                            // توليد الـ QR فقط إذا لم يتم توليده مسبقاً لهذا العنوان
+                            if (!qrGenerated) {
+                                document.getElementById("qrcode").innerHTML = "";
+                                new QRCode(document.getElementById("qrcode"), {
+                                    text: currentAddr,
+                                    width: 160,
+                                    height: 160
+                                });
+                                qrGenerated = true;
+                            }
                         }
                     }
                 });
@@ -124,16 +136,6 @@
             } else { window.location.replace('login.html'); }
         });
 
-        // توليد QR Code
-        let qrStatus = false;
-        function generateQR(text) {
-            if (qrStatus) return; 
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: text, width: 180, height: 180 });
-            qrStatus = true;
-        }
-
-        // جلب التاريخ (بما في ذلك الإيداعات التلقائية)
         function fetchHistory(uid) {
             const q = query(collection(db, "users", uid, "withdrawals"), orderBy("timestamp", "desc"), limit(10));
             onSnapshot(q, (sn) => {
@@ -143,11 +145,11 @@
                     const color = data.type === 'Withdrawal' ? 'text-red-400' : 'text-green-400';
                     h += `<div class="flex justify-between items-center border-b border-white/5 pb-4 last:border-0">
                             <div>
-                                <p class="text-[10px] font-black uppercase">${data.type}</p>
+                                <p class="text-[10px] font-black uppercase tracking-tighter">${data.type}</p>
                                 <p class="text-[8px] font-bold text-slate-500 uppercase">${data.status}</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-[12px] font-black ${color}">${data.type === 'Withdrawal' ? '-' : '+'}$${data.amount}</span>
+                                <span class="text-[12px] font-black ${color}">${data.type === 'Withdrawal' ? '-' : '+'}$${parseFloat(data.amount).toFixed(2)}</span>
                                 <p class="text-[7px] text-slate-600 font-bold">${new Date(data.timestamp).toLocaleDateString()}</p>
                             </div>
                           </div>`;
@@ -156,13 +158,13 @@
             });
         }
 
-        // التحكم باللوحات
         document.getElementById('depositTrigger').onclick = () => document.getElementById('depositPanel').classList.add('show-panel');
         document.getElementById('closeDep').onclick = () => document.getElementById('depositPanel').classList.remove('show-panel');
         
-        window.copyDepositAddr = () => {
+        document.getElementById('copyBtn').onclick = () => {
+            if (!currentAddr) return;
             navigator.clipboard.writeText(currentAddr);
-            Swal.fire({ title: 'Copied!', text: 'Address copied to clipboard', icon: 'success', timer: 1500, showConfirmButton: false });
+            Swal.fire({ title: 'Copied!', text: 'Wallet address copied', icon: 'success', timer: 1200, showConfirmButton: false });
         };
     </script>
 </body>
