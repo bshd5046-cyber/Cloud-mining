@@ -16,6 +16,11 @@
             --nav-bg: rgba(7, 10, 22, 0.98);
         }
 
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: var(--bg-dark);
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -58,6 +63,11 @@
             top: -28px;
             border: 6px solid #020617;
             box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .invest-fab:active {
+            transform: scale(0.96);
         }
 
         .nav-item {
@@ -69,6 +79,7 @@
             text-decoration: none;
             font-size: 10px;
             font-weight: 700;
+            transition: color 0.2s ease;
         }
 
         .nav-item i {
@@ -120,6 +131,13 @@
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,255,255,0.04);
             border-radius: 1.5rem;
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.18);
+            background: rgba(255,255,255,0.03);
         }
 
         .tx-icon {
@@ -186,6 +204,52 @@
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(255,255,255,0.06);
         }
+
+        .action-btn {
+            transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .copy-ready {
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.22);
+        }
+
+        .copy-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .address-box {
+            position: relative;
+        }
+
+        .address-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            padding: 6px 9px;
+            border-radius: 999px;
+        }
+
+        .pulse-soft {
+            animation: pulseSoft 2.2s infinite;
+        }
+
+        @keyframes pulseSoft {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.16); }
+            70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
     </style>
 </head>
 <body class="pb-32">
@@ -196,7 +260,7 @@
                 <p class="text-[10px] uppercase tracking-[0.28em] text-slate-500 font-black">Secure Wallet</p>
                 <h1 class="text-3xl font-black italic uppercase tracking-tighter">My <span class="text-blue-500">Vault</span></h1>
             </div>
-            <div class="flex items-center gap-2 mini-pill px-3 py-2 rounded-full">
+            <div class="flex items-center gap-2 mini-pill px-3 py-2 rounded-full pulse-soft">
                 <span class="status-dot"></span>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-200">Live</span>
             </div>
@@ -204,12 +268,12 @@
 
         <div class="px-6 mt-8">
             <div class="crypto-card p-8">
-                <div class="flex justify-between items-start">
+                <div class="flex justify-between items-start gap-4">
                     <div>
                         <p class="text-blue-200 text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Secured Balance</p>
                         <h2 id="userBalance" class="text-5xl font-black mt-3 tracking-tighter">$0.00</h2>
                     </div>
-                    <div class="mini-pill px-3 py-2 rounded-xl text-right">
+                    <div class="mini-pill px-3 py-2 rounded-xl text-right shrink-0">
                         <p class="text-[8px] uppercase tracking-[0.2em] text-slate-400 font-black">Network</p>
                         <p class="text-[11px] font-black text-blue-300">USDT TRC20</p>
                     </div>
@@ -251,10 +315,10 @@
         </div>
 
         <div class="px-6 mt-6 flex gap-4">
-            <button id="depositTrigger" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest shadow-lg shadow-blue-600/20">
+            <button id="depositTrigger" class="action-btn flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest shadow-lg shadow-blue-600/20">
                 <i class="fas fa-arrow-down mr-2"></i>Deposit
             </button>
-            <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">
+            <button id="withdrawTrigger" class="action-btn flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">
                 <i class="fas fa-arrow-up mr-2"></i>Withdraw
             </button>
         </div>
@@ -292,8 +356,9 @@
 
             <div id="qrcode" class="mb-6"></div>
 
-            <div class="bg-black/40 border border-white/10 p-4 rounded-2xl mb-4 break-all">
-                <p id="depositAddrText" class="text-xs font-mono text-blue-300 italic">Waiting for system...</p>
+            <div class="address-box bg-black/40 border border-white/10 p-4 rounded-2xl mb-4 break-all">
+                <span class="address-badge">Wallet</span>
+                <p id="depositAddrText" class="text-xs font-mono text-blue-300 italic pr-16">Waiting for system...</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mb-6 text-left">
@@ -307,7 +372,9 @@
                 </div>
             </div>
 
-            <button id="copyBtn" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest">Copy Address</button>
+            <button id="copyBtn" class="action-btn w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest copy-disabled" disabled>
+                Copy Address
+            </button>
             <p class="text-[9px] text-red-400 font-bold mt-4 uppercase italic">Do not send unsupported assets to this address</p>
         </div>
     </div>
@@ -337,50 +404,60 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
         let currentAddr = "";
         let qrGenerated = false;
 
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
-                    const data = snap.data();
-                    if (data) {
-                        document.getElementById('userBalance').innerText =
-                            `$${parseFloat(data.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                        document.getElementById('userName').innerText = data.fullName || "USER";
-                        document.getElementById('userTier').innerText = data.tier || "Tier 1";
+        const copyBtn = document.getElementById('copyBtn');
+        const depositAddrText = document.getElementById('depositAddrText');
+        const depositPanel = document.getElementById('depositPanel');
+        const depositTrigger = document.getElementById('depositTrigger');
+        const closeDep = document.getElementById('closeDep');
+        const withdrawTrigger = document.getElementById('withdrawTrigger');
 
-                        if (data.depositAddress) {
-                            currentAddr = data.depositAddress;
-                            document.getElementById('depositAddrText').innerText = currentAddr;
-                            document.getElementById('depositAddrText').classList.remove('italic');
+        function setCopyState(enabled) {
+            copyBtn.disabled = !enabled;
+            copyBtn.classList.toggle('copy-disabled', !enabled);
+            copyBtn.classList.toggle('copy-ready', enabled);
+        }
 
-                            if (!qrGenerated) {
-                                document.getElementById("qrcode").innerHTML = "";
-                                new QRCode(document.getElementById("qrcode"), {
-                                    text: currentAddr,
-                                    width: 160,
-                                    height: 160
-                                });
-                                qrGenerated = true;
-                            }
-                        }
-                    }
+        function enableAddressUI(address) {
+            currentAddr = address || "";
+            depositAddrText.innerText = currentAddr || "Waiting for system...";
+            depositAddrText.classList.toggle('italic', !currentAddr);
+            setCopyState(!!currentAddr);
+
+            if (currentAddr && !qrGenerated) {
+                document.getElementById("qrcode").innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), {
+                    text: currentAddr,
+                    width: 160,
+                    height: 160
                 });
-
-                fetchCombinedHistory(user.uid);
-            } else {
-                window.location.replace('login.html');
+                qrGenerated = true;
             }
-        });
+        }
+
+        function openDepositPanel() {
+            depositPanel.classList.add('show-panel');
+        }
+
+        function closeDepositPanel() {
+            depositPanel.classList.remove('show-panel');
+        }
+
+        function formatCurrency(amount) {
+            return `$${parseFloat(amount || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+        }
 
         function formatType(item, docId) {
             if (item.type) return item.type;
-
-            if (item.txId || item.token === 'USDT' || docId) {
-                return 'Deposit';
-            }
-
+            if (item._source === 'withdrawal') return 'Withdrawal';
+            if (item._source === 'deposit') return 'Deposit';
+            if (item.txId || item.token === 'USDT' || docId) return 'Deposit';
             return 'Transaction';
         }
 
@@ -388,7 +465,8 @@
             const lower = String(typeLabel || '').toLowerCase();
             if (lower.includes('withdraw')) return 'withdrawal';
             if (lower.includes('deposit')) return 'deposit';
-
+            if (item._source === 'withdrawal') return 'withdrawal';
+            if (item._source === 'deposit') return 'deposit';
             if (item.txId || item.token === 'USDT') return 'deposit';
             return 'withdrawal';
         }
@@ -408,6 +486,66 @@
                 </div>
             `;
         }
+
+        function formatDateLabel(timestamp) {
+            if (!timestamp) return 'Processing';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        async function copyAddress(address) {
+            if (!address) return false;
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(address);
+                    return true;
+                }
+
+                const textArea = document.createElement('textarea');
+                textArea.value = address;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return successful;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    const data = snap.data();
+
+                    if (data) {
+                        document.getElementById('userBalance').innerText = formatCurrency(data.balance || 0);
+                        document.getElementById('userName').innerText = data.fullName || "USER";
+                        document.getElementById('userTier').innerText = data.tier || "Tier 1";
+
+                        if (data.depositAddress) {
+                            enableAddressUI(data.depositAddress);
+                        } else {
+                            enableAddressUI("");
+                        }
+                    }
+                });
+
+                fetchCombinedHistory(user.uid);
+            } else {
+                window.location.replace('login.html');
+            }
+        });
 
         function fetchCombinedHistory(uid) {
             const historyContainer = document.getElementById('transactionHistory');
@@ -460,7 +598,7 @@
                         const colorClass = isDeposit ? 'text-emerald-400' : 'text-red-400';
                         const prefix = isDeposit ? '+' : '-';
                         const status = item.status || 'Completed';
-                        const dateLabel = item.timestamp ? item.timestamp.toDate().toLocaleDateString() : 'Processing';
+                        const dateLabel = formatDateLabel(item.timestamp);
                         const amount = parseFloat(item.amount || 0).toFixed(2);
 
                         html += `
@@ -476,7 +614,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-right">
+                                <div class="text-right shrink-0">
                                     <span class="text-[14px] font-black ${colorClass}">${prefix}$${amount}</span>
                                 </div>
                             </div>
@@ -488,18 +626,41 @@
             });
         }
 
-        document.getElementById('depositTrigger').onclick = () => {
-            document.getElementById('depositPanel').classList.add('show-panel');
+        depositTrigger.onclick = () => {
+            openDepositPanel();
         };
 
-        document.getElementById('closeDep').onclick = () => {
-            document.getElementById('depositPanel').classList.remove('show-panel');
+        closeDep.onclick = () => {
+            closeDepositPanel();
         };
 
-        document.getElementById('copyBtn').onclick = () => {
-            if (!currentAddr) return;
+        depositPanel.addEventListener('click', (e) => {
+            if (e.target === depositPanel) {
+                closeDepositPanel();
+            }
+        });
 
-            navigator.clipboard.writeText(currentAddr).then(() => {
+        withdrawTrigger.onclick = () => {
+            window.location.href = 'admin.html';
+        };
+
+        copyBtn.onclick = async () => {
+            if (!currentAddr) {
+                Swal.fire({
+                    title: 'Unavailable',
+                    text: 'Wallet address is not ready yet',
+                    icon: 'warning',
+                    timer: 1700,
+                    showConfirmButton: false,
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            const copied = await copyAddress(currentAddr);
+
+            if (copied) {
                 Swal.fire({
                     title: 'Copied!',
                     text: 'Wallet address copied to clipboard',
@@ -509,8 +670,20 @@
                     background: '#0f172a',
                     color: '#fff'
                 });
-            });
+            } else {
+                Swal.fire({
+                    title: 'Copy Failed',
+                    text: 'Please copy the address manually',
+                    icon: 'error',
+                    timer: 1800,
+                    showConfirmButton: false,
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            }
         };
+
+        setCopyState(false);
     </script>
 </body>
 </html>
