@@ -169,6 +169,8 @@
             border-top: 1px solid rgba(59, 130, 246, 0.2);
             transform: translateY(100%);
             transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .show-panel {
@@ -243,6 +245,37 @@
 
         .pulse-soft {
             animation: pulseSoft 2.2s infinite;
+        }
+
+        .field {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            border-radius: 1rem;
+            padding: 16px;
+            outline: none;
+        }
+
+        .field::placeholder {
+            color: #64748b;
+        }
+
+        .field:focus {
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .status-pending {
+            color: #f59e0b;
+        }
+
+        .status-approved {
+            color: #22c55e;
+        }
+
+        .status-rejected {
+            color: #ef4444;
         }
 
         @keyframes pulseSoft {
@@ -379,6 +412,56 @@
         </div>
     </div>
 
+    <div id="withdrawPanel" class="slide-panel">
+        <div class="panel-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black uppercase italic text-blue-500">Withdrawal Request</h3>
+                <button id="closeWithdraw" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white text-xl">&times;</button>
+            </div>
+
+            <div class="mini-pill rounded-2xl p-4 mb-5">
+                <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Available Balance</p>
+                <p id="withdrawAvailableBalance" class="text-2xl font-black mt-2">$0.00</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Wallet Address</label>
+                    <input id="withdrawAddress" type="text" class="field" placeholder="Enter destination wallet address">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Amount (USDT)</label>
+                    <input id="withdrawAmount" type="number" min="1" step="0.01" class="field" placeholder="Enter amount">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase tracking-[0.2em] text-slate-500 font-black mb-2">Notes (optional)</label>
+                    <textarea id="withdrawNote" class="field min-h-[110px] resize-none" placeholder="Optional note for admin"></textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-5 mb-5 text-left">
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Processing</p>
+                    <p class="text-sm font-black text-amber-400 mt-2">Manual Review</p>
+                </div>
+                <div class="mini-pill rounded-2xl p-4">
+                    <p class="text-[8px] uppercase tracking-[0.2em] text-slate-500 font-black">Balance Rule</p>
+                    <p class="text-sm font-black text-white mt-2">Deduct On Approval</p>
+                </div>
+            </div>
+
+            <button id="submitWithdrawBtn" class="action-btn w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest">
+                Submit Withdrawal Request
+            </button>
+
+            <p class="text-[9px] text-slate-500 font-bold mt-4 uppercase italic text-center">
+                Your balance stays unchanged until admin approval
+            </p>
+        </div>
+    </div>
+
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
         <a href="wallet.html" class="nav-item active"><i class="fas fa-wallet"></i><span>Wallet</span></a>
@@ -390,7 +473,18 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getFirestore,
+            doc,
+            onSnapshot,
+            collection,
+            query,
+            orderBy,
+            limit,
+            addDoc,
+            serverTimestamp,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -407,6 +501,8 @@
 
         let currentAddr = "";
         let qrGenerated = false;
+        let currentUser = null;
+        let currentUserData = null;
 
         const copyBtn = document.getElementById('copyBtn');
         const depositAddrText = document.getElementById('depositAddrText');
@@ -414,6 +510,13 @@
         const depositTrigger = document.getElementById('depositTrigger');
         const closeDep = document.getElementById('closeDep');
         const withdrawTrigger = document.getElementById('withdrawTrigger');
+        const withdrawPanel = document.getElementById('withdrawPanel');
+        const closeWithdraw = document.getElementById('closeWithdraw');
+        const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
+        const withdrawAddress = document.getElementById('withdrawAddress');
+        const withdrawAmount = document.getElementById('withdrawAmount');
+        const withdrawNote = document.getElementById('withdrawNote');
+        const withdrawAvailableBalance = document.getElementById('withdrawAvailableBalance');
 
         function setCopyState(enabled) {
             copyBtn.disabled = !enabled;
@@ -444,6 +547,15 @@
 
         function closeDepositPanel() {
             depositPanel.classList.remove('show-panel');
+        }
+
+        function openWithdrawPanel() {
+            withdrawAvailableBalance.innerText = formatCurrency(currentUserData?.balance || 0);
+            withdrawPanel.classList.add('show-panel');
+        }
+
+        function closeWithdrawPanel() {
+            withdrawPanel.classList.remove('show-panel');
         }
 
         function formatCurrency(amount) {
@@ -497,6 +609,13 @@
             });
         }
 
+        function getStatusClass(status) {
+            const s = String(status || '').toLowerCase();
+            if (s === 'approved' || s === 'completed') return 'status-approved';
+            if (s === 'rejected' || s === 'failed') return 'status-rejected';
+            return 'status-pending';
+        }
+
         async function copyAddress(address) {
             if (!address) return false;
 
@@ -525,13 +644,17 @@
 
         onAuthStateChanged(auth, user => {
             if (user) {
+                currentUser = user;
+
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     const data = snap.data();
 
                     if (data) {
+                        currentUserData = data;
                         document.getElementById('userBalance').innerText = formatCurrency(data.balance || 0);
                         document.getElementById('userName').innerText = data.fullName || "USER";
                         document.getElementById('userTier').innerText = data.tier || "Tier 1";
+                        withdrawAvailableBalance.innerText = formatCurrency(data.balance || 0);
 
                         if (data.depositAddress) {
                             enableAddressUI(data.depositAddress);
@@ -600,6 +723,7 @@
                         const status = item.status || 'Completed';
                         const dateLabel = formatDateLabel(item.timestamp);
                         const amount = parseFloat(item.amount || 0).toFixed(2);
+                        const statusClass = getStatusClass(status);
 
                         html += `
                             <div class="history-item p-4 flex items-center justify-between gap-3">
@@ -608,7 +732,7 @@
                                     <div class="min-w-0">
                                         <p class="text-[11px] font-black uppercase tracking-wide text-white truncate">${typeLabel}</p>
                                         <div class="flex items-center gap-2 mt-1 flex-wrap">
-                                            <span class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-500">${status}</span>
+                                            <span class="text-[8px] font-black uppercase tracking-[0.18em] ${statusClass}">${status}</span>
                                             <span class="text-[8px] text-slate-600">•</span>
                                             <span class="text-[8px] font-bold text-slate-500">${dateLabel}</span>
                                         </div>
@@ -641,8 +765,18 @@
         });
 
         withdrawTrigger.onclick = () => {
-            window.location.href = 'admin.html';
+            openWithdrawPanel();
         };
+
+        closeWithdraw.onclick = () => {
+            closeWithdrawPanel();
+        };
+
+        withdrawPanel.addEventListener('click', (e) => {
+            if (e.target === withdrawPanel) {
+                closeWithdrawPanel();
+            }
+        });
 
         copyBtn.onclick = async () => {
             if (!currentAddr) {
@@ -680,6 +814,118 @@
                     background: '#0f172a',
                     color: '#fff'
                 });
+            }
+        };
+
+        submitWithdrawBtn.onclick = async () => {
+            try {
+                if (!currentUser || !currentUserData) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'User data is not ready',
+                        icon: 'error',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                const walletAddress = withdrawAddress.value.trim();
+                const amount = Number(withdrawAmount.value);
+                const note = withdrawNote.value.trim();
+                const availableBalance = Number(currentUserData.balance || 0);
+
+                if (!walletAddress) {
+                    Swal.fire({
+                        title: 'Missing Address',
+                        text: 'Please enter destination wallet address',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                if (!amount || amount <= 0) {
+                    Swal.fire({
+                        title: 'Invalid Amount',
+                        text: 'Please enter a valid withdrawal amount',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                if (amount > availableBalance) {
+                    Swal.fire({
+                        title: 'Insufficient Balance',
+                        text: 'Withdrawal amount exceeds your available balance',
+                        icon: 'warning',
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+                    return;
+                }
+
+                submitWithdrawBtn.disabled = true;
+                submitWithdrawBtn.innerText = 'Submitting...';
+
+                const requestPayload = {
+                    uid: currentUser.uid,
+                    email: currentUser.email || '',
+                    fullName: currentUserData.fullName || 'USER',
+                    username: currentUserData.username || '',
+                    phone: currentUserData.phone || '',
+                    tier: currentUserData.tier || 'Tier 1',
+                    userBalanceAtRequest: availableBalance,
+                    amount: amount,
+                    token: 'USDT',
+                    network: 'TRC20',
+                    walletAddress: walletAddress,
+                    note: note,
+                    status: 'pending',
+                    type: 'Withdrawal',
+                    createdAt: serverTimestamp(),
+                    timestamp: serverTimestamp(),
+                    depositAddress: currentUserData.depositAddress || '',
+                    reviewedAt: null,
+                    reviewedBy: '',
+                    adminNote: ''
+                };
+
+                const adminRef = await addDoc(collection(db, "withdrawalRequests"), requestPayload);
+
+                await setDoc(doc(db, "users", currentUser.uid, "withdrawals", adminRef.id), {
+                    ...requestPayload,
+                    requestId: adminRef.id
+                });
+
+                withdrawAddress.value = '';
+                withdrawAmount.value = '';
+                withdrawNote.value = '';
+
+                closeWithdrawPanel();
+
+                Swal.fire({
+                    title: 'Request Submitted',
+                    text: 'Your withdrawal request is now pending admin review',
+                    icon: 'success',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+
+            } catch (error) {
+                Swal.fire({
+                    title: 'Submission Failed',
+                    text: error.message || 'Something went wrong',
+                    icon: 'error',
+                    background: '#0f172a',
+                    color: '#fff'
+                });
+            } finally {
+                submitWithdrawBtn.disabled = false;
+                submitWithdrawBtn.innerText = 'Submit Withdrawal Request';
             }
         };
 
