@@ -12,7 +12,7 @@
             --bg-dark: #050810; 
             --primary: #3b82f6; 
             --accent: #6366f1;
-            --nav-bg: rgba(10, 15, 28, 0.96); 
+            --nav-bg: rgba(10, 15, 28, 0.98); 
         }
 
         body { 
@@ -40,16 +40,17 @@
             -webkit-text-fill-color: transparent; 
         }
 
-        /* Fixed Bottom Navigation (Standardized) */
+        /* --- البار السفلي المطور --- */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
             border-top: 1px solid rgba(255, 255, 255, 0.08); 
-            height: 70px; 
+            height: 85px; 
             position: fixed; 
             bottom: 0; left: 0; right: 0; 
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 1000;
+            padding-bottom: 15px;
         }
 
         .nav-item { 
@@ -62,13 +63,18 @@
         .nav-item.active { color: var(--primary); }
 
         .invest-fab { 
-            width: 56px; height: 56px; 
+            width: 68px; height: 68px; 
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
-            border-radius: 18px; display: flex; align-items: center; justify-content: center; 
-            position: relative; top: -20px; 
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); 
-            border: 4px solid var(--bg-dark); 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; top: -28px; 
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5); 
+            border: 5px solid var(--bg-dark); 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        
+        .invest-fab:active { transform: scale(0.9); }
+        /* ------------------------ */
 
         .feature-icon {
             width: 50px; height: 50px;
@@ -88,12 +94,11 @@
 </head>
 <body class="pb-32">
 
-    <!-- Header -->
-    <nav class="flex justify-between items-center p-8 max-w-7xl mx-auto sticky top-0 z-50 bg-[#050810]/80 backdrop-blur-md">
-        <div class="text-2xl font-black italic tracking-tighter text-blue-500">VERTEX<span class="text-white">PREMIER</span></div>
-        <a href="login.html" class="bg-blue-600 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white hover:shadow-blue-500/50 transition-all shadow-lg">
-            Join Now <i class="fas fa-arrow-right ml-2"></i>
-        </a>
+    <!-- Header (تم إزالة Join Now وتوسيط الشعار) -->
+    <nav class="flex justify-center items-center p-8 max-w-7xl mx-auto sticky top-0 z-50 bg-[#050810]/80 backdrop-blur-md">
+        <div class="text-2xl font-black italic tracking-tighter text-blue-500 text-center">
+            VERTEX<span class="text-white">PREMIER</span>
+        </div>
     </nav>
 
     <!-- Hero Section -->
@@ -219,7 +224,7 @@
         </a>
         <div class="relative px-6">
             <a href="invest.html" class="invest-fab">
-                <i class="fas fa-bolt text-white text-xl"></i>
+                <i class="fas fa-bolt text-white text-2xl"></i>
             </a>
         </div>
         <a href="support.html" class="nav-item">
