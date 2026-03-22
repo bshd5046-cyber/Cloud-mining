@@ -31,7 +31,6 @@
             border: 1px solid rgba(255, 255, 255, 0.05); 
         }
 
-        /* البار السفلي - نسخة طبق الأصل من كودك */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -44,7 +43,6 @@
             padding-bottom: 15px; 
         }
 
-        /* الزر العائم FAB - نسخة طبق الأصل من كودك */
         .invest-fab { 
             width: 68px; height: 68px; 
             background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); 
@@ -87,56 +85,85 @@
     <main class="px-6">
         <!-- Hero Section -->
         <section class="text-center py-10">
+            <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-1.5 rounded-full mb-6">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                <span class="text-[9px] font-black uppercase tracking-widest text-blue-400">System Core Active</span>
+            </div>
             <h1 class="text-4xl font-extrabold tracking-tight leading-tight mb-4 uppercase">
-                Invest in <br><span class="text-gradient text-5xl">Future AI</span>
+                AI Powered <br><span class="text-gradient text-5xl">Digital Yield</span>
             </h1>
-            <p class="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase">Daily Yield: 1.9% — 3.5%</p>
+            <p class="text-slate-500 text-[10px] font-black tracking-[0.2em] uppercase px-4">Maximize your assets with high-performance computational nodes</p>
         </section>
 
-        <!-- Balance Card -->
+        <!-- Main Balance Card -->
         <div class="glass-panel p-8 rounded-[2.5rem] mb-8 relative overflow-hidden">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Total Trading Balance</p>
-                    <h2 class="text-4xl font-black text-white">$12,450<span class="text-xl text-slate-500">.00</span></h2>
-                </div>
-                <div class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Online</div>
+            <div class="absolute top-0 right-0 p-6 opacity-10">
+                <i class="fas fa-microchip text-6xl"></i>
             </div>
-            <div class="flex gap-3 mt-6">
-                <button class="flex-1 py-3.5 rounded-2xl bg-blue-600 font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-blue-900/40">Deposit</button>
-                <button class="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 font-bold uppercase text-[10px] tracking-widest">Withdraw</button>
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-1">Available Liquidity</p>
+                    <h2 class="text-4xl font-black text-white">$10,240<span class="text-xl text-slate-500">.50</span></h2>
+                </div>
+                <div class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[8px] font-black uppercase border border-blue-500/20">Verified</div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="wallet.html" class="py-4 rounded-2xl bg-blue-600 flex items-center justify-center gap-2 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-blue-900/40">
+                    <i class="fas fa-plus-circle"></i> Deposit
+                </a>
+                <a href="wallet.html" class="py-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center gap-2 font-black uppercase text-[10px] tracking-widest">
+                    <i class="fas fa-arrow-up-right-from-square"></i> Withdraw
+                </a>
             </div>
         </div>
 
-        <!-- Nodes Section -->
-        <div class="space-y-4">
-            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4">Mining Nodes</h3>
+        <!-- Investment Tiers -->
+        <div class="space-y-4 mb-10">
+            <div class="flex justify-between items-center px-4">
+                <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em]">Quantum Nodes</h3>
+                <span class="text-[9px] font-bold text-blue-500 uppercase">View All</span>
+            </div>
             
-            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-blue-500 flex items-center justify-between">
-                <div>
-                    <p class="text-[13px] font-bold text-white">Standard AI Node</p>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">1.9% Daily Profit</p>
+            <!-- Standard Node -->
+            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-blue-500 flex items-center justify-between active:scale-[0.98] transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-black text-white uppercase tracking-tight">Standard AI</p>
+                        <p class="text-[10px] text-emerald-400 font-bold tracking-tighter">1.9% Daily Return</p>
+                    </div>
                 </div>
                 <div class="text-right">
-                    <p class="text-blue-400 font-black">$100.00</p>
-                    <p class="text-[8px] text-slate-600 uppercase font-bold">Min Entry</p>
+                    <p class="text-white font-black text-sm">$100.00</p>
+                    <p class="text-[8px] text-slate-500 uppercase font-bold">Minimum</p>
                 </div>
             </div>
 
-            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-purple-500 flex items-center justify-between">
-                <div>
-                    <p class="text-[13px] font-bold text-white">Ultra Core Node</p>
-                    <p class="text-[10px] text-slate-500 uppercase tracking-tighter">3.5% Daily Profit</p>
+            <!-- Premium Node -->
+            <div class="glass-panel p-6 rounded-[2rem] border-l-4 border-l-purple-500 flex items-center justify-between active:scale-[0.98] transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-black text-white uppercase tracking-tight">Enterprise</p>
+                        <p class="text-[10px] text-emerald-400 font-bold tracking-tighter">3.5% Daily Return</p>
+                    </div>
                 </div>
                 <div class="text-right">
-                    <p class="text-purple-400 font-black">$5,000.00</p>
-                    <p class="text-[8px] text-slate-600 uppercase font-bold">VIP Tier</p>
+                    <p class="text-white font-black text-sm">$5,000.00</p>
+                    <p class="text-[8px] text-slate-500 uppercase font-bold">Premium</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- البار السفلي - مطابق تماماً لصفحة البروفايل اللي بعتّها -->
+    <!-- البار السفلي - نسخة طبق الأصل من كودك حرفياً -->
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active">
             <i class="fas fa-house"></i>
