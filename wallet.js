@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
-    getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, getDoc
+    getFirestore, doc, onSnapshot, collection, query, orderBy, limit, 
+    addDoc, serverTimestamp, getDoc, where, getDocs, setDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- إعدادات Firebase ---
@@ -63,21 +64,19 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// تحديث واجهة المستخدم بالبيانات الحقيقية
 function updateUI(data) {
     document.getElementById('userBalance').innerText = formatCurrency(data.balance || 0);
     document.getElementById('userName').innerText = data.fullName || "GUEST";
     const tier = data.tier || "Tier 1";
     document.getElementById('userTier').innerText = tier;
     
-    // تحديث نافذة السحب
     if(document.getElementById('displayTier')) document.getElementById('displayTier').innerText = `${tier} Status`;
     if(document.getElementById('displayLimit')) document.getElementById('displayLimit').innerText = `LIMIT: ${formatCurrency(TIER_LIMITS[tier])}`;
     
     if (data.depositAddress) enableAddressUI(data.depositAddress);
 }
 
-// --- معالجة طلب السحب ---
+// --- معالجة طلب السحب المطور ---
 submitWithdrawBtn.onclick = async () => {
     const amount = parseFloat(withdrawAmountInput.value);
     const address = document.getElementById('withdrawAddress').value;
@@ -91,29 +90,34 @@ submitWithdrawBtn.onclick = async () => {
         return showError("All fields including Security PIN are required.");
     }
 
-    // 2. التحقق من الـ PIN (يجب أن يكون مخزناً في Firestore كـ withdrawalPin)
+    // 2. التحقق من الـ PIN
     if (enteredPin !== currentUserData?.withdrawalPin) {
         return showError("Security Vault PIN is incorrect.");
     }
 
-    // 3. التحقق من الحد الأدنى
-    if (amount < 10) {
-        return showError("Minimum withdrawal is $10.00");
-    }
-
-    // 4. التحقق من سقف المرحلة (Tier Limit)
-    if (amount > maxLimit) {
-        return showError(`Limit Exceeded: Your ${userTier} limit is ${formatCurrency(maxLimit)}`);
-    }
-
-    // 5. التحقق من الرصيد
-    if (amount > (currentUserData?.balance || 0)) {
-        return showError("Insufficient funds in your vault.");
-    }
+    // 3. التحقق من القواعد المالية
+    if (amount < 10) return showError("Minimum withdrawal is $10.00");
+    if (amount > maxLimit) return showError(`Limit Exceeded: Your ${userTier} limit is ${formatCurrency(maxLimit)}`);
+    if (amount > (currentUserData?.balance || 0)) return showError("Insufficient funds in your vault.");
 
     try {
         submitWithdrawBtn.disabled = true;
-        submitWithdrawBtn.innerText = "Verifying Protocol...";
+        submitWithdrawBtn.innerText = "Scanning Blockchain...";
+
+        // --- فحص إذا كان هناك طلب معلق (Pending) ---
+        const withdrawalsRef = collection(db, "withdrawals");
+        const q = query(withdrawalsRef, 
+            where("uid", "==", currentUser.uid), 
+            where("status", "==", "pending")
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            showError("Active Protocol Detected: You have a pending request. Please wait for completion.");
+            return;
+        }
+
+        submitWithdrawBtn.innerText = "Initiating Relay...";
 
         const withdrawData = {
             uid: currentUser.uid,
@@ -129,10 +133,13 @@ submitWithdrawBtn.onclick = async () => {
             tierAtTime: userTier
         };
 
-        // تسجيل الطلب للإدارة
-        await addDoc(collection(db, "withdrawals"), withdrawData);
+        // تسجيل الطلب في المجلد العام للإدارة
+        const docRef = await addDoc(collection(db, "withdrawals"), withdrawData);
         
-        // تسجيل المعاملة في سجل المستخدم
+        // تسجيل نفس الطلب في مجلد المستخدم الخاص لسهولة العرض
+        await setDoc(doc(db, "users", currentUser.uid, "withdrawals", docRef.id), withdrawData);
+
+        // تسجيل العملية في سجل المعاملات (History)
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             type: "Withdrawal",
             amount: amount,
@@ -143,7 +150,7 @@ submitWithdrawBtn.onclick = async () => {
 
         Swal.fire({
             title: 'Protocol Initiated',
-            text: 'Withdrawal request sent. Approval may take 2-120 hours.',
+            text: 'Withdrawal request sent. Approval time: 2-120 hours.',
             icon: 'success',
             background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6'
         });
@@ -152,6 +159,7 @@ submitWithdrawBtn.onclick = async () => {
         clearInputs();
         
     } catch (error) {
+        console.error(error);
         showError("Blockchain relay error. Please try again.");
     } finally {
         submitWithdrawBtn.disabled = false;
@@ -217,7 +225,6 @@ function showError(msg) {
     Swal.fire({ icon: 'error', title: 'Action Denied', text: msg, background: '#070b16', color: '#fff', confirmButtonColor: '#ef4444' });
 }
 
-// الأحداث
 depositTrigger.onclick = () => depositPanel.classList.add('show-panel');
 closeDep.onclick = () => depositPanel.classList.remove('show-panel');
 withdrawTrigger.onclick = () => {
