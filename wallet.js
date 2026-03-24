@@ -5,7 +5,7 @@ import {
     addDoc, serverTimestamp, getDoc, where, getDocs, setDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// --- إعدادات Firebase ---
+// --- إعدادات Firebase (نفس الإعدادات الخاصة بك) ---
 const firebaseConfig = {
     apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
     authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -24,16 +24,11 @@ let currentUser = null;
 let currentUserData = null;
 let qrGenerated = false;
 
-// --- حدود السحب لكل مرحلة (Tiers) ---
 const TIER_LIMITS = {
-    "Tier 1": 500,
-    "Tier 2": 2000,
-    "Tier 3": 5000,
-    "Tier 4": 8000,
-    "Tier 5": 10000
+    "Tier 1": 500, "Tier 2": 2000, "Tier 3": 5000, "Tier 4": 8000, "Tier 5": 10000
 };
 
-// --- اختيار العناصر ---
+// --- اختيار العناصر من الـ HTML ---
 const depositTrigger = document.getElementById('depositTrigger');
 const withdrawTrigger = document.getElementById('withdrawTrigger');
 const depositPanel = document.getElementById('depositPanel');
@@ -76,7 +71,7 @@ function updateUI(data) {
     if (data.depositAddress) enableAddressUI(data.depositAddress);
 }
 
-// --- معالجة طلب السحب المطور ---
+// --- المنطق الأساسي لكبسة السحب ---
 submitWithdrawBtn.onclick = async () => {
     const amount = parseFloat(withdrawAmountInput.value);
     const address = document.getElementById('withdrawAddress').value;
@@ -85,26 +80,26 @@ submitWithdrawBtn.onclick = async () => {
     const userTier = currentUserData?.tier || "Tier 1";
     const maxLimit = TIER_LIMITS[userTier] || 500;
 
-    // 1. التحقق من الحقول الأساسية
+    // 1. فحص الحقول
     if (!address || isNaN(amount) || !enteredPin) {
         return showError("All fields including Security PIN are required.");
     }
 
-    // 2. التحقق من الـ PIN
+    // 2. فحص الـ PIN
     if (enteredPin !== currentUserData?.withdrawalPin) {
         return showError("Security Vault PIN is incorrect.");
     }
 
-    // 3. التحقق من القواعد المالية
+    // 3. فحص الرصيد والحدود
     if (amount < 10) return showError("Minimum withdrawal is $10.00");
-    if (amount > maxLimit) return showError(`Limit Exceeded: Your ${userTier} limit is ${formatCurrency(maxLimit)}`);
-    if (amount > (currentUserData?.balance || 0)) return showError("Insufficient funds in your vault.");
+    if (amount > maxLimit) return showError(`Limit Exceeded for ${userTier}`);
+    if (amount > (currentUserData?.balance || 0)) return showError("Insufficient funds.");
 
     try {
         submitWithdrawBtn.disabled = true;
-        submitWithdrawBtn.innerText = "Scanning Blockchain...";
+        submitWithdrawBtn.innerText = "Checking Active Requests...";
 
-        // --- فحص إذا كان هناك طلب معلق (Pending) ---
+        // --- الفحص: هل يوجد طلب معلق؟ ---
         const withdrawalsRef = collection(db, "withdrawals");
         const q = query(withdrawalsRef, 
             where("uid", "==", currentUser.uid), 
@@ -113,11 +108,13 @@ submitWithdrawBtn.onclick = async () => {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            showError("Active Protocol Detected: You have a pending request. Please wait for completion.");
-            return;
+            showError("You have a pending withdrawal. Please wait for it to be processed before making a new one.");
+            submitWithdrawBtn.disabled = false;
+            submitWithdrawBtn.innerText = "Initiate Payout";
+            return; 
         }
 
-        submitWithdrawBtn.innerText = "Initiating Relay...";
+        submitWithdrawBtn.innerText = "Processing...";
 
         const withdrawData = {
             uid: currentUser.uid,
@@ -133,13 +130,13 @@ submitWithdrawBtn.onclick = async () => {
             tierAtTime: userTier
         };
 
-        // تسجيل الطلب في المجلد العام للإدارة
+        // تسجيل في المجلد العام (للآدمن)
         const docRef = await addDoc(collection(db, "withdrawals"), withdrawData);
         
-        // تسجيل نفس الطلب في مجلد المستخدم الخاص لسهولة العرض
+        // تسجيل في مجلد المستخدم (للعرض في حسابه)
         await setDoc(doc(db, "users", currentUser.uid, "withdrawals", docRef.id), withdrawData);
 
-        // تسجيل العملية في سجل المعاملات (History)
+        // تسجيل في الترانزاكشن (السجل المالي)
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             type: "Withdrawal",
             amount: amount,
@@ -149,10 +146,10 @@ submitWithdrawBtn.onclick = async () => {
         });
 
         Swal.fire({
-            title: 'Protocol Initiated',
-            text: 'Withdrawal request sent. Approval time: 2-120 hours.',
+            title: 'Success',
+            text: 'Withdrawal request sent successfully.',
             icon: 'success',
-            background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6'
+            background: '#070b16', color: '#fff'
         });
 
         withdrawPanel.classList.remove('show-panel');
@@ -160,7 +157,7 @@ submitWithdrawBtn.onclick = async () => {
         
     } catch (error) {
         console.error(error);
-        showError("Blockchain relay error. Please try again.");
+        showError("Error connecting to server.");
     } finally {
         submitWithdrawBtn.disabled = false;
         submitWithdrawBtn.innerText = "Initiate Payout";
@@ -179,7 +176,7 @@ function enableAddressUI(address) {
     copyBtn.disabled = false;
     if (!qrGenerated) {
         document.getElementById("qrcode").innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: address, width: 180, height: 180, colorDark: "#000000", colorLight: "#ffffff" });
+        new QRCode(document.getElementById("qrcode"), { text: address, width: 180, height: 180 });
         qrGenerated = true;
     }
 }
@@ -189,19 +186,16 @@ function loadTransactions(uid) {
     onSnapshot(q, (snapshot) => {
         const historyCont = document.getElementById('transactionHistory');
         historyCont.innerHTML = "";
-        
         if (snapshot.empty) {
             historyCont.innerHTML = '<p class="text-center text-[10px] text-slate-500 py-10 tracking-widest uppercase italic">Vault is Empty</p>';
             return;
         }
-
         snapshot.forEach(doc => {
             const tx = doc.data();
             const date = tx.timestamp?.toDate().toLocaleString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) || "Processing";
             const statusClass = tx.status === 'pending' ? 'text-amber-500' : (tx.status === 'approved' ? 'text-emerald-500' : 'text-rose-500');
-            
             historyCont.innerHTML += `
-                <div class="p-4 flex justify-between items-center border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                <div class="p-4 flex justify-between items-center border-b border-white/5 last:border-0">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'Withdrawal' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}">
                             <i class="fas ${tx.type === 'Withdrawal' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
@@ -212,19 +206,19 @@ function loadTransactions(uid) {
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-black italic ${tx.type === 'Withdrawal' ? 'text-slate-100' : 'text-emerald-400'}">${tx.type === 'Withdrawal' ? '-' : '+'}${formatCurrency(tx.amount)}</p>
+                        <p class="text-sm font-black italic text-slate-100">${formatCurrency(tx.amount)}</p>
                         <p class="text-[8px] font-black uppercase tracking-tighter ${statusClass}">${tx.status}</p>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
     });
 }
 
 function showError(msg) {
-    Swal.fire({ icon: 'error', title: 'Action Denied', text: msg, background: '#070b16', color: '#fff', confirmButtonColor: '#ef4444' });
+    Swal.fire({ icon: 'error', title: 'Denied', text: msg, background: '#070b16', color: '#fff' });
 }
 
+// الأحداث
 depositTrigger.onclick = () => depositPanel.classList.add('show-panel');
 closeDep.onclick = () => depositPanel.classList.remove('show-panel');
 withdrawTrigger.onclick = () => {
@@ -236,5 +230,5 @@ copyBtn.onclick = async () => {
     const addr = document.getElementById('depositAddrText').innerText;
     if(addr === "---") return;
     await navigator.clipboard.writeText(addr);
-    Swal.fire({ title: 'Address Copied', icon: 'success', toast: true, position: 'top', showConfirmButton: false, timer: 2000, background: '#1e293b', color: '#fff' });
+    Swal.fire({ title: 'Copied', icon: 'success', toast: true, position: 'top', showConfirmButton: false, timer: 2000 });
 };
