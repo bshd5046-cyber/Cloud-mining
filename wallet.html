@@ -25,6 +25,10 @@
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
         .field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 1.25rem; padding: 15px; outline: none; font-size: 14px; }
+        
+        /* iOS Alert Style */
+        .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
+        .ios-btn { border-radius: 14px !important; font-weight: 800 !important; text-transform: uppercase !important; }
     </style>
 </head>
 <body class="pb-32">
@@ -69,9 +73,15 @@
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit</h3>
                 <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
             </div>
-            <div id="qrcode" class="mb-6 border-8 border-white rounded-[2rem] mx-auto"></div>
-            <p id="depositAddrText" class="text-xs font-mono text-blue-400 font-bold mb-4">---</p>
-            <button id="copyBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase">Copy Address</button>
+            <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto"></div>
+            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all">---</p>
+            <button id="copyBtn" class="w-full bg-blue-600/20 text-blue-400 border border-blue-400/30 py-4 rounded-2xl font-black uppercase mb-8">Copy Address</button>
+            
+            <div class="border-t border-white/5 pt-6 text-left">
+                <p class="text-[10px] text-slate-500 font-black uppercase mb-3 ml-2 italic">Confirm Transaction</p>
+                <input id="txHash" type="text" class="field mb-3" placeholder="Paste Transaction ID (Hash)">
+                <button id="submitDeposit" class="w-full bg-emerald-600 py-5 rounded-2xl font-black uppercase tracking-widest">Confirm Payment</button>
+            </div>
         </div>
     </div>
 
@@ -92,13 +102,6 @@
                 <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10)">
                 <input id="vaultPin" type="password" maxlength="6" class="field text-center tracking-[1em]" placeholder="******">
                 
-                <div class="bg-black/60 rounded-2xl p-4 border border-white/5">
-                    <div class="flex justify-between text-[11px] font-black uppercase">
-                        <span class="text-blue-400">Net Settlement</span>
-                        <span id="finalAmount" class="text-emerald-500">$0.00</span>
-                    </div>
-                </div>
-
                 <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest">
                     Initiate Payout
                 </button>
@@ -117,7 +120,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, getDoc, where, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, updateDoc, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -135,14 +138,27 @@
         let currentUser = null;
         let currentUserData = null;
 
-        // --- مراقبة الحالة ---
+        // --- Custom iOS Error Style ---
+        function showError(msg) {
+            Swal.fire({
+                icon: 'error',
+                title: 'DENIED',
+                text: msg,
+                background: '#070b16',
+                color: '#fff',
+                confirmButtonColor: '#3b82f6',
+                customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
+            });
+        }
+
+        // --- Auth Observer ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 currentUser = user;
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     currentUserData = snap.data();
                     if (currentUserData) {
-                        document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString()}`;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = currentUserData.fullName || "GUEST";
                         document.getElementById('userTier').innerText = currentUserData.tier || "Tier 1";
                         if (currentUserData.depositAddress) enableAddressUI(currentUserData.depositAddress);
@@ -154,97 +170,119 @@
             }
         });
 
-        // --- كبسة السحب الرئيسية ---
+        // --- Withdrawal Logic ---
+        document.getElementById('withdrawTrigger').onclick = () => {
+            if (!currentUserData?.withdrawalPin) {
+                return Swal.fire({
+                    icon: 'lock',
+                    title: 'Security Required',
+                    text: 'Please set your 6-digit Vault PIN in Profile settings first.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Set PIN Now',
+                    background: '#070b16', color: '#fff'
+                }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
+            }
+            document.getElementById('withdrawAvailableBalance').innerText = `Available for payout: $${parseFloat(currentUserData.balance).toFixed(2)}`;
+            document.getElementById('withdrawPanel').classList.add('show-panel');
+        };
+
         document.getElementById('submitWithdrawBtn').onclick = async () => {
             const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const address = document.getElementById('withdrawAddress').value;
             const enteredPin = document.getElementById('vaultPin').value;
 
-            // 1. فحص الحقول الأساسية
-            if (!address || isNaN(amount) || !enteredPin) {
-                return Swal.fire('Error', 'Fill all fields', 'error');
-            }
-
-            // 2. فحص الرصيد
-            if (amount > (currentUserData?.balance || 0)) {
-                return Swal.fire('Error', 'Insufficient balance', 'error');
-            }
-
-            // 3. فحص الـ PIN (تأكد أن الحقل في فايربيس اسمه withdrawalPin)
-            if (enteredPin !== currentUserData?.withdrawalPin) {
-                return Swal.fire('Error', 'Security PIN Incorrect', 'error');
-            }
+            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Enter valid Address, Amount and 6-digit PIN");
+            if (enteredPin !== currentUserData.withdrawalPin) return showError("Invalid Security PIN");
+            if (amount < 10) return showError("Minimum payout is $10.00");
+            if (amount > (currentUserData.balance || 0)) return showError("Insufficient Vault Balance");
 
             try {
-                btn.disabled = true;
-                btn.innerText = "Checking...";
+                btn.disabled = true; btn.innerText = "Authorizing...";
 
-                // --- فحص الطلبات النشطة ---
-                const q = query(collection(db, "withdrawals"), 
-                    where("uid", "==", currentUser.uid), 
-                    where("status", "==", "pending")
-                );
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    btn.disabled = false;
-                    btn.innerText = "Initiate Payout";
-                    return Swal.fire('Action Blocked', 'You already have a pending withdrawal request.', 'warning');
+                // Check for pending
+                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    btn.disabled = false; btn.innerText = "Initiate Payout";
+                    return showError("You already have a pending withdrawal.");
                 }
 
-                const withdrawData = {
-                    uid: currentUser.uid,
-                    amount: amount,
-                    status: "pending",
-                    address: address,
-                    timestamp: serverTimestamp()
-                };
+                // 1. Deduct Balance Immediately
+                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
 
-                // حفظ الطلب
-                const docRef = await addDoc(collection(db, "withdrawals"), withdrawData);
-                await setDoc(doc(db, "users", currentUser.uid, "withdrawals", docRef.id), withdrawData);
+                // 2. Add to Global Withdrawals (For Admin)
+                const txData = {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    amount: amount,
+                    address: address,
+                    status: "pending",
+                    timestamp: serverTimestamp(),
+                    type: "Withdrawal"
+                };
+                const docRef = await addDoc(collection(db, "withdrawals"), txData);
                 
-                Swal.fire('Success', 'Request sent!', 'success');
+                // 3. Add to User History
+                await addDoc(collection(db, "users", currentUser.uid, "transactions"), txData);
+
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Payout initiated. Funds locked for audit.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
-                
-            } catch (err) {
-                console.error(err);
-                Swal.fire('Error', 'Server Error', 'error');
+            } catch (e) {
+                showError("Relay Error. Try again.");
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Initiate Payout";
+                btn.disabled = false; btn.innerText = "Initiate Payout";
             }
         };
 
-        // --- وظائف مساعدة ---
+        // --- Deposit Proof Logic ---
+        document.getElementById('submitDeposit').onclick = async () => {
+            const hash = document.getElementById('txHash').value;
+            if (!hash) return showError("Please provide Transaction Hash");
+
+            await addDoc(collection(db, "deposits"), {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                hash: hash,
+                status: "pending",
+                timestamp: serverTimestamp()
+            });
+            Swal.fire('Submitted', 'Admin is verifying your deposit.', 'success');
+            document.getElementById('txHash').value = "";
+        };
+
+        // --- Helpers ---
         function loadTransactions(uid) {
             const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(10));
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(q, snap => {
                 const cont = document.getElementById('transactionHistory');
-                cont.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const tx = doc.data();
-                    cont.innerHTML += `<div class="p-3 border-b border-white/5 flex justify-between">
-                        <span class="text-[10px] uppercase font-bold">${tx.type || 'TX'}</span>
-                        <span class="${tx.status === 'pending' ? 'text-amber-500' : 'text-emerald-500'} text-[10px] font-bold">$${tx.amount}</span>
+                cont.innerHTML = snap.empty ? '<p class="text-center text-[10px] py-10 opacity-30 italic">No activity</p>' : "";
+                snap.forEach(d => {
+                    const tx = d.data();
+                    const color = tx.status === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+                    cont.innerHTML += `<div class="p-4 border-b border-white/5 flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase text-slate-400">${tx.type || 'TX'}</span>
+                        <div class="text-right">
+                            <p class="text-xs font-black italic">$${parseFloat(tx.amount).toFixed(2)}</p>
+                            <p class="text-[8px] font-black uppercase ${color}">${tx.status}</p>
+                        </div>
                     </div>`;
                 });
             });
         }
 
-        function enableAddressUI(address) {
-            document.getElementById('depositAddrText').innerText = address;
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), { text: address, width: 150, height: 150 });
+        function enableAddressUI(addr) {
+            document.getElementById('depositAddrText').innerText = addr;
+            const qrBox = document.getElementById('qrcode');
+            qrBox.innerHTML = "";
+            new QRCode(qrBox, { text: addr, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff" });
         }
 
-        // --- أحداث فتح اللوحات ---
-        document.getElementById('depositTrigger').onclick = () => document.getElementById('depositPanel').classList.add('show-panel');
-        document.getElementById('withdrawTrigger').onclick = () => {
-            document.getElementById('withdrawAvailableBalance').innerText = `Available: $${currentUserData?.balance || 0}`;
-            document.getElementById('withdrawPanel').classList.add('show-panel');
+        document.getElementById('copyBtn').onclick = () => {
+            navigator.clipboard.writeText(document.getElementById('depositAddrText').innerText);
+            Swal.fire({ icon: 'success', title: 'Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
         };
+
         document.getElementById('closeDep').onclick = () => document.getElementById('depositPanel').classList.remove('show-panel');
         document.getElementById('closeWithdraw').onclick = () => document.getElementById('withdrawPanel').classList.remove('show-panel');
     </script>
