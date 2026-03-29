@@ -117,7 +117,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, updateDoc, where, getDocs, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -161,7 +161,7 @@
             }
         });
 
-        // Withdrawal Trigger
+        // Withdrawal Logic
         document.getElementById('withdrawTrigger').onclick = () => {
             if (!currentUserData?.securePin) {
                 return Swal.fire({
@@ -173,7 +173,6 @@
             document.getElementById('withdrawPanel').classList.add('show-panel');
         };
 
-        // Submit Withdrawal
         document.getElementById('submitWithdrawBtn').onclick = async () => {
             const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -189,14 +188,6 @@
             try {
                 btn.disabled = true; btn.innerText = "Encrypting...";
                 
-                // Check pending
-                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    btn.disabled = false; btn.innerText = "Confirm Withdrawal";
-                    return showError("Active request already in progress.");
-                }
-
                 const withdrawalData = {
                     uid: currentUser.uid,
                     email: currentUser.email,
@@ -209,68 +200,78 @@
                     type: "Withdrawal"
                 };
 
-                // Deduct Balance
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                
-                // Add to Global & User local history
-                const docRef = await addDoc(collection(db, "withdrawals"), withdrawalData);
-                await setDoc(doc(db, "users", currentUser.uid, "transactions", docRef.id), withdrawalData);
+                await addDoc(collection(db, "withdrawals"), withdrawalData);
 
                 Swal.fire({ icon: 'success', title: 'Request Sent', text: 'Transaction is being verified by the node.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAmount').value = "";
             } catch (e) {
-                showError("Relay timeout. Please try again.");
+                showError("Relay timeout.");
             } finally {
                 btn.disabled = false; btn.innerText = "Confirm Withdrawal";
             }
         };
 
-        // Load Transactions (Fixed for Immediate Display)
-        function loadTransactions(uid) {
-            const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(15));
-            
-            onSnapshot(q, snap => {
-                const cont = document.getElementById('transactionHistory');
-                if (snap.empty) {
-                    cont.innerHTML = '<div class="flex flex-col items-center py-10 opacity-20"><i class="fas fa-box-open text-3xl mb-2"></i><p class="text-[10px] font-black uppercase italic">No Activity Logs</p></div>';
-                    return;
-                }
+        // LOAD TRANSACTIONS (FIXED)
+        async function loadTransactions(uid) {
+            const cont = document.getElementById('transactionHistory');
 
-                cont.innerHTML = "";
-                snap.forEach(d => {
-                    const tx = d.data();
-                    let color = 'text-amber-500';
-                    let icon = 'fa-clock';
-                    
-                    if (tx.status === 'approved' || tx.status === 'success') { color = 'text-emerald-500'; icon = 'fa-check-circle'; }
-                    if (tx.status === 'rejected' || tx.status === 'failed') { color = 'text-red-500'; icon = 'fa-times-circle'; }
+            // دمج سحوبات وإيداعات المستخدم من المجموعات العامة مباشرة كما في صورك
+            const wQ = query(collection(db, "withdrawals"), where("uid", "==", uid));
+            const dQ = query(collection(db, "deposits"), where("uid", "==", uid));
 
-                    const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Processing';
+            const syncLogs = () => {
+                getDocs(wQ).then(wSnap => {
+                    getDocs(dQ).then(dSnap => {
+                        let allTx = [];
+                        wSnap.forEach(doc => allTx.push({id: doc.id, ...doc.data()}));
+                        dSnap.forEach(doc => allTx.push({id: doc.id, ...doc.data()}));
 
-                    cont.innerHTML += `
-                    <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                                <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type || 'TX'}</span>
-                                <p class="text-[8px] text-slate-500 font-bold">${date}</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                            <p class="text-[8px] font-black uppercase ${color} flex items-center justify-end gap-1">
-                                <i class="fas ${icon} text-[7px]"></i> ${tx.status}
-                            </p>
-                        </div>
-                    </div>`;
+                        if (allTx.length === 0) {
+                            cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
+                            return;
+                        }
+
+                        // ترتيب يدوي للأحدث
+                        allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                        cont.innerHTML = "";
+                        allTx.forEach(tx => {
+                            let color = 'text-amber-500';
+                            let icon = 'fa-clock';
+                            if (tx.status === 'approved' || tx.status === 'success') { color = 'text-emerald-500'; icon = 'fa-check-circle'; }
+                            if (tx.status === 'rejected' || tx.status === 'failed') { color = 'text-red-500'; icon = 'fa-times-circle'; }
+
+                            const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
+
+                            cont.innerHTML += `
+                            <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                        <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type || 'TX'}</span>
+                                        <p class="text-[8px] text-slate-500 font-bold">${date}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
+                                    <p class="text-[8px] font-black uppercase ${color} flex items-center justify-end gap-1">
+                                        <i class="fas ${icon} text-[7px]"></i> ${tx.status || 'pending'}
+                                    </p>
+                                </div>
+                            </div>`;
+                        });
+                    });
                 });
-            }, (err) => {
-                console.error("Snapshot error:", err);
-            });
+            };
+
+            // تشغيل التزامن كل 5 ثواني أو عند التحميل
+            syncLogs();
+            setInterval(syncLogs, 10000); 
         }
 
         // Deposit Logic
@@ -282,16 +283,14 @@
                 uid: currentUser.uid,
                 email: currentUser.email,
                 fullName: currentUserData.fullName,
-                amount: 0, // Admin will update
+                amount: 0,
                 hash: hash,
                 status: "pending",
                 timestamp: serverTimestamp(),
                 type: "Deposit"
             };
 
-            const docRef = await addDoc(collection(db, "deposits"), depData);
-            await setDoc(doc(db, "users", currentUser.uid, "transactions", docRef.id), depData);
-
+            await addDoc(collection(db, "deposits"), depData);
             Swal.fire({ icon: 'success', title: 'Hash Received', text: 'Nodes are verifying your transaction.', background: '#070b16', color: '#fff' });
             document.getElementById('txHash').value = "";
             document.getElementById('depositPanel').classList.remove('show-panel');
