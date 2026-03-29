@@ -26,7 +26,6 @@
         .show-panel .panel-content { transform: translateY(0); }
         .field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 1.25rem; padding: 15px; outline: none; font-size: 14px; }
         
-        /* iOS Alert Style */
         .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
         .ios-btn { border-radius: 14px !important; font-weight: 800 !important; text-transform: uppercase !important; }
     </style>
@@ -56,7 +55,7 @@
     </div>
 
     <div class="px-6 mt-6 flex gap-4">
-        <button id="depositTrigger" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Deposit</button>
+        <button id="depositTrigger" onclick="document.getElementById('depositPanel').classList.add('show-panel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Deposit</button>
         <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Withdraw</button>
     </div>
 
@@ -138,7 +137,6 @@
         let currentUser = null;
         let currentUserData = null;
 
-        // --- Custom iOS Error Style ---
         function showError(msg) {
             Swal.fire({
                 icon: 'error',
@@ -151,7 +149,6 @@
             });
         }
 
-        // --- Auth Observer ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 currentUser = user;
@@ -170,9 +167,10 @@
             }
         });
 
-        // --- Withdrawal Logic ---
+        // --- Withdrawal Logic (Fixed securePin) ---
         document.getElementById('withdrawTrigger').onclick = () => {
-            if (!currentUserData?.withdrawalPin) {
+            // التصحيح: استبدال withdrawalPin بـ securePin
+            if (!currentUserData?.securePin) {
                 return Swal.fire({
                     icon: 'lock',
                     title: 'Security Required',
@@ -182,7 +180,7 @@
                     background: '#070b16', color: '#fff'
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
-            document.getElementById('withdrawAvailableBalance').innerText = `Available for payout: $${parseFloat(currentUserData.balance).toFixed(2)}`;
+            document.getElementById('withdrawAvailableBalance').innerText = `Available: $${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
             document.getElementById('withdrawPanel').classList.add('show-panel');
         };
 
@@ -193,14 +191,16 @@
             const enteredPin = document.getElementById('vaultPin').value;
 
             if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Enter valid Address, Amount and 6-digit PIN");
-            if (enteredPin !== currentUserData.withdrawalPin) return showError("Invalid Security PIN");
+            
+            // التصحيح: المقارنة مع securePin
+            if (enteredPin !== currentUserData.securePin) return showError("Invalid Security PIN");
+            
             if (amount < 10) return showError("Minimum payout is $10.00");
             if (amount > (currentUserData.balance || 0)) return showError("Insufficient Vault Balance");
 
             try {
                 btn.disabled = true; btn.innerText = "Authorizing...";
 
-                // Check for pending
                 const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
@@ -208,26 +208,26 @@
                     return showError("You already have a pending withdrawal.");
                 }
 
-                // 1. Deduct Balance Immediately
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
 
-                // 2. Add to Global Withdrawals (For Admin)
                 const txData = {
                     uid: currentUser.uid,
                     email: currentUser.email,
+                    fullName: currentUserData.fullName,
                     amount: amount,
                     address: address,
                     status: "pending",
                     timestamp: serverTimestamp(),
                     type: "Withdrawal"
                 };
-                const docRef = await addDoc(collection(db, "withdrawals"), txData);
                 
-                // 3. Add to User History
+                await addDoc(collection(db, "withdrawals"), txData);
                 await addDoc(collection(db, "users", currentUser.uid, "transactions"), txData);
 
                 Swal.fire({ icon: 'success', title: 'Success', text: 'Payout initiated. Funds locked for audit.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
+                document.getElementById('vaultPin').value = "";
+                document.getElementById('withdrawAmount').value = "";
             } catch (e) {
                 showError("Relay Error. Try again.");
             } finally {
@@ -243,12 +243,14 @@
             await addDoc(collection(db, "deposits"), {
                 uid: currentUser.uid,
                 email: currentUser.email,
+                fullName: currentUserData.fullName,
                 hash: hash,
                 status: "pending",
                 timestamp: serverTimestamp()
             });
-            Swal.fire('Submitted', 'Admin is verifying your deposit.', 'success');
+            Swal.fire({ icon: 'success', title: 'Submitted', text: 'Admin is verifying your deposit.', background: '#070b16', color: '#fff' });
             document.getElementById('txHash').value = "";
+            document.getElementById('depositPanel').classList.remove('show-panel');
         };
 
         // --- Helpers ---
@@ -263,7 +265,7 @@
                     cont.innerHTML += `<div class="p-4 border-b border-white/5 flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase text-slate-400">${tx.type || 'TX'}</span>
                         <div class="text-right">
-                            <p class="text-xs font-black italic">$${parseFloat(tx.amount).toFixed(2)}</p>
+                            <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
                             <p class="text-[8px] font-black uppercase ${color}">${tx.status}</p>
                         </div>
                     </div>`;
