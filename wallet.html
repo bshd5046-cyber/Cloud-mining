@@ -13,10 +13,7 @@
         :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.16) 0%, transparent 40%), #020617; min-height: 100vh; margin: 0; padding: 0; overflow-x: hidden; }
-        
-        /* حل مشكلة الطبقات - الـ Alert فوق كل شيء */
         .swal2-container { z-index: 9999 !important; }
-        
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
@@ -77,12 +74,20 @@
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit Asset</h3>
                 <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
+            
             <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto shadow-2xl shadow-blue-500/20"></div>
-            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all px-4">---</p>
-            <button id="copyBtn" class="w-full bg-blue-600/10 text-blue-400 border border-blue-400/20 py-4 rounded-2xl font-black uppercase mb-8 active:bg-blue-600/20 transition-all">Copy Address</button>
-            <div class="border-t border-white/5 pt-6 text-left">
-                <input id="txHash" type="text" class="field mb-4" placeholder="Transaction Hash (TxID)">
-                <button id="submitDeposit" class="w-full bg-emerald-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-emerald-900/40">Verify Payment</button>
+            
+            <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Personal Deposit Address</p>
+            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all px-4 tracking-tight">Generating secure address...</p>
+            
+            <button id="copyBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase mb-8 shadow-lg shadow-blue-900/40 transition-all active:scale-95">Copy Address</button>
+            
+            <div class="border-t border-white/5 pt-6">
+                <div class="flex items-center justify-center gap-2 text-emerald-500 mb-2">
+                    <i class="fas fa-bolt-lightning animate-pulse"></i>
+                    <span class="text-[10px] font-black uppercase">Automatic Sync Active</span>
+                </div>
+                <p class="text-[9px] text-slate-500 italic px-6">The system will automatically detect your transfer and credit your vault within minutes.</p>
             </div>
         </div>
     </div>
@@ -121,7 +126,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -139,13 +144,12 @@
         let currentUser = null;
         let currentUserData = null;
 
-        // دالة عرض الخطأ المحسنة لضمان الظهور فوق الـ Panel
         function showError(msg) {
             Swal.fire({
                 icon: 'error', title: 'ACCESS DENIED', text: msg,
                 background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6',
                 backdrop: `rgba(0,0,0,0.8)`, 
-                target: document.body, // ضمان الظهور فوق الـ Slide Panel
+                target: document.body,
                 customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
             });
         }
@@ -197,24 +201,17 @@
                 btn.disabled = true; 
                 btn.innerText = "Checking Nodes...";
 
-                // --- منطق منع تكرار الطلب (قيد واحد فقط) ---
-                const q = query(
-                    collection(db, "withdrawals"), 
-                    where("uid", "==", currentUser.uid), 
-                    where("status", "==", "pending")
-                );
+                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const existingSnap = await getDocs(q);
                 
                 if (!existingSnap.empty) {
                     btn.disabled = false;
                     btn.innerText = "Confirm Withdrawal";
-                    return showError("You already have a pending request. Please wait for processing.");
+                    return showError("You already have a pending request.");
                 }
-                // ---------------------------------------
 
-                btn.innerText = "Encrypting...";
-                
-                const withdrawalData = {
+                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
+                await addDoc(collection(db, "withdrawals"), {
                     uid: currentUser.uid,
                     email: currentUser.email,
                     fullName: currentUserData.fullName,
@@ -224,25 +221,12 @@
                     status: "pending",
                     timestamp: serverTimestamp(),
                     type: "Withdrawal"
-                };
-
-                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                await addDoc(collection(db, "withdrawals"), withdrawalData);
-
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'Request Sent', 
-                    text: 'Transaction is being verified by the node.', 
-                    background: '#070b16', 
-                    color: '#fff',
-                    target: document.body 
                 });
-                
+
+                Swal.fire({ icon: 'success', title: 'Request Sent', background: '#070b16', color: '#fff', target: document.body });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
-                document.getElementById('vaultPin').value = "";
-                document.getElementById('withdrawAmount').value = "";
             } catch (e) {
-                showError("Relay timeout. Check connectivity.");
+                showError("Relay timeout.");
             } finally {
                 btn.disabled = false; 
                 btn.innerText = "Confirm Withdrawal";
@@ -251,79 +235,40 @@
 
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
-            const wQ = query(collection(db, "withdrawals"), where("uid", "==", uid));
-            const dQ = query(collection(db, "deposits"), where("uid", "==", uid));
+            // مراقبة فورية للسحب والإيداع
+            onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
+                onSnapshot(query(collection(db, "deposits"), where("uid", "==", uid)), dSnap => {
+                    let allTx = [];
+                    wSnap.forEach(doc => allTx.push(doc.data()));
+                    dSnap.forEach(doc => allTx.push(doc.data()));
+                    
+                    if (allTx.length === 0) {
+                        cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
+                        return;
+                    }
 
-            const syncLogs = () => {
-                getDocs(wQ).then(wSnap => {
-                    getDocs(dQ).then(dSnap => {
-                        let allTx = [];
-                        wSnap.forEach(doc => allTx.push({id: doc.id, ...doc.data()}));
-                        dSnap.forEach(doc => allTx.push({id: doc.id, ...doc.data()}));
-
-                        if (allTx.length === 0) {
-                            cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
-                            return;
-                        }
-
-                        allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-                        cont.innerHTML = "";
-                        allTx.forEach(tx => {
-                            let color = 'text-amber-500';
-                            let icon = 'fa-clock';
-                            if (tx.status === 'approved' || tx.status === 'success') { color = 'text-emerald-500'; icon = 'fa-check-circle'; }
-                            if (tx.status === 'rejected' || tx.status === 'failed') { color = 'text-red-500'; icon = 'fa-times-circle'; }
-
-                            const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
-
-                            cont.innerHTML += `
-                            <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                                        <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type || 'TX'}</span>
-                                        <p class="text-[8px] text-slate-500 font-bold">${date}</p>
-                                    </div>
+                    allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    cont.innerHTML = "";
+                    allTx.forEach(tx => {
+                        let color = tx.status === 'approved' ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
+                        const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
+                        cont.innerHTML += `
+                        <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                    <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                                    <p class="text-[8px] font-black uppercase ${color} flex items-center justify-end gap-1">
-                                        <i class="fas ${icon} text-[7px]"></i> ${tx.status || 'pending'}
-                                    </p>
-                                </div>
-                            </div>`;
-                        });
+                                <div><span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span><p class="text-[8px] text-slate-500 font-bold">${date}</p></div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
+                                <p class="text-[8px] font-black uppercase ${color}">${tx.status || 'pending'}</p>
+                            </div>
+                        </div>`;
                     });
                 });
-            };
-
-            syncLogs();
-            setInterval(syncLogs, 15000); 
+            });
         }
-
-        document.getElementById('submitDeposit').onclick = async () => {
-            const hash = document.getElementById('txHash').value;
-            if (!hash || hash.length < 10) return showError("Valid Transaction Hash required.");
-            
-            const depData = {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                fullName: currentUserData.fullName,
-                amount: 0,
-                hash: hash,
-                status: "pending",
-                timestamp: serverTimestamp(),
-                type: "Deposit"
-            };
-
-            await addDoc(collection(db, "deposits"), depData);
-            Swal.fire({ icon: 'success', title: 'Hash Received', text: 'Nodes are verifying your transaction.', background: '#070b16', color: '#fff', target: document.body });
-            document.getElementById('txHash').value = "";
-            document.getElementById('depositPanel').classList.remove('show-panel');
-        };
 
         function enableAddressUI(addr) {
             document.getElementById('depositAddrText').innerText = addr;
@@ -334,7 +279,7 @@
 
         document.getElementById('copyBtn').onclick = () => {
             navigator.clipboard.writeText(document.getElementById('depositAddrText').innerText);
-            Swal.fire({ icon: 'success', title: 'Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
+            Swal.fire({ icon: 'success', title: 'Address Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500, background: '#070b16', color: '#fff' });
         };
     </script>
 </body>
