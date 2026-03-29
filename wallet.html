@@ -13,6 +13,10 @@
         :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.16) 0%, transparent 40%), #020617; min-height: 100vh; margin: 0; padding: 0; overflow-x: hidden; }
+        
+        /* حل مشكلة الطبقات - الـ Alert فوق كل شيء */
+        .swal2-container { z-index: 9999 !important; }
+        
         .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
         .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; border: 6px solid #020617; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; }
@@ -25,7 +29,7 @@
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
         .field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 1.25rem; padding: 15px; outline: none; font-size: 14px; }
-        .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; z-index: 9999 !important; }
+        .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
         .ios-btn { border-radius: 14px !important; font-weight: 800 !important; text-transform: uppercase !important; }
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -135,11 +139,14 @@
         let currentUser = null;
         let currentUserData = null;
 
+        // دالة عرض الخطأ المحسنة لضمان الظهور فوق الـ Panel
         function showError(msg) {
             Swal.fire({
                 icon: 'error', title: 'ACCESS DENIED', text: msg,
                 background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6',
-                backdrop: `rgba(0,0,0,0.8)`, customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
+                backdrop: `rgba(0,0,0,0.8)`, 
+                target: document.body, // ضمان الظهور فوق الـ Slide Panel
+                customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
             });
         }
 
@@ -166,7 +173,8 @@
             if (!currentUserData?.securePin) {
                 return Swal.fire({
                     icon: 'lock', title: 'Security Required', text: 'Please set your 6-digit Vault PIN in Profile.',
-                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff'
+                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff',
+                    target: document.body
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
             document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
@@ -186,7 +194,25 @@
             if (amount > (currentUserData.balance || 0)) return showError("Insufficient available balance.");
 
             try {
-                btn.disabled = true; btn.innerText = "Encrypting...";
+                btn.disabled = true; 
+                btn.innerText = "Checking Nodes...";
+
+                // --- منطق منع تكرار الطلب (قيد واحد فقط) ---
+                const q = query(
+                    collection(db, "withdrawals"), 
+                    where("uid", "==", currentUser.uid), 
+                    where("status", "==", "pending")
+                );
+                const existingSnap = await getDocs(q);
+                
+                if (!existingSnap.empty) {
+                    btn.disabled = false;
+                    btn.innerText = "Confirm Withdrawal";
+                    return showError("You already have a pending request. Please wait for processing.");
+                }
+                // ---------------------------------------
+
+                btn.innerText = "Encrypting...";
                 
                 const withdrawalData = {
                     uid: currentUser.uid,
@@ -203,22 +229,28 @@
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
                 await addDoc(collection(db, "withdrawals"), withdrawalData);
 
-                Swal.fire({ icon: 'success', title: 'Request Sent', text: 'Transaction is being verified by the node.', background: '#070b16', color: '#fff' });
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: 'Request Sent', 
+                    text: 'Transaction is being verified by the node.', 
+                    background: '#070b16', 
+                    color: '#fff',
+                    target: document.body 
+                });
+                
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAmount').value = "";
             } catch (e) {
-                showError("Relay timeout.");
+                showError("Relay timeout. Check connectivity.");
             } finally {
-                btn.disabled = false; btn.innerText = "Confirm Withdrawal";
+                btn.disabled = false; 
+                btn.innerText = "Confirm Withdrawal";
             }
         };
 
-        // LOAD TRANSACTIONS (FIXED)
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
-
-            // دمج سحوبات وإيداعات المستخدم من المجموعات العامة مباشرة كما في صورك
             const wQ = query(collection(db, "withdrawals"), where("uid", "==", uid));
             const dQ = query(collection(db, "deposits"), where("uid", "==", uid));
 
@@ -234,7 +266,6 @@
                             return;
                         }
 
-                        // ترتيب يدوي للأحدث
                         allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                         cont.innerHTML = "";
@@ -269,12 +300,10 @@
                 });
             };
 
-            // تشغيل التزامن كل 5 ثواني أو عند التحميل
             syncLogs();
-            setInterval(syncLogs, 10000); 
+            setInterval(syncLogs, 15000); 
         }
 
-        // Deposit Logic
         document.getElementById('submitDeposit').onclick = async () => {
             const hash = document.getElementById('txHash').value;
             if (!hash || hash.length < 10) return showError("Valid Transaction Hash required.");
@@ -291,7 +320,7 @@
             };
 
             await addDoc(collection(db, "deposits"), depData);
-            Swal.fire({ icon: 'success', title: 'Hash Received', text: 'Nodes are verifying your transaction.', background: '#070b16', color: '#fff' });
+            Swal.fire({ icon: 'success', title: 'Hash Received', text: 'Nodes are verifying your transaction.', background: '#070b16', color: '#fff', target: document.body });
             document.getElementById('txHash').value = "";
             document.getElementById('depositPanel').classList.remove('show-panel');
         };
