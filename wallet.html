@@ -27,6 +27,8 @@
         .field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 1.25rem; padding: 15px; outline: none; font-size: 14px; }
         .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; z-index: 9999 !important; }
         .ios-btn { border-radius: 14px !important; font-weight: 800 !important; text-transform: uppercase !important; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="pb-32">
@@ -54,29 +56,29 @@
     </div>
 
     <div class="px-6 mt-6 flex gap-4">
-        <button onclick="document.getElementById('depositPanel').classList.add('show-panel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Deposit</button>
-        <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Withdraw</button>
+        <button onclick="document.getElementById('depositPanel').classList.add('show-panel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-transform">Deposit</button>
+        <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest active:scale-95 transition-transform">Withdraw</button>
     </div>
 
     <div class="px-6 mt-10">
         <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 italic mb-4 ml-2">Financial Logs</h3>
-        <div id="transactionHistory" class="glass-panel rounded-[2.5rem] p-4 min-h-[100px]">
-            <p class="text-center text-[10px] text-slate-500 py-10">Syncing with blockchain...</p>
+        <div id="transactionHistory" class="glass-panel rounded-[2.5rem] p-4 min-h-[150px] overflow-hidden">
+            <p class="text-center text-[10px] text-slate-500 py-12 italic opacity-50">Syncing with secure node...</p>
         </div>
     </div>
 
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content text-center">
             <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit</h3>
-                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
+                <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit Asset</h3>
+                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
-            <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto"></div>
-            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all">---</p>
-            <button id="copyBtn" class="w-full bg-blue-600/20 text-blue-400 border border-blue-400/30 py-4 rounded-2xl font-black uppercase mb-8">Copy Address</button>
+            <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto shadow-2xl shadow-blue-500/20"></div>
+            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all px-4">---</p>
+            <button id="copyBtn" class="w-full bg-blue-600/10 text-blue-400 border border-blue-400/20 py-4 rounded-2xl font-black uppercase mb-8 active:bg-blue-600/20 transition-all">Copy Address</button>
             <div class="border-t border-white/5 pt-6 text-left">
-                <input id="txHash" type="text" class="field mb-3" placeholder="Paste Transaction ID (Hash)">
-                <button id="submitDeposit" class="w-full bg-emerald-600 py-5 rounded-2xl font-black uppercase tracking-widest">Confirm Payment</button>
+                <input id="txHash" type="text" class="field mb-4" placeholder="Transaction Hash (TxID)">
+                <button id="submitDeposit" class="w-full bg-emerald-600 py-5 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-emerald-900/40">Verify Payment</button>
             </div>
         </div>
     </div>
@@ -84,19 +86,22 @@
     <div id="withdrawPanel" class="slide-panel">
         <div class="panel-content">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black uppercase italic text-blue-500">Withdraw</h3>
-                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
+                <h3 class="text-xl font-black uppercase italic text-blue-500">Initiate Payout</h3>
+                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
             <div class="space-y-4">
-                <p class="text-center text-xs text-amber-500 font-bold" id="withdrawAvailableBalance"></p>
+                <div class="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 text-center">
+                    <p class="text-[10px] text-blue-400 font-black uppercase tracking-widest">Available to Withdraw</p>
+                    <p class="text-xl font-black mt-1" id="withdrawAvailableBalance">$0.00</p>
+                </div>
                 <select id="withdrawNetwork" class="field">
-                    <option value="TRC20">USDT (TRC20)</option>
-                    <option value="BEP20">USDT (BEP20)</option>
+                    <option value="TRC20">USDT (TRC20) - Fast</option>
+                    <option value="BEP20">USDT (BEP20) - Low Fee</option>
                 </select>
-                <input id="withdrawAddress" type="text" class="field" placeholder="Wallet Address">
-                <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10)">
-                <input id="vaultPin" type="password" maxlength="6" class="field text-center tracking-[1em]" placeholder="******">
-                <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest">Initiate Payout</button>
+                <input id="withdrawAddress" type="text" class="field" placeholder="Recipient Wallet Address">
+                <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10.00)">
+                <input id="vaultPin" type="password" maxlength="6" class="field text-center tracking-[1.2em] font-black" placeholder="******">
+                <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl shadow-blue-900/40">Confirm Withdrawal</button>
             </div>
         </div>
     </div>
@@ -112,7 +117,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, updateDoc, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimestamp, updateDoc, where, getDocs, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -132,14 +137,9 @@
 
         function showError(msg) {
             Swal.fire({
-                icon: 'error',
-                title: 'DENIED',
-                text: msg,
-                background: '#070b16',
-                color: '#fff',
-                confirmButtonColor: '#3b82f6',
-                backdrop: `rgba(0,0,0,0.8)`,
-                customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
+                icon: 'error', title: 'ACCESS DENIED', text: msg,
+                background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6',
+                backdrop: `rgba(0,0,0,0.8)`, customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
             });
         }
 
@@ -150,7 +150,7 @@
                     currentUserData = snap.data();
                     if (currentUserData) {
                         document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                        document.getElementById('userName').innerText = currentUserData.fullName || "GUEST";
+                        document.getElementById('userName').innerText = currentUserData.fullName || "IDENTIFIED USER";
                         document.getElementById('userTier').innerText = currentUserData.tier || "Tier 1";
                         if (currentUserData.depositAddress) enableAddressUI(currentUserData.depositAddress);
                     }
@@ -161,98 +161,138 @@
             }
         });
 
+        // Withdrawal Trigger
         document.getElementById('withdrawTrigger').onclick = () => {
             if (!currentUserData?.securePin) {
                 return Swal.fire({
-                    icon: 'lock',
-                    title: 'Security Required',
-                    text: 'Set your 6-digit PIN in Profile settings.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Settings',
-                    background: '#070b16', color: '#fff'
+                    icon: 'lock', title: 'Security Required', text: 'Please set your 6-digit Vault PIN in Profile.',
+                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff'
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
-            document.getElementById('withdrawAvailableBalance').innerText = `Available: $${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+            document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
             document.getElementById('withdrawPanel').classList.add('show-panel');
         };
 
+        // Submit Withdrawal
         document.getElementById('submitWithdrawBtn').onclick = async () => {
             const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const address = document.getElementById('withdrawAddress').value;
             const enteredPin = document.getElementById('vaultPin').value;
+            const network = document.getElementById('withdrawNetwork').value;
 
-            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Invalid input data.");
-            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN");
-            if (amount < 10) return showError("Minimum: $10.00");
-            if (amount > (currentUserData.balance || 0)) return showError("Insufficient funds.");
+            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Invalid parameters provided.");
+            if (enteredPin !== currentUserData.securePin) return showError("Unauthorized Security PIN.");
+            if (amount < 10) return showError("Minimum payout is $10.00.");
+            if (amount > (currentUserData.balance || 0)) return showError("Insufficient available balance.");
 
             try {
-                btn.disabled = true; btn.innerText = "Processing...";
+                btn.disabled = true; btn.innerText = "Encrypting...";
+                
+                // Check pending
                 const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
-                    btn.disabled = false; btn.innerText = "Initiate Payout";
-                    return showError("You have a pending request.");
+                    btn.disabled = false; btn.innerText = "Confirm Withdrawal";
+                    return showError("Active request already in progress.");
                 }
 
-                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                await addDoc(collection(db, "withdrawals"), {
+                const withdrawalData = {
                     uid: currentUser.uid,
                     email: currentUser.email,
                     fullName: currentUserData.fullName,
                     amount: amount,
                     address: address,
+                    network: network,
                     status: "pending",
                     timestamp: serverTimestamp(),
                     type: "Withdrawal"
-                });
+                };
 
-                Swal.fire({ icon: 'success', title: 'Success', text: 'Withdrawal under review.', background: '#070b16', color: '#fff' });
+                // Deduct Balance
+                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
+                
+                // Add to Global & User local history
+                const docRef = await addDoc(collection(db, "withdrawals"), withdrawalData);
+                await setDoc(doc(db, "users", currentUser.uid, "transactions", docRef.id), withdrawalData);
+
+                Swal.fire({ icon: 'success', title: 'Request Sent', text: 'Transaction is being verified by the node.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAmount').value = "";
             } catch (e) {
-                showError("Relay Error. Try again.");
+                showError("Relay timeout. Please try again.");
             } finally {
-                btn.disabled = false; btn.innerText = "Initiate Payout";
+                btn.disabled = false; btn.innerText = "Confirm Withdrawal";
             }
         };
 
+        // Load Transactions (Fixed for Immediate Display)
         function loadTransactions(uid) {
-            const q = query(collection(db, "withdrawals"), where("uid", "==", uid), orderBy("timestamp", "desc"), limit(10));
+            const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(15));
+            
             onSnapshot(q, snap => {
                 const cont = document.getElementById('transactionHistory');
-                cont.innerHTML = snap.empty ? '<p class="text-center text-[10px] py-10 opacity-30 italic">No activity</p>' : "";
+                if (snap.empty) {
+                    cont.innerHTML = '<div class="flex flex-col items-center py-10 opacity-20"><i class="fas fa-box-open text-3xl mb-2"></i><p class="text-[10px] font-black uppercase italic">No Activity Logs</p></div>';
+                    return;
+                }
+
+                cont.innerHTML = "";
                 snap.forEach(d => {
                     const tx = d.data();
                     let color = 'text-amber-500';
-                    if (tx.status === 'approved') color = 'text-emerald-500';
-                    if (tx.status === 'rejected') color = 'text-red-500';
+                    let icon = 'fa-clock';
+                    
+                    if (tx.status === 'approved' || tx.status === 'success') { color = 'text-emerald-500'; icon = 'fa-check-circle'; }
+                    if (tx.status === 'rejected' || tx.status === 'failed') { color = 'text-red-500'; icon = 'fa-times-circle'; }
 
-                    cont.innerHTML += `<div class="p-4 border-b border-white/5 flex justify-between items-center">
-                        <span class="text-[10px] font-black uppercase text-slate-400">${tx.type || 'TX'}</span>
+                    const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Processing';
+
+                    cont.innerHTML += `
+                    <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                                <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type || 'TX'}</span>
+                                <p class="text-[8px] text-slate-500 font-bold">${date}</p>
+                            </div>
+                        </div>
                         <div class="text-right">
                             <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                            <p class="text-[8px] font-black uppercase ${color}">${tx.status}</p>
+                            <p class="text-[8px] font-black uppercase ${color} flex items-center justify-end gap-1">
+                                <i class="fas ${icon} text-[7px]"></i> ${tx.status}
+                            </p>
                         </div>
                     </div>`;
                 });
+            }, (err) => {
+                console.error("Snapshot error:", err);
             });
         }
 
+        // Deposit Logic
         document.getElementById('submitDeposit').onclick = async () => {
             const hash = document.getElementById('txHash').value;
-            if (!hash) return showError("Transaction Hash required.");
-            await addDoc(collection(db, "deposits"), {
+            if (!hash || hash.length < 10) return showError("Valid Transaction Hash required.");
+            
+            const depData = {
                 uid: currentUser.uid,
                 email: currentUser.email,
                 fullName: currentUserData.fullName,
+                amount: 0, // Admin will update
                 hash: hash,
                 status: "pending",
-                timestamp: serverTimestamp()
-            });
-            Swal.fire({ icon: 'success', title: 'Sent', text: 'Verification in progress.', background: '#070b16', color: '#fff' });
+                timestamp: serverTimestamp(),
+                type: "Deposit"
+            };
+
+            const docRef = await addDoc(collection(db, "deposits"), depData);
+            await setDoc(doc(db, "users", currentUser.uid, "transactions", docRef.id), depData);
+
+            Swal.fire({ icon: 'success', title: 'Hash Received', text: 'Nodes are verifying your transaction.', background: '#070b16', color: '#fff' });
             document.getElementById('txHash').value = "";
             document.getElementById('depositPanel').classList.remove('show-panel');
         };
