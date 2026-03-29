@@ -25,8 +25,7 @@
         .show-panel { display: flex !important; }
         .show-panel .panel-content { transform: translateY(0); }
         .field { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 1.25rem; padding: 15px; outline: none; font-size: 14px; }
-        
-        .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; }
+        .ios-alert { border-radius: 24px !important; background: rgba(10, 15, 29, 0.95) !important; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; z-index: 9999 !important; }
         .ios-btn { border-radius: 14px !important; font-weight: 800 !important; text-transform: uppercase !important; }
     </style>
 </head>
@@ -55,14 +54,14 @@
     </div>
 
     <div class="px-6 mt-6 flex gap-4">
-        <button id="depositTrigger" onclick="document.getElementById('depositPanel').classList.add('show-panel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Deposit</button>
+        <button onclick="document.getElementById('depositPanel').classList.add('show-panel')" class="flex-1 bg-blue-600 py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Deposit</button>
         <button id="withdrawTrigger" class="flex-1 glass-panel py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-widest">Withdraw</button>
     </div>
 
     <div class="px-6 mt-10">
         <h3 class="font-black text-[11px] uppercase tracking-[0.3em] text-slate-600 italic mb-4 ml-2">Financial Logs</h3>
         <div id="transactionHistory" class="glass-panel rounded-[2.5rem] p-4 min-h-[100px]">
-            <p class="text-center text-[10px] text-slate-500 py-10">Loading Vault...</p>
+            <p class="text-center text-[10px] text-slate-500 py-10">Syncing with blockchain...</p>
         </div>
     </div>
 
@@ -70,14 +69,12 @@
         <div class="panel-content text-center">
             <div class="flex justify-between items-center mb-8">
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit</h3>
-                <button id="closeDep" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
+                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
             </div>
             <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto"></div>
             <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all">---</p>
             <button id="copyBtn" class="w-full bg-blue-600/20 text-blue-400 border border-blue-400/30 py-4 rounded-2xl font-black uppercase mb-8">Copy Address</button>
-            
             <div class="border-t border-white/5 pt-6 text-left">
-                <p class="text-[10px] text-slate-500 font-black uppercase mb-3 ml-2 italic">Confirm Transaction</p>
                 <input id="txHash" type="text" class="field mb-3" placeholder="Paste Transaction ID (Hash)">
                 <button id="submitDeposit" class="w-full bg-emerald-600 py-5 rounded-2xl font-black uppercase tracking-widest">Confirm Payment</button>
             </div>
@@ -88,9 +85,8 @@
         <div class="panel-content">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black uppercase italic text-blue-500">Withdraw</h3>
-                <button id="closeWithdraw" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
+                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5">&times;</button>
             </div>
-            
             <div class="space-y-4">
                 <p class="text-center text-xs text-amber-500 font-bold" id="withdrawAvailableBalance"></p>
                 <select id="withdrawNetwork" class="field">
@@ -100,10 +96,7 @@
                 <input id="withdrawAddress" type="text" class="field" placeholder="Wallet Address">
                 <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10)">
                 <input id="vaultPin" type="password" maxlength="6" class="field text-center tracking-[1em]" placeholder="******">
-                
-                <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest">
-                    Initiate Payout
-                </button>
+                <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest">Initiate Payout</button>
             </div>
         </div>
     </div>
@@ -145,6 +138,7 @@
                 background: '#070b16',
                 color: '#fff',
                 confirmButtonColor: '#3b82f6',
+                backdrop: `rgba(0,0,0,0.8)`,
                 customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
             });
         }
@@ -167,16 +161,14 @@
             }
         });
 
-        // --- Withdrawal Logic (Fixed securePin) ---
         document.getElementById('withdrawTrigger').onclick = () => {
-            // التصحيح: استبدال withdrawalPin بـ securePin
             if (!currentUserData?.securePin) {
                 return Swal.fire({
                     icon: 'lock',
                     title: 'Security Required',
-                    text: 'Please set your 6-digit Vault PIN in Profile settings first.',
+                    text: 'Set your 6-digit PIN in Profile settings.',
                     showCancelButton: true,
-                    confirmButtonText: 'Set PIN Now',
+                    confirmButtonText: 'Settings',
                     background: '#070b16', color: '#fff'
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
@@ -190,27 +182,22 @@
             const address = document.getElementById('withdrawAddress').value;
             const enteredPin = document.getElementById('vaultPin').value;
 
-            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Enter valid Address, Amount and 6-digit PIN");
-            
-            // التصحيح: المقارنة مع securePin
-            if (enteredPin !== currentUserData.securePin) return showError("Invalid Security PIN");
-            
-            if (amount < 10) return showError("Minimum payout is $10.00");
-            if (amount > (currentUserData.balance || 0)) return showError("Insufficient Vault Balance");
+            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Invalid input data.");
+            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN");
+            if (amount < 10) return showError("Minimum: $10.00");
+            if (amount > (currentUserData.balance || 0)) return showError("Insufficient funds.");
 
             try {
-                btn.disabled = true; btn.innerText = "Authorizing...";
-
+                btn.disabled = true; btn.innerText = "Processing...";
                 const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     btn.disabled = false; btn.innerText = "Initiate Payout";
-                    return showError("You already have a pending withdrawal.");
+                    return showError("You have a pending request.");
                 }
 
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-
-                const txData = {
+                await addDoc(collection(db, "withdrawals"), {
                     uid: currentUser.uid,
                     email: currentUser.email,
                     fullName: currentUserData.fullName,
@@ -219,12 +206,9 @@
                     status: "pending",
                     timestamp: serverTimestamp(),
                     type: "Withdrawal"
-                };
-                
-                await addDoc(collection(db, "withdrawals"), txData);
-                await addDoc(collection(db, "users", currentUser.uid, "transactions"), txData);
+                });
 
-                Swal.fire({ icon: 'success', title: 'Success', text: 'Payout initiated. Funds locked for audit.', background: '#070b16', color: '#fff' });
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Withdrawal under review.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAmount').value = "";
@@ -235,33 +219,17 @@
             }
         };
 
-        // --- Deposit Proof Logic ---
-        document.getElementById('submitDeposit').onclick = async () => {
-            const hash = document.getElementById('txHash').value;
-            if (!hash) return showError("Please provide Transaction Hash");
-
-            await addDoc(collection(db, "deposits"), {
-                uid: currentUser.uid,
-                email: currentUser.email,
-                fullName: currentUserData.fullName,
-                hash: hash,
-                status: "pending",
-                timestamp: serverTimestamp()
-            });
-            Swal.fire({ icon: 'success', title: 'Submitted', text: 'Admin is verifying your deposit.', background: '#070b16', color: '#fff' });
-            document.getElementById('txHash').value = "";
-            document.getElementById('depositPanel').classList.remove('show-panel');
-        };
-
-        // --- Helpers ---
         function loadTransactions(uid) {
-            const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(10));
+            const q = query(collection(db, "withdrawals"), where("uid", "==", uid), orderBy("timestamp", "desc"), limit(10));
             onSnapshot(q, snap => {
                 const cont = document.getElementById('transactionHistory');
                 cont.innerHTML = snap.empty ? '<p class="text-center text-[10px] py-10 opacity-30 italic">No activity</p>' : "";
                 snap.forEach(d => {
                     const tx = d.data();
-                    const color = tx.status === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+                    let color = 'text-amber-500';
+                    if (tx.status === 'approved') color = 'text-emerald-500';
+                    if (tx.status === 'rejected') color = 'text-red-500';
+
                     cont.innerHTML += `<div class="p-4 border-b border-white/5 flex justify-between items-center">
                         <span class="text-[10px] font-black uppercase text-slate-400">${tx.type || 'TX'}</span>
                         <div class="text-right">
@@ -272,6 +240,22 @@
                 });
             });
         }
+
+        document.getElementById('submitDeposit').onclick = async () => {
+            const hash = document.getElementById('txHash').value;
+            if (!hash) return showError("Transaction Hash required.");
+            await addDoc(collection(db, "deposits"), {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                fullName: currentUserData.fullName,
+                hash: hash,
+                status: "pending",
+                timestamp: serverTimestamp()
+            });
+            Swal.fire({ icon: 'success', title: 'Sent', text: 'Verification in progress.', background: '#070b16', color: '#fff' });
+            document.getElementById('txHash').value = "";
+            document.getElementById('depositPanel').classList.remove('show-panel');
+        };
 
         function enableAddressUI(addr) {
             document.getElementById('depositAddrText').innerText = addr;
@@ -284,9 +268,6 @@
             navigator.clipboard.writeText(document.getElementById('depositAddrText').innerText);
             Swal.fire({ icon: 'success', title: 'Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
         };
-
-        document.getElementById('closeDep').onclick = () => document.getElementById('depositPanel').classList.remove('show-panel');
-        document.getElementById('closeWithdraw').onclick = () => document.getElementById('withdrawPanel').classList.remove('show-panel');
     </script>
 </body>
 </html>
