@@ -1,11 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import {
     getFirestore, doc, onSnapshot, collection, query, orderBy, limit, 
-    addDoc, serverTimestamp, getDoc, where, getDocs, setDoc
+    addDoc, serverTimestamp, updateDoc, where, getDocs, setDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// --- إعدادات Firebase ---
+// --- Firebase Configuration ---
 const firebaseConfig = {
     apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
     authDomain: "cloud-mining-6f190.firebaseapp.com",
@@ -19,37 +19,17 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- متغيرات الحالة ---
 let currentUser = null;
 let currentUserData = null;
-let qrGenerated = false;
+const TIER_LIMITS = { "Tier 1": 500, "Tier 2": 2000, "Tier 3": 5000, "Tier 4": 8000, "Tier 5": 10000 };
 
-const TIER_LIMITS = {
-    "Tier 1": 500, "Tier 2": 2000, "Tier 3": 5000, "Tier 4": 8000, "Tier 5": 10000
-};
-
-// --- اختيار العناصر ---
-const withdrawTrigger = document.getElementById('withdrawTrigger');
-const withdrawPanel = document.getElementById('withdrawPanel');
-const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
-const withdrawAmountInput = document.getElementById('withdrawAmount');
-const vaultPinInput = document.getElementById('vaultPin');
-
-const formatCurrency = (amount) => `$${parseFloat(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-// --- مراقبة حالة المستخدم ---
-onAuthStateChanged(auth, async (user) => {
+// --- 1. مراقبة حالة المستخدم وتحديث الرصيد لحظياً ---
+onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
-        // تحديث بيانات الجلسة للتأكد من حالة الإيميل
-        await user.reload(); 
-
         onSnapshot(doc(db, "users", user.uid), (snap) => {
-            const data = snap.data();
-            if (data) {
-                currentUserData = data;
-                updateUI(data);
-            }
+            currentUserData = snap.data();
+            if (currentUserData) updateUI(currentUserData);
         });
         loadTransactions(user.uid);
     } else {
@@ -57,190 +37,136 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// تحديث الواجهة
 function updateUI(data) {
-    document.getElementById('userBalance').innerText = formatCurrency(data.balance || 0);
-    document.getElementById('userName').innerText = data.fullName || "GUEST";
-    const tier = data.tier || "Tier 1";
-    document.getElementById('userTier').innerText = tier;
-    
-    if(document.getElementById('displayTier')) document.getElementById('displayTier').innerText = `${tier} Status`;
-    if(document.getElementById('displayLimit')) document.getElementById('displayLimit').innerText = `LIMIT: ${formatCurrency(TIER_LIMITS[tier])}`;
-    
+    document.getElementById('userBalance').innerText = `$${parseFloat(data.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+    document.getElementById('userName').innerText = data.fullName || "User";
+    document.getElementById('userTier').innerText = data.tier || "Tier 1";
     if (data.depositAddress) enableAddressUI(data.depositAddress);
 }
 
-// --- فتح لوحة السحب مع فحص الإيميل ---
-withdrawTrigger.onclick = async () => {
-    // تحديث الحالة للتأكد من تأكيد الإيميل
-    await auth.currentUser.reload();
-    
-    if (!auth.currentUser.emailVerified) {
-        Swal.fire({
-            title: 'Verify Your Email',
-            text: 'Security Protocol: You must verify your email address before making a withdrawal.',
-            icon: 'warning',
+// --- 2. منطق فتح لوحة السحب (شرط وجود PIN) ---
+document.getElementById('withdrawTrigger').onclick = () => {
+    if (!currentUserData?.withdrawalPin || currentUserData.withdrawalPin === "") {
+        return Swal.fire({
+            title: 'Security Alert',
+            text: 'You must set a 6-digit Security PIN in your profile before withdrawing.',
+            icon: 'lock',
             showCancelButton: true,
-            confirmButtonText: 'Send Verification Link',
-            background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                sendEmailVerification(auth.currentUser).then(() => {
-                    Swal.fire('Link Sent', 'Please check your inbox and spam folder.', 'success');
-                });
-            }
-        });
-        return;
+            confirmButtonText: 'Go to Profile',
+            background: '#070b16', color: '#fff'
+        }).then(res => { if(res.isConfirmed) window.location.href = 'profile.html'; });
     }
-
-    document.getElementById('withdrawAvailableBalance').innerText = formatCurrency(currentUserData?.balance || 0);
-    withdrawPanel.classList.add('show-panel');
+    document.getElementById('withdrawAvailableBalance').innerText = `Available: $${parseFloat(currentUserData.balance).toFixed(2)}`;
+    document.getElementById('withdrawPanel').classList.add('show-panel');
 };
 
-// --- معالجة طلب السحب النهائي ---
-submitWithdrawBtn.onclick = async () => {
-    const amount = parseFloat(withdrawAmountInput.value);
+// --- 3. تنفيذ عملية السحب (الخصم + الإرسال للآدمن) ---
+document.getElementById('submitWithdrawBtn').onclick = async () => {
+    const amount = parseFloat(document.getElementById('withdrawAmount').value);
     const address = document.getElementById('withdrawAddress').value;
-    const network = document.getElementById('withdrawNetwork').value;
-    const enteredPin = vaultPinInput.value;
-    const userTier = currentUserData?.tier || "Tier 1";
-    const maxLimit = TIER_LIMITS[userTier] || 500;
+    const pin = document.getElementById('vaultPin').value;
+    const netAmount = amount * 0.95; // خصم عمولة 5% مثلاً
 
-    // 1. الفحوصات الأمنية الأساسية
-    if (!address || isNaN(amount) || !enteredPin) {
-        return showError("All fields including Security PIN are required.");
-    }
-
-    if (enteredPin !== currentUserData?.withdrawalPin) {
-        return showError("Security Vault PIN is incorrect.");
-    }
-
-    if (amount < 10) return showError("Minimum withdrawal is $10.00");
-    if (amount > maxLimit) return showError(`Limit Exceeded for ${userTier}`);
-    if (amount > (currentUserData?.balance || 0)) return showError("Insufficient funds.");
+    if (!address || isNaN(amount) || pin.length !== 6) return showError("Complete all fields correctly.");
+    if (pin !== currentUserData.withdrawalPin) return showError("Incorrect Security PIN.");
+    if (amount < 10) return showError("Minimum withdrawal is $10.");
+    if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance.");
 
     try {
-        submitWithdrawBtn.disabled = true;
-        submitWithdrawBtn.innerText = "Authorizing...";
+        const btn = document.getElementById('submitWithdrawBtn');
+        btn.disabled = true;
+        btn.innerText = "Securing Funds...";
 
-        // --- الفحص: هل يوجد طلب معلق؟ ---
-        const withdrawalsRef = collection(db, "withdrawals");
-        const q = query(withdrawalsRef, 
-            where("uid", "==", currentUser.uid), 
-            where("status", "==", "pending")
-        );
-        const querySnapshot = await getDocs(q);
+        // أ. خصم الرصيد فوراً من حساب المستخدم (للحماية من التلاعب)
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, { balance: increment(-amount) });
 
-        if (!querySnapshot.empty) {
-            showError("Active Protocol: You already have a pending withdrawal request.");
-            return;
-        }
-
+        // ب. إنشاء طلب سحب للآدمن
         const withdrawData = {
             uid: currentUser.uid,
             email: currentUser.email,
             fullName: currentUserData.fullName,
             amount: amount,
-            fee: amount * 0.05,
-            netAmount: amount * 0.95,
+            netAmount: netAmount,
             address: address,
-            network: network,
             status: "pending",
             timestamp: serverTimestamp(),
-            tierAtTime: userTier,
-            securityCleared: true
+            type: "Withdrawal"
         };
 
-        // تسجيل الطلب
         const docRef = await addDoc(collection(db, "withdrawals"), withdrawData);
-        await setDoc(doc(db, "users", currentUser.uid, "withdrawals", docRef.id), withdrawData);
-
-        // تسجيل في السجل المالي للمستخدم
+        
+        // ج. تسجيل في سجل معاملات المستخدم
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             type: "Withdrawal",
             amount: amount,
             status: "pending",
-            timestamp: serverTimestamp(),
-            details: `Net: ${formatCurrency(amount * 0.95)} | Network: ${network}`
+            timestamp: serverTimestamp()
         });
 
-        Swal.fire({
-            title: 'Withdrawal Initiated',
-            text: 'Your request has been placed in the queue for manual audit (2-120h).',
-            icon: 'success',
-            background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6'
-        });
-
-        withdrawPanel.classList.remove('show-panel');
-        clearInputs();
-        
-    } catch (error) {
-        showError("Blockchain relay error. Please try again.");
+        Swal.fire({ title: 'Success', text: 'Funds locked. Payout pending audit.', icon: 'success', background: '#070b16', color: '#fff' });
+        document.getElementById('withdrawPanel').classList.remove('show-panel');
+        document.getElementById('vaultPin').value = "";
+    } catch (e) {
+        showError("Transaction failed. Contact support.");
     } finally {
-        submitWithdrawBtn.disabled = false;
-        submitWithdrawBtn.innerText = "Initiate Payout";
+        document.getElementById('submitWithdrawBtn').disabled = false;
+        document.getElementById('submitWithdrawBtn').innerText = "Initiate Payout";
     }
 };
 
-// وظائف مساعدة
-function clearInputs() {
-    withdrawAmountInput.value = "";
-    vaultPinInput.value = "";
-    document.getElementById('withdrawAddress').value = "";
+// --- 4. نظام الإيداع (إرسال إثبات للآدمن) ---
+// تأكد من إضافة id="submitDeposit" و id="txHash" في الـ HTML الخاص بك
+if (document.getElementById('submitDeposit')) {
+    document.getElementById('submitDeposit').onclick = async () => {
+        const hash = document.getElementById('txHash').value;
+        if (!hash) return showError("Please enter Transaction Hash/ID.");
+
+        await addDoc(collection(db, "deposits"), {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            hash: hash,
+            status: "pending",
+            timestamp: serverTimestamp()
+        });
+        
+        Swal.fire('Sent', 'Deposit proof submitted to admin.', 'success');
+        document.getElementById('txHash').value = "";
+    };
 }
 
-function enableAddressUI(address) {
-    document.getElementById('depositAddrText').innerText = address;
-    if (!qrGenerated) {
-        document.getElementById("qrcode").innerHTML = "";
-        new QRCode(document.getElementById("qrcode"), { text: address, width: 180, height: 180 });
-        qrGenerated = true;
-    }
-}
-
+// --- وظائف مساعدة ---
 function loadTransactions(uid) {
-    const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(15));
-    onSnapshot(q, (snapshot) => {
-        const historyCont = document.getElementById('transactionHistory');
-        historyCont.innerHTML = "";
-        if (snapshot.empty) {
-            historyCont.innerHTML = '<p class="text-center text-[10px] text-slate-500 py-10 italic">No activity detected.</p>';
-            return;
-        }
-        snapshot.forEach(doc => {
-            const tx = doc.data();
-            const date = tx.timestamp?.toDate().toLocaleString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) || "Pending";
-            const statusClass = tx.status === 'pending' ? 'text-amber-500' : (tx.status === 'approved' ? 'text-emerald-500' : 'text-rose-500');
-            historyCont.innerHTML += `
-                <div class="p-4 flex justify-between items-center border-b border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'Withdrawal' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}">
-                            <i class="fas ${tx.type === 'Withdrawal' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-black uppercase">${tx.type}</p>
-                            <p class="text-[9px] text-slate-500">${date}</p>
-                        </div>
-                    </div>
+    const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(10));
+    onSnapshot(q, (snap) => {
+        const cont = document.getElementById('transactionHistory');
+        cont.innerHTML = "";
+        snap.forEach(d => {
+            const tx = d.data();
+            const color = tx.status === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+            cont.innerHTML += `
+                <div class="p-4 border-b border-white/5 flex justify-between items-center">
+                    <div><p class="text-[10px] font-bold uppercase">${tx.type}</p></div>
                     <div class="text-right">
-                        <p class="text-sm font-black text-slate-100">${formatCurrency(tx.amount)}</p>
-                        <p class="text-[8px] font-black uppercase ${statusClass}">${tx.status}</p>
+                        <p class="text-xs font-black">$${parseFloat(tx.amount).toFixed(2)}</p>
+                        <p class="text-[8px] uppercase ${color}">${tx.status}</p>
                     </div>
                 </div>`;
         });
     });
 }
 
-function showError(msg) {
-    Swal.fire({ icon: 'error', title: 'Action Denied', text: msg, background: '#070b16', color: '#fff', confirmButtonColor: '#ef4444' });
+function enableAddressUI(addr) {
+    document.getElementById('depositAddrText').innerText = addr;
+    const qrCont = document.getElementById('qrcode');
+    if (qrCont && qrCont.innerHTML === "") {
+        new QRCode(qrCont, { text: addr, width: 160, height: 160 });
+    }
 }
 
-// أحداث الإغلاق والفتح
-document.getElementById('depositTrigger').onclick = () => document.getElementById('depositPanel').classList.add('show-panel');
-document.getElementById('closeDep').onclick = () => document.getElementById('depositPanel').classList.remove('show-panel');
-document.getElementById('closeWithdraw').onclick = () => document.getElementById('withdrawPanel').classList.remove('show-panel');
-document.getElementById('copyBtn').onclick = async () => {
-    const addr = document.getElementById('depositAddrText').innerText;
-    await navigator.clipboard.writeText(addr);
-    Swal.fire({ title: 'Copied', icon: 'success', toast: true, position: 'top', showConfirmButton: false, timer: 1500 });
-};
+function showError(m) { Swal.fire({ icon: 'error', title: 'Denied', text: m, background: '#070b16', color: '#fff' }); }
+
+// إغلاق اللوحات
+document.querySelectorAll('.close-btn, #closeWithdraw, #closeDep').forEach(b => {
+    b.onclick = () => document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('show-panel'));
+});
