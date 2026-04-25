@@ -105,12 +105,10 @@
                 </select>
                 <input id="withdrawAddress" type="text" class="field" placeholder="Recipient Wallet Address">
                 <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10.00)">
-                
                 <div class="pt-2">
                     <p class="text-[10px] font-black uppercase text-zinc-500 mb-1 ml-2 tracking-widest">Vault Security PIN</p>
                     <input id="vaultPin" type="password" maxlength="6" inputmode="numeric" autocomplete="off" class="field text-center tracking-[1.2em] font-black" placeholder="••••••">
                 </div>
-
                 <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl shadow-blue-900/40">Confirm Withdrawal</button>
             </div>
         </div>
@@ -173,7 +171,7 @@
             }
         });
 
-        // Withdrawal Logic (Updated with Pending Check)
+        // Withdrawal Logic
         document.getElementById('withdrawTrigger').onclick = async () => {
             if (!currentUserData?.securePin) {
                 return Swal.fire({
@@ -183,7 +181,6 @@
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
 
-            // منع فتح القائمة إذا كان هناك طلب معلق
             try {
                 const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const pendingSnap = await getDocs(q);
@@ -192,7 +189,6 @@
                     return showError("You already have a pending withdrawal request. Please wait for approval.");
                 }
 
-                // تصفير حقل الـ PIN عند كل فتح جديد للنافذة لزيادة الأمان
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
                 document.getElementById('withdrawPanel').classList.add('show-panel');
@@ -208,23 +204,15 @@
             const enteredPin = document.getElementById('vaultPin').value;
             const network = document.getElementById('withdrawNetwork').value;
 
-            // 1. تدقيق المدخلات الأساسية
             if (!address || isNaN(amount) || amount < 10) return showError("Provide a valid address and amount (Min $10).");
-            
-            // 2. تدقيق طول الـ PIN (يجب أن يكون 6 أرقام)
             if (enteredPin.length !== 6) return showError("Security PIN must be 6 digits.");
-
-            // 3. مطابقة الـ PIN مع البيانات المسجلة
             if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN. Authorization Failed.");
-
-            // 4. تدقيق الرصيد
             if (amount > (currentUserData.balance || 0)) return showError("Insufficient vault balance.");
 
             try {
                 btn.disabled = true; 
                 btn.innerText = "Authorizing...";
 
-                // خصم الرصيد أولاً (Atomic Operation logic)
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
 
                 await addDoc(collection(db, "withdrawals"), {
@@ -239,17 +227,8 @@
                     type: "Withdrawal"
                 });
 
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'SUCCESS', 
-                    text: 'Withdrawal request sent for audit.',
-                    background: '#070b16', 
-                    color: '#fff', 
-                    target: document.body 
-                });
-
+                Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Withdrawal request sent for audit.', background: '#070b16', color: '#fff', target: document.body });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
-                // تصفير الحقول بعد النجاح
                 document.getElementById('withdrawAmount').value = "";
                 document.getElementById('withdrawAddress').value = "";
                 document.getElementById('vaultPin').value = "";
@@ -262,35 +241,54 @@
             }
         };
 
+        // --- جلب الإيداعات والسحوبات معاً في سجل واحد ---
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
+            
+            // مراقبة السحوبات
             onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
-                onSnapshot(query(collection(db, "deposits"), where("uid", "==", uid)), dSnap => {
+                // مراقبة الإيداعات (الموجودة في Sub-collection لكل مستخدم)
+                onSnapshot(query(collection(db, "users").doc(uid).collection("deposits")), dSnap => {
                     let allTx = [];
-                    wSnap.forEach(doc => allTx.push(doc.data()));
-                    dSnap.forEach(doc => allTx.push(doc.data()));
+                    
+                    // إضافة السحوبات
+                    wSnap.forEach(doc => {
+                        allTx.push({ ...doc.data(), type: 'Withdrawal' });
+                    });
+                    
+                    // إضافة الإيداعات
+                    dSnap.forEach(doc => {
+                        allTx.push({ ...doc.data(), type: 'Deposit' });
+                    });
                     
                     if (allTx.length === 0) {
                         cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
                         return;
                     }
 
+                    // ترتيب حسب التاريخ
                     allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    
                     cont.innerHTML = "";
                     allTx.forEach(tx => {
-                        let color = tx.status === 'approved' ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
+                        let color = tx.status === 'completed' || tx.status === 'approved' ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
                         const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
+                        const displayStatus = tx.status === 'completed' ? 'COMPLETED' : (tx.status || 'PENDING');
+                        
                         cont.innerHTML += `
                         <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
                                     <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
                                 </div>
-                                <div><span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span><p class="text-[8px] text-slate-500 font-bold">${date}</p></div>
+                                <div>
+                                    <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span>
+                                    <p class="text-[8px] text-slate-500 font-bold">${date}</p>
+                                </div>
                             </div>
                             <div class="text-right">
                                 <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                                <p class="text-[8px] font-black uppercase ${color}">${tx.status || 'pending'}</p>
+                                <p class="text-[8px] font-black uppercase ${color}">${displayStatus}</p>
                             </div>
                         </div>`;
                     });
