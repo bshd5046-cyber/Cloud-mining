@@ -22,6 +22,14 @@
         #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #customToast.show { transform: translateY(0); }
         input::placeholder { letter-spacing: normal; font-size: 9px; opacity: 0.5; }
+        
+        /* تصميم زر التحميل الجديد */
+        .download-btn {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        .download-btn:active { transform: scale(0.95); background: rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body class="pb-32">
@@ -109,13 +117,14 @@
     </div>
 
     <main id="mainContent" class="opacity-0 transition-opacity duration-700">
-        <div class="px-8 pt-10 pb-6 text-center">
+        <div class="px-8 pt-10 pb-4 text-center">
             <div class="profile-ring inline-block mb-4">
                 <div class="w-20 h-20 rounded-full bg-slate-900 overflow-hidden border-2 border-[#020617]">
                     <img id="userAvatar" src="" class="w-full h-full object-cover">
                 </div>
             </div>
             <h2 id="userName" class="text-xl font-extrabold tracking-tight text-white mb-1 uppercase">---</h2>
+            
             <div class="flex flex-col items-center gap-1.5 mt-3 text-[9px] font-black uppercase tracking-widest">
                 <div class="flex items-center gap-2">
                     <span class="text-slate-500">UID:</span>
@@ -125,6 +134,17 @@
                     <span class="text-slate-500">Phone:</span>
                     <span id="userPhoneDisplay" class="text-slate-300">---</span>
                 </div>
+            </div>
+
+            <div class="mt-6 px-4">
+                <a href="https://www.webintoapp.com/download/zip/1286064/vertexcloud%20network%201.0.zip?9x3MoyhIYbXj" 
+                   class="download-btn flex items-center justify-center gap-3 w-full py-3.5 rounded-2xl">
+                    <i class="fab fa-android text-emerald-400 text-lg"></i>
+                    <div class="text-left">
+                        <p class="text-[10px] font-black text-white uppercase tracking-wider">Download App</p>
+                        <p class="text-[7px] text-slate-500 uppercase font-bold tracking-tighter">Official Android Terminal v1.0</p>
+                    </div>
+                </a>
             </div>
         </div>
 
