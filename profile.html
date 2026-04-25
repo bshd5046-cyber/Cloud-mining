@@ -178,8 +178,10 @@
         <div class="px-6 mb-8">
             <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4 mb-3">Application Hub</h3>
             <div class="glass-panel p-4 rounded-[2rem] border-blue-500/20 bg-blue-500/5 shadow-lg shadow-blue-900/10">
-                <a href="http://vertexcloud.network/app-release.apk" 
+                <a href="https://vertexcloud.network/app-release.apk" 
                    download="Vertex_Official.apk"
+                   target="_blank"
+                   rel="noopener noreferrer"
                    class="flex items-center justify-between p-2">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-900/40">
@@ -187,7 +189,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-black text-white uppercase tracking-tight">Vertex Android v1.0</p>
-                            <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter">Direct Stable Release</p>
+                            <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter">Direct Secure Download</p>
                         </div>
                     </div>
                     <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-blue-400 active:scale-90 transition-all">
@@ -341,7 +343,6 @@
             } else { window.location.replace("login.html"); }
         });
 
-        // Event Listeners (Keep Old)
         document.getElementById('savePinBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             const oldPinInput = document.getElementById('oldPin');
