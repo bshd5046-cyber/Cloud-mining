@@ -2,12 +2,12 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const TronWeb = require('tronweb');
 
-// تهيئة Firebase Admin لضمان الوصول لقاعدة البيانات
+// تهيئة التطبيق - ضرورية جداً للوصول لقاعدة البيانات
 if (admin.apps.length === 0) {
     admin.initializeApp();
 }
 
-// مفتاح الـ API الخاص بك الذي استخرجته من TronGrid
+// المفتاح الخاص بك الذي أرسلته لي
 const TRON_PRO_API_KEY = '389b4b1f-ba12-4322-92ab-234dd2260ea4'; 
 
 exports.checkDepositsTask = functions.pubsub.schedule('every 10 minutes').onRun(async (context) => {
@@ -18,7 +18,7 @@ exports.checkDepositsTask = functions.pubsub.schedule('every 10 minutes').onRun(
 
     try {
         const usersSnap = await admin.firestore().collection('users').get();
-        console.log(`Starting scan for ${usersSnap.size} users...`);
+        console.log(`بدء فحص الإيداعات لـ ${usersSnap.size} مستخدم...`);
 
         for (const userDoc of usersSnap.docs) {
             const userData = userDoc.data();
@@ -27,18 +27,17 @@ exports.checkDepositsTask = functions.pubsub.schedule('every 10 minutes').onRun(
             if (!address) continue;
 
             try {
-                // تأخير 500 ملي ثانية لضمان عدم تجاوز حد الطلبات (Rate Limit)
+                // تأخير بسيط لمنع حظر الطلبات (Rate Limit)
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                // عقد عملة USDT الرسمي
+                // فحص رصيد الـ USDT (عقد TRC20)
                 const contract = await tronWeb.contract().at("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
                 const balanceInChain = await contract.balanceOf(address).call();
                 
-                // تحويل القيمة من Sun إلى USDT
                 const actualBalance = parseFloat(tronWeb.fromSun(balanceInChain.toString()));
                 const totalDeposited = parseFloat(userData.totalDeposited || 0);
 
-                // إذا وجدنا رصيداً في الشبكة أكبر من المسجل في الموقع
+                // مقارنة الرصيد في الشبكة مع المسجل في الموقع
                 if (actualBalance > totalDeposited) {
                     const amountToAdd = actualBalance - totalDeposited;
 
@@ -48,15 +47,15 @@ exports.checkDepositsTask = functions.pubsub.schedule('every 10 minutes').onRun(
                         lastDepositUpdate: admin.firestore.FieldValue.serverTimestamp()
                     });
 
-                    console.log(`✅ Success: Added ${amountToAdd} USDT to user ${userDoc.id}`);
+                    console.log(`✅ نجاح: تم إضافة ${amountToAdd} USDT للمستخدم ${userDoc.id}`);
                 }
             } catch (err) {
-                // تسجيل الخطأ لكل محفظة بشكل منفصل لسهولة التتبع
-                console.error(`❌ Wallet ${address} check failed:`, err.message);
+                // تسجيل الخطأ لكل محفظة بشكل منفصل لفهمه
+                console.error(`❌ فشل فحص العنوان ${address}:`, err.message);
             }
         }
     } catch (globalError) {
-        console.error("❌ Global error in checkDepositsTask:", globalError.message);
+        console.error("❌ خطأ عام في الدالة:", globalError.message);
     }
     
     return null;
