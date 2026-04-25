@@ -74,14 +74,10 @@
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit Asset</h3>
                 <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
-            
             <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto shadow-2xl shadow-blue-500/20"></div>
-            
             <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Personal Deposit Address</p>
             <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all px-4 tracking-tight">Generating secure address...</p>
-            
             <button id="copyBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase mb-8 shadow-lg shadow-blue-900/40 transition-all active:scale-95">Copy Address</button>
-            
             <div class="border-t border-white/5 pt-6">
                 <div class="flex items-center justify-center gap-2 text-emerald-500 mb-2">
                     <i class="fas fa-bolt-lightning animate-pulse"></i>
@@ -109,7 +105,12 @@
                 </select>
                 <input id="withdrawAddress" type="text" class="field" placeholder="Recipient Wallet Address">
                 <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10.00)">
-                <input id="vaultPin" type="password" maxlength="6" class="field text-center tracking-[1.2em] font-black" placeholder="******">
+                
+                <div class="pt-2">
+                    <p class="text-[10px] font-black uppercase text-zinc-500 mb-1 ml-2 tracking-widest">Vault Security PIN</p>
+                    <input id="vaultPin" type="password" maxlength="6" inputmode="numeric" autocomplete="off" class="field text-center tracking-[1.2em] font-black" placeholder="••••••">
+                </div>
+
                 <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl shadow-blue-900/40">Confirm Withdrawal</button>
             </div>
         </div>
@@ -172,8 +173,8 @@
             }
         });
 
-        // Withdrawal Logic
-        document.getElementById('withdrawTrigger').onclick = () => {
+        // Withdrawal Logic (Updated with Pending Check)
+        document.getElementById('withdrawTrigger').onclick = async () => {
             if (!currentUserData?.securePin) {
                 return Swal.fire({
                     icon: 'lock', title: 'Security Required', text: 'Please set your 6-digit Vault PIN in Profile.',
@@ -181,8 +182,23 @@
                     target: document.body
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
-            document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-            document.getElementById('withdrawPanel').classList.add('show-panel');
+
+            // منع فتح القائمة إذا كان هناك طلب معلق
+            try {
+                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
+                const pendingSnap = await getDocs(q);
+
+                if (!pendingSnap.empty) {
+                    return showError("You already have a pending withdrawal request. Please wait for approval.");
+                }
+
+                // تصفير حقل الـ PIN عند كل فتح جديد للنافذة لزيادة الأمان
+                document.getElementById('vaultPin').value = "";
+                document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+                document.getElementById('withdrawPanel').classList.add('show-panel');
+            } catch (e) {
+                showError("Relay error. Please try again.");
+            }
         };
 
         document.getElementById('submitWithdrawBtn').onclick = async () => {
@@ -192,25 +208,25 @@
             const enteredPin = document.getElementById('vaultPin').value;
             const network = document.getElementById('withdrawNetwork').value;
 
-            if (!address || isNaN(amount) || enteredPin.length !== 6) return showError("Invalid parameters provided.");
-            if (enteredPin !== currentUserData.securePin) return showError("Unauthorized Security PIN.");
-            if (amount < 10) return showError("Minimum payout is $10.00.");
-            if (amount > (currentUserData.balance || 0)) return showError("Insufficient available balance.");
+            // 1. تدقيق المدخلات الأساسية
+            if (!address || isNaN(amount) || amount < 10) return showError("Provide a valid address and amount (Min $10).");
+            
+            // 2. تدقيق طول الـ PIN (يجب أن يكون 6 أرقام)
+            if (enteredPin.length !== 6) return showError("Security PIN must be 6 digits.");
+
+            // 3. مطابقة الـ PIN مع البيانات المسجلة
+            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN. Authorization Failed.");
+
+            // 4. تدقيق الرصيد
+            if (amount > (currentUserData.balance || 0)) return showError("Insufficient vault balance.");
 
             try {
                 btn.disabled = true; 
-                btn.innerText = "Checking Nodes...";
+                btn.innerText = "Authorizing...";
 
-                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
-                const existingSnap = await getDocs(q);
-                
-                if (!existingSnap.empty) {
-                    btn.disabled = false;
-                    btn.innerText = "Confirm Withdrawal";
-                    return showError("You already have a pending request.");
-                }
-
+                // خصم الرصيد أولاً (Atomic Operation logic)
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
+
                 await addDoc(collection(db, "withdrawals"), {
                     uid: currentUser.uid,
                     email: currentUser.email,
@@ -223,10 +239,23 @@
                     type: "Withdrawal"
                 });
 
-                Swal.fire({ icon: 'success', title: 'Request Sent', background: '#070b16', color: '#fff', target: document.body });
+                Swal.fire({ 
+                    icon: 'success', 
+                    title: 'SUCCESS', 
+                    text: 'Withdrawal request sent for audit.',
+                    background: '#070b16', 
+                    color: '#fff', 
+                    target: document.body 
+                });
+
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
+                // تصفير الحقول بعد النجاح
+                document.getElementById('withdrawAmount').value = "";
+                document.getElementById('withdrawAddress').value = "";
+                document.getElementById('vaultPin').value = "";
+
             } catch (e) {
-                showError("Relay timeout.");
+                showError("System busy. Relay timeout.");
             } finally {
                 btn.disabled = false; 
                 btn.innerText = "Confirm Withdrawal";
@@ -235,7 +264,6 @@
 
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
-            // مراقبة فورية للسحب والإيداع
             onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
                 onSnapshot(query(collection(db, "deposits"), where("uid", "==", uid)), dSnap => {
                     let allTx = [];
