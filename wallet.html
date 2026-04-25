@@ -147,8 +147,6 @@
             Swal.fire({
                 icon: 'error', title: 'ACCESS DENIED', text: msg,
                 background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6',
-                backdrop: `rgba(0,0,0,0.8)`, 
-                target: document.body,
                 customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
             });
         }
@@ -171,32 +169,29 @@
             }
         });
 
-        // Withdrawal Logic
+        // Withdrawal Trigger Logic
         document.getElementById('withdrawTrigger').onclick = async () => {
             if (!currentUserData?.securePin) {
                 return Swal.fire({
                     icon: 'lock', title: 'Security Required', text: 'Please set your 6-digit Vault PIN in Profile.',
-                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff',
-                    target: document.body
+                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff'
                 }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
             }
 
             try {
                 const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
                 const pendingSnap = await getDocs(q);
-
-                if (!pendingSnap.empty) {
-                    return showError("You already have a pending withdrawal request. Please wait for approval.");
-                }
+                if (!pendingSnap.empty) return showError("You already have a pending withdrawal request.");
 
                 document.getElementById('vaultPin').value = "";
                 document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
                 document.getElementById('withdrawPanel').classList.add('show-panel');
             } catch (e) {
-                showError("Relay error. Please try again.");
+                showError("Relay error.");
             }
         };
 
+        // Submit Withdrawal
         document.getElementById('submitWithdrawBtn').onclick = async () => {
             const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
@@ -204,59 +199,42 @@
             const enteredPin = document.getElementById('vaultPin').value;
             const network = document.getElementById('withdrawNetwork').value;
 
-            if (!address || isNaN(amount) || amount < 10) return showError("Provide a valid address and amount (Min $10).");
-            if (enteredPin.length !== 6) return showError("Security PIN must be 6 digits.");
-            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN. Authorization Failed.");
-            if (amount > (currentUserData.balance || 0)) return showError("Insufficient vault balance.");
+            if (!address || isNaN(amount) || amount < 10) return showError("Min withdrawal is $10.");
+            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN.");
+            if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance.");
 
             try {
-                btn.disabled = true; 
-                btn.innerText = "Authorizing...";
-
+                btn.disabled = true; btn.innerText = "Authorizing...";
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-
                 await addDoc(collection(db, "withdrawals"), {
-                    uid: currentUser.uid,
-                    email: currentUser.email,
-                    fullName: currentUserData.fullName,
-                    amount: amount,
-                    address: address,
-                    network: network,
-                    status: "pending",
-                    timestamp: serverTimestamp(),
-                    type: "Withdrawal"
+                    uid: currentUser.uid, email: currentUser.email, fullName: currentUserData.fullName,
+                    amount: amount, address: address, network: network, status: "pending",
+                    timestamp: serverTimestamp(), type: "Withdrawal"
                 });
 
-                Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Withdrawal request sent for audit.', background: '#070b16', color: '#fff', target: document.body });
+                Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Request sent for audit.', background: '#070b16', color: '#fff' });
                 document.getElementById('withdrawPanel').classList.remove('show-panel');
-                document.getElementById('withdrawAmount').value = "";
-                document.getElementById('withdrawAddress').value = "";
-                document.getElementById('vaultPin').value = "";
-
             } catch (e) {
-                showError("System busy. Relay timeout.");
+                showError("System busy.");
             } finally {
-                btn.disabled = false; 
-                btn.innerText = "Confirm Withdrawal";
+                btn.disabled = false; btn.innerText = "Confirm Withdrawal";
             }
         };
 
-        // --- جلب الإيداعات والسحوبات معاً في سجل واحد ---
+        // --- جلب الإيداعات والسحوبات معاً ---
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
             
             // مراقبة السحوبات
             onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
-                // مراقبة الإيداعات (الموجودة في Sub-collection لكل مستخدم)
-                onSnapshot(query(collection(db, "users").doc(uid).collection("deposits")), dSnap => {
+                // مراقبة الإيداعات من sub-collection
+                onSnapshot(collection(db, "users", uid, "deposits"), dSnap => {
                     let allTx = [];
                     
-                    // إضافة السحوبات
                     wSnap.forEach(doc => {
                         allTx.push({ ...doc.data(), type: 'Withdrawal' });
                     });
                     
-                    // إضافة الإيداعات
                     dSnap.forEach(doc => {
                         allTx.push({ ...doc.data(), type: 'Deposit' });
                     });
@@ -266,14 +244,14 @@
                         return;
                     }
 
-                    // ترتيب حسب التاريخ
+                    // الترتيب حسب التاريخ الأحدث
                     allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                     
                     cont.innerHTML = "";
                     allTx.forEach(tx => {
-                        let color = tx.status === 'completed' || tx.status === 'approved' ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
+                        let color = (tx.status === 'completed' || tx.status === 'approved') ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
                         const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
-                        const displayStatus = tx.status === 'completed' ? 'COMPLETED' : (tx.status || 'PENDING');
+                        const displayStatus = (tx.status || 'PENDING').toUpperCase();
                         
                         cont.innerHTML += `
                         <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
