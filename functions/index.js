@@ -1,62 +1,91 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
+const logger = require('firebase-functions/logger');
 const admin = require('firebase-admin');
-const TronWeb = require('tronweb');
+const TronWebImport = require('tronweb');
 
-// تهيئة التطبيق - ضرورية جداً للوصول لقاعدة البيانات
+const TronWeb = TronWebImport.TronWeb || TronWebImport.default || TronWebImport;
+
 if (admin.apps.length === 0) {
-    admin.initializeApp();
+  admin.initializeApp();
+}
+const db = admin.firestore();
+
+// المفتاح الخاص بك (تأكد إنه منسوخ صح بدون فراغات)
+const TRONGRID_API_KEY = '389b4b1f-ba12-4322-92ab-234dd2260ea4';
+const USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
+
+function getTronWeb() {
+  return new TronWeb({
+    fullHost: 'https://api.trongrid.io',
+    headers: { "TRON-PRO-API-KEY": TRONGRID_API_KEY } // تأمين المفتاح هنا
+  });
 }
 
-// المفتاح الخاص بك الذي أرسلته لي
-const TRON_PRO_API_KEY = '389b4b1f-ba12-4322-92ab-234dd2260ea4'; 
-
-exports.checkDepositsTask = functions.pubsub.schedule('every 10 minutes').onRun(async (context) => {
-    const tronWeb = new TronWeb({ 
-        fullHost: 'https://api.trongrid.io',
-        headers: { "TRON-PRO-API-KEY": TRON_PRO_API_KEY }
-    });
+exports.checkDepositsTask = functions.pubsub
+  .schedule('every 5 minutes')
+  .timeZone('UTC')
+  .onRun(async () => {
+    logger.info('SCAN START');
+    const tronWeb = getTronWeb();
 
     try {
-        const usersSnap = await admin.firestore().collection('users').get();
-        console.log(`بدء فحص الإيداعات لـ ${usersSnap.size} مستخدم...`);
+      const usersSnap = await db.collection('users').get();
+      
+      for (const userDoc of usersSnap.docs) {
+        const userData = userDoc.data();
+        const address = userData.depositAddress;
 
-        for (const userDoc of usersSnap.docs) {
-            const userData = userDoc.data();
-            const address = userData.depositAddress;
+        if (!address || !tronWeb.isAddress(address)) continue;
 
-            if (!address) continue;
+        try {
+          // إضافة تأخير بسيط لمنع الـ Rate Limit
+          await new Promise(r => setTimeout(r, 500));
 
-            try {
-                // تأخير بسيط لمنع حظر الطلبات (Rate Limit)
-                await new Promise(resolve => setTimeout(resolve, 500));
+          // جلب الحركات باستخدام TronWeb مباشرة بدل fetch اليدوي لضمان استقرار المفتاح
+          const url = `https://api.trongrid.io/v1/accounts/${address}/transactions/trc20?limit=20&contract_address=${USDT_CONTRACT}`;
+          
+          const response = await fetch(url, {
+            headers: { 'TRON-PRO-API-KEY': TRONGRID_API_KEY }
+          });
 
-                // فحص رصيد الـ USDT (عقد TRC20)
-                const contract = await tronWeb.contract().at("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
-                const balanceInChain = await contract.balanceOf(address).call();
-                
-                const actualBalance = parseFloat(tronWeb.fromSun(balanceInChain.toString()));
-                const totalDeposited = parseFloat(userData.totalDeposited || 0);
+          if (!response.ok) throw new Error(`TronGrid Error: ${response.status}`);
+          const result = await response.json();
+          const txs = result.data || [];
 
-                // مقارنة الرصيد في الشبكة مع المسجل في الموقع
-                if (actualBalance > totalDeposited) {
-                    const amountToAdd = actualBalance - totalDeposited;
+          for (const tx of txs) {
+            const txId = tx.transaction_id;
+            if (tx.to !== address) continue;
 
-                    await userDoc.ref.update({
-                        balance: admin.firestore.FieldValue.increment(amountToAdd),
-                        totalDeposited: actualBalance,
-                        lastDepositUpdate: admin.firestore.FieldValue.serverTimestamp()
-                    });
+            const txRef = userDoc.ref.collection('processedDeposits').doc(txId);
+            const txDoc = await txRef.get();
+            if (txDoc.exists) continue;
 
-                    console.log(`✅ نجاح: تم إضافة ${amountToAdd} USDT للمستخدم ${userDoc.id}`);
-                }
-            } catch (err) {
-                // تسجيل الخطأ لكل محفظة بشكل منفصل لفهمه
-                console.error(`❌ فشل فحص العنوان ${address}:`, err.message);
-            }
+            const amount = Number(tx.value) / 1000000; // تحويل من Sun لـ USDT
+            if (amount <= 0) continue;
+
+            const batch = db.batch();
+            batch.update(userDoc.ref, {
+              balance: admin.firestore.FieldValue.increment(amount),
+              totalDeposited: admin.firestore.FieldValue.increment(amount),
+              lastDepositAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            batch.set(userDoc.ref.collection('deposits').doc(txId), {
+              txId, amount, status: 'completed', timestamp: admin.firestore.FieldValue.serverTimestamp()
+            });
+
+            batch.set(txRef, { txId, processedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+            await batch.commit();
+            logger.info(`✅ DEPOSIT SUCCESS: ${amount} USDT for ${userDoc.id}`);
+          }
+        } catch (err) {
+          logger.error('Wallet check failed', { address, error: err.message });
         }
-    } catch (globalError) {
-        console.error("❌ خطأ عام في الدالة:", globalError.message);
+      }
+    } catch (err) {
+      logger.error('GLOBAL ERROR', { error: err.message });
     }
-    
+    logger.info('SCAN END');
     return null;
-});
+  });
