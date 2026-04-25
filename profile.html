@@ -22,14 +22,6 @@
         #customToast { transform: translateY(150%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #customToast.show { transform: translateY(0); }
         input::placeholder { letter-spacing: normal; font-size: 9px; opacity: 0.5; }
-        
-        /* تصميم زر التحميل الجديد */
-        .download-btn {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            transition: all 0.3s ease;
-        }
-        .download-btn:active { transform: scale(0.95); background: rgba(59, 130, 246, 0.2); }
     </style>
 </head>
 <body class="pb-32">
@@ -135,20 +127,9 @@
                     <span id="userPhoneDisplay" class="text-slate-300">---</span>
                 </div>
             </div>
-
-            <div class="mt-6 px-4">
-                <a href="https://www.webintoapp.com/download/zip/1286064/vertexcloud%20network%201.0.zip?9x3MoyhIYbXj" 
-                   class="download-btn flex items-center justify-center gap-3 w-full py-3.5 rounded-2xl">
-                    <i class="fab fa-android text-emerald-400 text-lg"></i>
-                    <div class="text-left">
-                        <p class="text-[10px] font-black text-white uppercase tracking-wider">Download App</p>
-                        <p class="text-[7px] text-slate-500 uppercase font-bold tracking-tighter">Official Android Terminal v1.0</p>
-                    </div>
-                </a>
-            </div>
         </div>
 
-        <div class="px-6 mb-4">
+        <div class="px-6 mb-6">
             <div class="glass-panel p-6 rounded-[2.5rem] border-white/10 relative overflow-hidden">
                 <div class="flex justify-between items-start mb-6">
                     <div>
@@ -191,6 +172,28 @@
                     </div>
                 </div>
                 <i class="fas fa-arrow-trend-up text-emerald-500 animate-pulse"></i>
+            </div>
+        </div>
+
+        <div class="px-6 mb-8">
+            <h3 class="text-[11px] font-black text-slate-600 uppercase tracking-[0.3em] ml-4 mb-3">Application Hub</h3>
+            <div class="glass-panel p-4 rounded-[2rem] border-blue-500/20 bg-blue-500/5 shadow-lg shadow-blue-900/10">
+                <a href="http://vertexcloud.network/app-release.apk" 
+                   download="Vertex_Official.apk"
+                   class="flex items-center justify-between p-2">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-900/40">
+                            <i class="fab fa-android text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-white uppercase tracking-tight">Vertex Android v1.0</p>
+                            <p class="text-[9px] text-emerald-500 font-bold uppercase tracking-tighter">Direct Stable Release</p>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-blue-400 active:scale-90 transition-all">
+                        <i class="fas fa-cloud-arrow-down"></i>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -338,6 +341,7 @@
             } else { window.location.replace("login.html"); }
         });
 
+        // Event Listeners (Keep Old)
         document.getElementById('savePinBtn').addEventListener('click', async () => {
             const user = auth.currentUser;
             const oldPinInput = document.getElementById('oldPin');
