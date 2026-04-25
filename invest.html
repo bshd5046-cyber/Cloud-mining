@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Invest | VERTEX PREMIER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #020617; --primary: #3b82f6; --nav-bg: rgba(7, 10, 22, 0.98); }
+        body { background-color: var(--bg-dark); font-family: 'Plus Jakarta Sans', sans-serif; color: #ffffff; overflow-x: hidden; background: radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%), #020617; min-height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .stat-card { background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%); border-radius: 24px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .bottom-nav { background: var(--nav-bg); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.05); height: 85px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+        .invest-fab { width: 68px; height: 68px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; top: -28px; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.6); border: 6px solid var(--bg-dark); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #475569; text-decoration: none; font-size: 10px; font-weight: 700; transition: 0.3s; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); }
+        .btn-glow { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); transition: all 0.3s ease; }
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; position: relative; }
+        .pulse-dot::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: pulse-ring 1.5s infinite; }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+        .plan-card { border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; transition: all 0.4s ease; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); filter: grayscale(1); opacity: 0.4; }
+        .plan-active { filter: grayscale(0); opacity: 1; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.3); transform: scale(1.02); }
+        .plan-active::before { content: "ACTIVE"; position: absolute; top: 10px; right: -25px; background: var(--primary); color: white; font-size: 8px; font-weight: 900; padding: 2px 30px; transform: rotate(45deg); }
+        .toast-wrap { position: fixed; top: 20px; left: 16px; right: 16px; z-index: 3000; pointer-events: none; }
+        .toast-card { transform: translateY(-140%); transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); }
+        .toast-card.show { transform: translateY(0); }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div class="toast-wrap">
+        <div id="customToast" class="toast-card rounded-3xl p-4 border border-blue-500/30 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div id="toastIcon" class="w-10 h-10 rounded-full bg-blue-500/15 flex items-center justify-center text-blue-400">
+                    <i class="fas fa-circle-info"></i>
+                </div>
+                <p id="toastMsg" class="text-xs font-bold uppercase tracking-wider text-white"></p>
+            </div>
+        </div>
+    </div>
+
+    <section class="p-6 pt-12">
+        <div class="text-center mb-8">
+            <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Available Capital</p>
+            <h2 class="text-5xl font-black tracking-tighter text-white mb-2">
+                <span class="text-blue-500 text-3xl">$</span><span id="displayBalance">0.00</span>
+            </h2>
+            <div class="inline-flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                <div class="pulse-dot bg-emerald-400"></div>
+                <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Quantum Live</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 mb-8">
+            <div class="stat-card flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20"><i class="fas fa-user-tie text-blue-400"></i></div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase">Personal Yield</p>
+                        <div class="flex gap-4">
+                            <div><p class="text-[8px] text-slate-400 font-bold">Today</p><p id="dailyPersonal" class="text-md font-black text-white">+$0.00</p></div>
+                            <div class="border-l border-white/5 pl-4"><p class="text-[8px] text-slate-400 font-bold">Total</p><p id="totalPersonal" class="text-md font-black text-blue-400">$0.00</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20"><i class="fas fa-users text-purple-400"></i></div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase">Affiliate Rewards</p>
+                        <div class="flex gap-4">
+                            <div><p class="text-[8px] text-slate-400 font-bold">Today</p><p id="dailyTeam" class="text-md font-black text-white">+$0.00</p></div>
+                            <div class="border-l border-white/5 pl-4"><p class="text-[8px] text-slate-400 font-bold">Total</p><p id="totalTeam" class="text-md font-black text-purple-400">$0.00</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-[2.5rem] text-center border-t border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-5 px-2">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-microchip text-blue-500 text-xs animate-pulse"></i>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">AI Processor</span>
+                </div>
+                <span id="tapCount" class="text-[10px] font-black text-blue-500 uppercase bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">Ready 0/2</span>
+            </div>
+
+            <button id="execBtn" class="btn-glow w-full py-5 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
+                <div id="btnContent" class="flex items-center gap-3">
+                    <i id="btnIcon" class="fas fa-bolt-lightning text-white"></i>
+                    <span id="execText" class="text-sm font-black uppercase tracking-widest text-white">Start Sequence</span>
+                </div>
+                <div id="loaderBar" class="absolute bottom-0 left-0 h-1 bg-white/40 transition-all duration-150" style="width: 0%"></div>
+            </button>
+
+            <p class="text-[9px] text-slate-600 mt-4 italic font-bold uppercase tracking-widest">Nodes synch required</p>
+        </div>
+    </section>
+
+    <section class="px-6 space-y-3 pb-10">
+        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-slate-500 ml-4 mb-4">Investment Protocols</h3>
+        
+        <div class="plan-card" id="plan-v1">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-cube text-blue-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V1 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">Under $500 | Team: 0</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">1.9%</p><p class="text-[8px] text-blue-400 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v2">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-gem text-amber-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V2 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$500+ | Team: 5</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">2.2%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-microchip text-indigo-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V3 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$2,000+ | Team: 10</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">2.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-atom text-emerald-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V4 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$5,000+ | Team: 20</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.0%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+
+        <div class="plan-card" id="plan-v5">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-white/10"><i class="fas fa-crown text-rose-400 text-xl"></i></div>
+                    <div><h4 class="text-sm font-black uppercase italic">V5 Protocol</h4><p class="text-[10px] text-slate-500 font-bold">$10,000+ | Team: 30</p></div>
+                </div>
+                <div class="text-right"><p class="text-xl font-black text-white">3.5%</p><p class="text-[8px] text-slate-500 font-black uppercase">Daily</p></div>
+            </div>
+        </div>
+    </section>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-house"></i><span>Home</span></a>
+        <a href="wallet.html" class="nav-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <div class="relative flex-1 flex justify-center"><a href="invest.html" class="invest-fab"><i class="fas fa-bolt-lightning text-2xl text-white"></i></a></div>
+        <a href="support.html" class="nav-item"><i class="fas fa-headset"></i><span>Support</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDocs, collection, query, where, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserId = null;
+        let userData = null;
+        let phaseOneDone = false;
+        let executionLocked = false;
+        let liveActiveTeamCount = 0; // سيتم تحديثه برقم حقيقي من قاعدة البيانات
+
+        const execBtn = document.getElementById('execBtn');
+        const execText = document.getElementById('execText');
+        const tapCount = document.getElementById('tapCount');
+        const loaderBar = document.getElementById('loaderBar');
+        const btnIcon = document.getElementById('btnIcon');
+        const customToast = document.getElementById('customToast');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        function showToast(message, icon = 'fa-circle-info', color = 'text-blue-400') {
+            toastMsg.innerText = message;
+            toastIcon.className = `w-10 h-10 rounded-full bg-white/5 flex items-center justify-center ${color}`;
+            toastIcon.innerHTML = `<i class="fas ${icon}"></i>`;
+            customToast.classList.add('show');
+            setTimeout(() => customToast.classList.remove('show'), 3500);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) { window.location.replace('login.html'); return; }
+            currentUserId = user.uid;
+            
+            // مراقبة بيانات المستخدم
+            onSnapshot(doc(db, "users", user.uid), async (docSnap) => {
+                if (!docSnap.exists()) return;
+                userData = docSnap.data();
+                const balance = parseFloat(userData.balance || 0);
+                const userCode = userData.referralId || "";
+
+                // تحديث واجهة الرصيد
+                document.getElementById('displayBalance').innerText = balance.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                document.getElementById('dailyPersonal').innerText = "+$" + parseFloat(userData.dailyEarn || 0).toFixed(2);
+                document.getElementById('totalPersonal').innerText = "$" + parseFloat(userData.totalEarned || 0).toFixed(2);
+                document.getElementById('dailyTeam').innerText = "+$" + parseFloat(userData.teamEarn || 0).toFixed(2);
+                document.getElementById('totalTeam').innerText = "$" + parseFloat(userData.totalTeamEarned || 0).toFixed(2);
+                
+                // حساب عدد الفريق "النشط" حياً من الـ Collection
+                if(userCode) {
+                    const q = query(collection(db, "users"), where("inviteCode", "==", userCode));
+                    const snapshot = await getDocs(q);
+                    liveActiveTeamCount = 0;
+                    snapshot.forEach(member => {
+                        // العضو النشط هو من أودع $100 أو أكثر كما في كود الدعوة
+                        if(parseFloat(member.data().balance || 0) >= 100) liveActiveTeamCount++;
+                    });
+                }
+
+                updatePlanStatus(balance, liveActiveTeamCount);
+                checkExecutionAvailability();
+            });
+        });
+
+        function checkExecutionAvailability() {
+            if (!userData?.lastExecution) { resetButtonUI(); return; }
+            const now = new Date();
+            const lastExecDate = userData.lastExecution.toDate();
+            if (now.toDateString() !== lastExecDate.toDateString()) resetButtonUI(); 
+            else lockButtonUI();
+        }
+
+        function resetButtonUI() {
+            executionLocked = false; phaseOneDone = false;
+            execBtn.disabled = false; execBtn.style.opacity = "1";
+            execText.innerText = "Start Sequence"; tapCount.innerText = "Ready 0/2";
+            loaderBar.style.width = "0%"; btnIcon.className = "fas fa-bolt-lightning text-white";
+        }
+
+        function lockButtonUI() {
+            executionLocked = true; execBtn.disabled = true;
+            execBtn.style.opacity = "0.6"; execText.innerText = "Completed Today";
+            tapCount.innerText = "Locked"; loaderBar.style.width = "100%";
+            btnIcon.className = "fas fa-lock text-white";
+        }
+
+        async function startPhaseOne() {
+            execBtn.disabled = true; tapCount.innerText = "Syncing...";
+            let progress = 0;
+            const timer = setInterval(() => {
+                progress += 5; loaderBar.style.width = `${progress}%`;
+                execText.innerText = `Node Sync ${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(timer); phaseOneDone = true;
+                    execBtn.disabled = false; execText.innerText = "Confirm Yield";
+                    tapCount.innerText = "Ready 2/2"; btnIcon.className = "fas fa-check-circle text-white";
+                }
+            }, 60);
+        }
+
+        async function processTeamCommission(userProfit) {
+            const commissions = [0.10, 0.05, 0.02]; 
+            let codeToSearch = userData.inviteCode; 
+
+            for (let i = 0; i < commissions.length; i++) {
+                if (!codeToSearch || codeToSearch === "" || codeToSearch === "none") break;
+                try {
+                    const q = query(collection(db, "users"), where("referralId", "==", codeToSearch));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        const parentDoc = querySnapshot.docs[0];
+                        const commissionAmount = userProfit * commissions[i];
+                        await updateDoc(parentDoc.ref, {
+                            balance: increment(commissionAmount),
+                            teamEarn: increment(commissionAmount),
+                            totalTeamEarned: increment(commissionAmount)
+                        });
+                        codeToSearch = parentDoc.data().inviteCode;
+                    } else break;
+                } catch(e) { console.error(e); break; }
+            }
+        }
+
+        // نظام المراحل المحدث بناءً على طلبك
+        function updatePlanStatus(balance, team) {
+            let activeId = "";
+
+            if (balance >= 10000 && team >= 30) activeId = "plan-v5";
+            else if (balance >= 5000 && team >= 20) activeId = "plan-v4";
+            else if (balance >= 2000 && team >= 10) activeId = "plan-v3";
+            else if (balance >= 500 && team >= 5) activeId = "plan-v2";
+            else if (balance >= 50) activeId = "plan-v1"; // المرحلة 1 لا تشترط فريق
+
+            document.querySelectorAll('.plan-card').forEach(plan => {
+                if (plan.id === activeId) {
+                    plan.classList.add('plan-active');
+                } else {
+                    plan.classList.remove('plan-active');
+                }
+            });
+        }
+
+        execBtn.addEventListener('click', async () => {
+            if (!currentUserId || !userData || executionLocked || execBtn.disabled) return;
+            const balance = parseFloat(userData.balance || 0);
+            
+            if (balance < 50) { 
+                showToast("Min $50 required", "fa-triangle-exclamation", "text-amber-400"); 
+                return; 
+            }
+            if (!phaseOneDone) { startPhaseOne(); return; }
+
+            // تحديد النسبة بناءً على رصيدك وفريقك النشط حالياً
+            let rate = 0;
+            if (balance >= 10000 && liveActiveTeamCount >= 30) rate = 0.035;
+            else if (balance >= 5000 && liveActiveTeamCount >= 20) rate = 0.030;
+            else if (balance >= 2000 && liveActiveTeamCount >= 10) rate = 0.025;
+            else if (balance >= 500 && liveActiveTeamCount >= 5) rate = 0.022;
+            else if (balance >= 50) rate = 0.019;
+
+            if (rate === 0) {
+                showToast("Requirements not met", "fa-lock", "text-amber-400");
+                return;
+            }
+
+            executionLocked = true; execBtn.disabled = true;
+            execText.innerText = "Processing..."; btnIcon.className = "fas fa-shield-halved text-white animate-pulse";
+
+            try {
+                const profit = balance * rate;
+                await updateDoc(doc(db, "users", currentUserId), {
+                    balance: increment(profit),
+                    dailyEarn: profit,
+                    totalEarned: increment(profit),
+                    lastExecution: serverTimestamp()
+                });
+
+                await processTeamCommission(profit);
+                showToast("Success! Capital Yield Credited", "fa-circle-check", "text-emerald-400");
+                lockButtonUI();
+            } catch (error) {
+                executionLocked = false; execBtn.disabled = false;
+                showToast("Execution Denied", "fa-circle-xmark", "text-red-400");
+            }
+        });
+    </script>
+</body>
+</html>

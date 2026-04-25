@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vertex | Register Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --brand: #3b82f6; --bg: #010208; }
+
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .starfield-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 80%), #010208;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            animation: starsMove 80s linear infinite;
+        }
+
+        @keyframes starsMove {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
+        .chrome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #fff 20%, #60a5fa 50%, #fff 80%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .stellar-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(30px);
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.15);
+        }
+
+        .stellar-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 41px;
+            z-index: -1;
+            background: linear-gradient(135deg, transparent, #3b82f6, transparent);
+            animation: borderFlow 2s linear infinite;
+        }
+
+        @keyframes borderFlow {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        .bright-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
+        }
+
+        .bright-input:focus-within {
+            border-color: #60a5fa;
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .referral-field {
+            border: 1px dashed #fbbf24 !important;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.1);
+        }
+
+        .btn-register {
+            background: #ffffff;
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-register:hover {
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.9);
+            transform: scale(1.03);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .custom-checkbox {
+            accent-color: #3b82f6;
+            width: 16px;
+            height: 16px;
+        }
+
+        #alertBox {
+            transform: translateY(-150%);
+            transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        #alertBox.show {
+            transform: translateY(0);
+        }
+
+        .locked-ref {
+            background: rgba(251, 191, 36, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="starfield-bg"></div>
+
+    <div id="alertBox" class="fixed top-8 left-6 right-6 z-[1000] hidden">
+        <div class="p-5 rounded-3xl border border-blue-500/30 bg-black/90 backdrop-blur-3xl flex items-center gap-4 shadow-[0_0_40px_rgba(59,130,246,0.4)]">
+            <i id="alertIcon" class="fas fa-circle-info text-blue-400"></i>
+            <p id="alertMsg" class="text-xs font-bold tracking-wide text-white"></p>
+        </div>
+    </div>
+
+    <div class="w-full max-w-[480px] p-6 relative z-10">
+        <div class="text-center mb-10">
+            <h1 class="chrome-title">VERTEX</h1>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.6em] mt-2">Create Your Account</p>
+        </div>
+
+        <div class="stellar-card p-8 md:p-10 space-y-4">
+            <div class="bright-input rounded-2xl p-4 flex items-center">
+                <i class="fas fa-user text-blue-400/50 mr-4"></i>
+                <input type="text" id="fullName" placeholder="Full Name" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
+            </div>
+
+            <div class="flex gap-3">
+                <div class="bright-input rounded-2xl p-4 w-32 flex items-center">
+                    <select id="countryCode" class="bg-transparent border-none outline-none text-xs font-bold text-blue-400 w-full">
+                        <option value="+961">🇱🇧 +961</option>
+                        <option value="+966">🇸🇦 +966</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+20">🇪🇬 +20</option>
+                        <option value="+964">🇮🇶 +964</option>
+                        <option value="+962">🇯🇴 +962</option>
+                        <option value="+965">🇰🇼 +965</option>
+                    </select>
+                </div>
+
+                <div class="bright-input rounded-2xl p-4 flex-1">
+                    <input type="tel" id="phone" placeholder="Phone Number" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
+                </div>
+            </div>
+
+            <div class="bright-input rounded-2xl p-4 flex items-center">
+                <i class="fas fa-envelope text-blue-400/50 mr-4"></i>
+                <input type="email" id="email" placeholder="Email Address" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
+            </div>
+
+            <div class="bright-input rounded-2xl p-4 flex items-center">
+                <i class="fas fa-lock text-blue-400/50 mr-4"></i>
+                <input type="password" id="password" placeholder="Password" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
+                <i class="fas fa-eye ml-2 text-xs cursor-pointer" onclick="togglePass('password')"></i>
+            </div>
+
+            <div class="bright-input rounded-2xl p-4 flex items-center">
+                <i class="fas fa-shield-check text-blue-400/50 mr-4"></i>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" class="bg-transparent border-none outline-none w-full text-sm font-bold placeholder:text-gray-600">
+                <i class="fas fa-eye ml-2 text-xs cursor-pointer" onclick="togglePass('confirmPassword')"></i>
+            </div>
+
+            <div id="inviteWrap" class="bright-input referral-field rounded-2xl p-4 flex items-center">
+                <i class="fas fa-gift text-amber-500 mr-4"></i>
+                <input type="text" id="inviteCode" placeholder="Invite Code (Mandatory)" class="bg-transparent border-none outline-none w-full text-sm font-bold text-amber-500 placeholder:text-amber-900/50">
+            </div>
+
+            <div class="flex items-center gap-3 py-2 px-1">
+                <input type="checkbox" id="terms" class="custom-checkbox">
+                <label for="terms" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider cursor-pointer">
+                    I agree to the <span class="text-blue-400">Terms & Conditions</span>
+                </label>
+            </div>
+
+            <button id="signupBtn" class="btn-register w-full py-5 rounded-2xl text-xs uppercase tracking-[0.2em] mt-4">
+                REGISTER
+            </button>
+
+            <div class="text-center pt-6">
+                <a href="login.html" class="text-gray-600 text-[10px] font-black uppercase tracking-[0.4em] hover:text-white transition-all underline decoration-blue-500/30">Back to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
+            authDomain: "cloud-mining-6f190.firebaseapp.com",
+            projectId: "cloud-mining-6f190",
+            storageBucket: "cloud-mining-6f190.firebasestorage.app",
+            messagingSenderId: "144227180849",
+            appId: "1:144227180849:web:ccbda447d074efbbddd010"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const inviteInput = document.getElementById('inviteCode');
+        const inviteWrap = document.getElementById('inviteWrap');
+        const signupBtn = document.getElementById('signupBtn');
+        const alertBox = document.getElementById('alertBox');
+        const alertMsg = document.getElementById('alertMsg');
+        const alertIcon = document.getElementById('alertIcon');
+
+        window.togglePass = (id) => {
+            const el = document.getElementById(id);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        };
+
+        function showAlert(message, type = "info") {
+            const iconMap = {
+                info: "fa-circle-info text-blue-400",
+                success: "fa-circle-check text-emerald-400",
+                warning: "fa-triangle-exclamation text-amber-400",
+                error: "fa-circle-xmark text-red-400"
+            };
+
+            alertMsg.innerText = message;
+            alertIcon.className = `fas ${iconMap[type] || iconMap.info}`;
+
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('show'), 10);
+
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+                setTimeout(() => alertBox.classList.add('hidden'), 500);
+            }, 3200);
+        }
+
+        function setButtonState(text, disabled = true) {
+            signupBtn.innerText = text;
+            signupBtn.disabled = disabled;
+        }
+
+        function resetButtonState() {
+            signupBtn.innerText = "REGISTER";
+            signupBtn.disabled = false;
+        }
+
+        function normalizeInvite(code) {
+            return String(code || '').trim().toUpperCase();
+        }
+
+        function normalizeEmail(email) {
+            return String(email || '').trim().toLowerCase();
+        }
+
+        function normalizePhone(phone) {
+            return String(phone || '').replace(/\s+/g, '').trim();
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function mapFirebaseError(error) {
+            switch (error?.code) {
+                case 'auth/email-already-in-use':
+                    return { message: "This email is already registered", type: "warning" };
+                case 'auth/invalid-email':
+                    return { message: "Invalid email address", type: "error" };
+                case 'auth/weak-password':
+                    return { message: "Password should be at least 6 characters", type: "warning" };
+                case 'auth/network-request-failed':
+                    return { message: "Network error, please check your connection", type: "error" };
+                case 'permission-denied':
+                    return { message: "Database permission denied while checking invite code", type: "error" };
+                case 'unavailable':
+                    return { message: "Service temporarily unavailable, try again", type: "warning" };
+                case 'failed-precondition':
+                    return { message: "Database index or configuration is missing", type: "error" };
+                default:
+                    return { message: "Unable to create account", type: "error" };
+            }
+        }
+
+        async function getInviterByCode(code) {
+            const cleanCode = normalizeInvite(code);
+            if (!cleanCode) return null;
+
+            const q = query(collection(db, "users"), where("referralId", "==", cleanCode));
+            const snap = await getDocs(q);
+
+            if (snap.empty) return null;
+
+            return snap.docs[0];
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const referralFromUrl = normalizeInvite(params.get('ref'));
+
+        if (referralFromUrl) {
+            inviteInput.value = referralFromUrl;
+            inviteInput.readOnly = true;
+            inviteWrap.classList.add('locked-ref');
+        }
+
+        signupBtn.addEventListener('click', async () => {
+            const name = document.getElementById('fullName').value.trim();
+            const phone = normalizePhone(document.getElementById('phone').value);
+            const email = normalizeEmail(document.getElementById('email').value);
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const invite = normalizeInvite(inviteInput.value);
+            const terms = document.getElementById('terms').checked;
+            const countryCode = document.getElementById('countryCode').value;
+
+            if (!name || !phone || !email || !pass || !confirm || !invite) {
+                showAlert("Please fill all fields", "warning");
+                return;
+            }
+
+            if (name.length < 3) {
+                showAlert("Full name must be at least 3 characters", "warning");
+                return;
+            }
+
+            if (!/^[0-9]{6,15}$/.test(phone)) {
+                showAlert("Enter a valid phone number", "warning");
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showAlert("Invalid email address", "error");
+                return;
+            }
+
+            if (pass.length < 6) {
+                showAlert("Password should be at least 6 characters", "warning");
+                return;
+            }
+
+            if (pass !== confirm) {
+                showAlert("Passwords do not match", "error");
+                return;
+            }
+
+            if (!terms) {
+                showAlert("Please accept the terms and conditions", "warning");
+                return;
+            }
+
+            setButtonState("CHECKING INVITE...");
+
+            try {
+                const inviterDoc = await getInviterByCode(invite);
+
+                if (!inviterDoc) {
+                    resetButtonState();
+                    showAlert("Invalid invite code", "error");
+                    return;
+                }
+
+                setButtonState("CREATING ACCOUNT...");
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+                const personalCode = user.uid.substring(0, 6).toUpperCase();
+
+                await setDoc(doc(db, "users", user.uid), {
+                    fullName: name,
+                    phone: countryCode + phone,
+                    email: email,
+                    referralId: personalCode,
+                    inviteCode: invite,
+                    balance: 0,
+                    dailyEarn: 0,
+                    totalEarned: 0,
+                    teamEarn: 0,
+                    totalTeamEarned: 0,
+                    walletAddress: "",
+                    securePin: "",
+                    createdAt: serverTimestamp()
+                });
+
+                showAlert("Account created successfully", "success");
+                setTimeout(() => window.location.href = "index.html", 1500);
+
+            } catch (error) {
+                console.error("Signup error:", error);
+                resetButtonState();
+
+                const friendlyError = mapFirebaseError(error);
+                showAlert(friendlyError.message, friendlyError.type);
+            }
+        });
+    </script>
+</body>
+</html>
