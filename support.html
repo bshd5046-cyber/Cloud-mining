@@ -28,14 +28,12 @@
             padding: 0;
         }
 
-        /* Glass Panel */
         .glass-panel { 
             background: rgba(15, 23, 42, 0.7); 
             backdrop-filter: blur(25px); 
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Bottom Nav */
         .bottom-nav { 
             background: var(--nav-bg); 
             backdrop-filter: blur(20px); 
@@ -60,7 +58,6 @@
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary); }
 
-        /* AI Panel Fixes */
         #aiChatPanel { 
             position: fixed;
             inset: 0;
@@ -81,15 +78,6 @@
             scroll-behavior: smooth;
         }
         .chat-scroll::-webkit-scrollbar { display: none; }
-
-        .typing-dot {
-            width: 4px; height: 4px; background: #3b82f6; border-radius: 50%;
-            animation: typing 1s infinite ease-in-out;
-        }
-        @keyframes typing {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-        }
     </style>
 </head>
 <body class="pb-32">
@@ -117,7 +105,7 @@
                 <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
             </div>
             
-            <a href="https://wa.me/YourNumber" class="glass-panel p-6 rounded-[2rem] flex items-center justify-between block">
+            <a href="https://wa.me/12713936333" class="glass-panel p-6 rounded-[2rem] flex items-center justify-between block">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-green-500 border border-green-500/20">
                         <i class="fab fa-whatsapp text-xl"></i>
@@ -155,12 +143,12 @@
         <div class="px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar shrink-0 border-t border-white/5 bg-[#020617]/50">
             <button onclick="sendQuickQuery('Withdrawal rules?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Withdrawal</button>
             <button onclick="sendQuickQuery('Network info?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Networks</button>
-            <button onclick="sendQuickQuery('Deposit protocol?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">Deposit</button>
+            <button onclick="sendQuickQuery('About System?')" class="whitespace-nowrap bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-bold uppercase text-slate-400">About System</button>
         </div>
 
         <div class="p-4 pb-10 glass-panel shrink-0">
             <div class="relative flex items-center gap-2">
-                <input type="text" id="chatInput" placeholder="Command..." 
+                <input type="text" id="chatInput" placeholder="Enter command..." 
                     class="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-sm text-white focus:outline-none focus:border-blue-500 transition-all">
                 <button onclick="handleUserInput()" class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 active:scale-90 transition-all">
                     <i class="fas fa-paper-plane text-xs text-white"></i>
@@ -180,7 +168,6 @@
     </nav>
 
     <script>
-        // UI Control
         function toggleAIChat(show) {
             const panel = document.getElementById('aiChatPanel');
             if(show) {
@@ -192,22 +179,17 @@
             }
         }
 
-        // Chat Engine
         function addMsg(text, type) {
             const body = document.getElementById('chatBody');
             const wrapper = document.createElement('div');
             wrapper.className = type === 'user' ? "flex justify-end" : "flex justify-start";
-            
             const div = document.createElement('div');
             div.className = type === 'user' 
                 ? "bg-white/5 border border-white/10 p-4 rounded-3xl rounded-tr-none max-w-[85%] text-sm text-slate-200"
                 : "bg-blue-600/10 border border-blue-500/20 p-4 rounded-3xl rounded-tl-none max-w-[85%] text-sm text-blue-100";
-            
             div.innerText = text;
             wrapper.appendChild(div);
             body.appendChild(wrapper);
-            
-            // Auto scroll to bottom
             body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
         }
 
@@ -215,14 +197,10 @@
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
             if(!msg) return;
-
             addMsg(msg, 'user');
             input.value = '';
-            
-            // Artificial delay for realism
             setTimeout(() => {
-                const response = getBotResponse(msg);
-                addMsg(response, 'bot');
+                addMsg(getBotResponse(msg), 'bot');
             }, 800);
         }
 
@@ -235,19 +213,27 @@
 
         function getBotResponse(input) {
             const q = input.toLowerCase();
-            if(q.includes('withdraw') || q.includes('سحب')) return "Withdrawal Protocol: 2-96 hours processing. Post-approval settlement within 5 business days.";
-            if(q.includes('deposit') || q.includes('ايداع')) return "Deposit Protocol: Exclusively TRC20 network. Vertex is not responsible for funds on incorrect networks.";
-            if(q.includes('network') || q.includes('شبكة')) return "Systems: BEP20 & TRC20 supported. Verify address node before confirming transfer.";
-            if(q.includes('long') || q.includes('مدى')) return "Strategy: Long-term sustainable cloud mining. Operational 24/7/365.";
-            return "Query logged. For high-level human assistance, contact VIP Node via WhatsApp.";
+            // Withdrawal: 2h to 48h + 5% fee
+            if(q.includes('withdraw')) {
+                return "Withdrawal Protocol: Processing time ranges from 2 hours to 48 hours. Please note a 5% withdrawal fee is applied to cover network transaction costs.";
+            }
+            // About System: Cloud Mining
+            if(q.includes('system') || q.includes('about') || q.includes('what')) {
+                return "Vertex Premier is an advanced Cloud Mining system. We provide high-performance computing power to mine cryptocurrencies, delivering daily returns to your digital wallet.";
+            }
+            if(q.includes('deposit')) {
+                return "Deposit Protocol: We exclusively support the TRC20 network. Ensure you use the correct address to avoid permanent loss of funds.";
+            }
+            if(q.includes('network')) {
+                return "Supported Networks: BEP20 and TRC20 nodes are currently operational. Verify your destination node before execution.";
+            }
+            return "Command recognized. For personalized human assistance, contact our VIP Support via WhatsApp at +1 2713936333.";
         }
 
-        // Enter key support
         document.getElementById('chatInput').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') handleUserInput();
         });
 
-        // Firebase Auth check (Minimal)
         window.onload = () => {
             document.getElementById('mainContent').style.display = 'block';
         };
