@@ -59,23 +59,16 @@
         .nav-item.active { color: var(--primary); }
 
         #aiChatPanel { 
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            background: #020617;
-            display: none;
-            flex-direction: column;
+            position: fixed; inset: 0; z-index: 2000; background: #020617;
+            display: none; flex-direction: column;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateY(100%);
         }
         #aiChatPanel.active { transform: translateY(0); display: flex; }
 
         .chat-scroll {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 20px;
-            scroll-behavior: smooth;
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 20px; scroll-behavior: smooth;
         }
         .chat-scroll::-webkit-scrollbar { display: none; }
     </style>
@@ -199,35 +192,29 @@
             if(!msg) return;
             addMsg(msg, 'user');
             input.value = '';
-            setTimeout(() => {
-                addMsg(getBotResponse(msg), 'bot');
-            }, 800);
+            setTimeout(() => { addMsg(getBotResponse(msg), 'bot'); }, 800);
         }
 
         function sendQuickQuery(text) {
             addMsg(text, 'user');
-            setTimeout(() => {
-                addMsg(getBotResponse(text), 'bot');
-            }, 600);
+            setTimeout(() => { addMsg(getBotResponse(text), 'bot'); }, 600);
         }
 
         function getBotResponse(input) {
             const q = input.toLowerCase();
-            // Withdrawal: 2h to 48h + 5% fee
             if(q.includes('withdraw')) {
-                return "Withdrawal Protocol: Processing time ranges from 2 hours to 48 hours. Please note a 5% withdrawal fee is applied to cover network transaction costs.";
+                return "Withdrawal Protocol: Processing time ranges from 2 hours to 48 hours. A 5% withdrawal fee is applied to each transaction.";
             }
-            // About System: Cloud Mining
             if(q.includes('system') || q.includes('about') || q.includes('what')) {
-                return "Vertex Premier is an advanced Cloud Mining system. We provide high-performance computing power to mine cryptocurrencies, delivering daily returns to your digital wallet.";
+                return "Vertex Premier is a secure Cloud Mining system. Users can lease computational power to generate crypto assets with automated distribution.";
             }
             if(q.includes('deposit')) {
-                return "Deposit Protocol: We exclusively support the TRC20 network. Ensure you use the correct address to avoid permanent loss of funds.";
+                return "Deposit Protocol: Exclusively TRC20 network. Please verify your individual wallet node before transfer.";
             }
             if(q.includes('network')) {
-                return "Supported Networks: BEP20 and TRC20 nodes are currently operational. Verify your destination node before execution.";
+                return "Supported Networks: BEP20 and TRC20 nodes are active. Always confirm the destination address.";
             }
-            return "Command recognized. For personalized human assistance, contact our VIP Support via WhatsApp at +1 2713936333.";
+            return "Query logged. For high-level human assistance, contact VIP Node via WhatsApp at +1 2713936333.";
         }
 
         document.getElementById('chatInput').addEventListener('keypress', (e) => {
