@@ -396,6 +396,7 @@
                 const user = userCredential.user;
                 const personalCode = user.uid.substring(0, 6).toUpperCase();
 
+                // التعديل الرئيسي هنا: تم إضافة depositAddress و tier
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: name,
                     phone: countryCode + phone,
@@ -408,6 +409,8 @@
                     teamEarn: 0,
                     totalTeamEarned: 0,
                     walletAddress: "",
+                    depositAddress: "TY3N1vX9aKzPqM8sL7wR2uE5YtX4zC6vB8", // يمكنك تغيير هذا العنوان إلى عنوان محفظة المنصة الخاصة بك
+                    tier: "Tier 1",
                     securePin: "",
                     createdAt: serverTimestamp()
                 });
