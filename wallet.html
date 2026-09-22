@@ -68,11 +68,12 @@
         </div>
     </div>
 
+    <!-- Deposit Panel -->
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content text-center">
             <div class="flex justify-between items-center mb-8">
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit Asset</h3>
-                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
+                <button onclick="document.getElementById('depositPanel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
             <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto shadow-2xl shadow-blue-500/20"></div>
             <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Personal Deposit Address</p>
@@ -88,11 +89,12 @@
         </div>
     </div>
 
+    <!-- Withdraw Panel -->
     <div id="withdrawPanel" class="slide-panel">
         <div class="panel-content">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black uppercase italic text-blue-500">Initiate Payout</h3>
-                <button onclick="this.closest('.slide-panel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
+                <button onclick="document.getElementById('withdrawPanel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
             <div class="space-y-4">
                 <div class="bg-blue-500/5 p-4 rounded-2xl border border-blue-500/10 text-center">
@@ -104,10 +106,10 @@
                     <option value="BEP20">USDT (BEP20) - Low Fee</option>
                 </select>
                 <input id="withdrawAddress" type="text" class="field" placeholder="Recipient Wallet Address">
-                <input id="withdrawAmount" type="number" class="field" placeholder="Amount (Min $10.00)">
+                <input id="withdrawAmount" type="number" step="any" class="field" placeholder="Amount (Min $10.00)">
                 <div class="pt-2">
                     <p class="text-[10px] font-black uppercase text-zinc-500 mb-1 ml-2 tracking-widest">Vault Security PIN</p>
-                    <input id="vaultPin" type="password" maxlength="6" inputmode="numeric" autocomplete="off" class="field text-center tracking-[1.2em] font-black" placeholder="••••••">
+                    <input id="vaultPin" type="password" maxlength="6" inputmode="numeric" autocomplete="new-password" class="field text-center tracking-[1.2em] font-black" placeholder="••••••">
                 </div>
                 <button id="submitWithdrawBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-xl shadow-blue-900/40">Confirm Withdrawal</button>
             </div>
@@ -143,6 +145,9 @@
         let currentUser = null;
         let currentUserData = null;
 
+        let withdrawalsList = [];
+        let depositsList = [];
+
         function showError(msg) {
             Swal.fire({
                 icon: 'error', title: 'ACCESS DENIED', text: msg,
@@ -157,10 +162,14 @@
                 onSnapshot(doc(db, "users", user.uid), (snap) => {
                     currentUserData = snap.data();
                     if (currentUserData) {
-                        document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                        document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                         document.getElementById('userName').innerText = currentUserData.fullName || "IDENTIFIED USER";
                         document.getElementById('userTier').innerText = currentUserData.tier || "Tier 1";
-                        if (currentUserData.depositAddress) enableAddressUI(currentUserData.depositAddress);
+                        if (currentUserData.depositAddress) {
+                            enableAddressUI(currentUserData.depositAddress);
+                        } else {
+                            document.getElementById('depositAddrText').innerText = "No deposit address generated.";
+                        }
                     }
                 });
                 loadTransactions(user.uid);
@@ -184,6 +193,8 @@
                 if (!pendingSnap.empty) return showError("You already have a pending withdrawal request.");
 
                 document.getElementById('vaultPin').value = "";
+                document.getElementById('withdrawAmount').value = "";
+                document.getElementById('withdrawAddress').value = "";
                 document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
                 document.getElementById('withdrawPanel').classList.add('show-panel');
             } catch (e) {
@@ -195,19 +206,19 @@
         document.getElementById('submitWithdrawBtn').onclick = async () => {
             const btn = document.getElementById('submitWithdrawBtn');
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const address = document.getElementById('withdrawAddress').value;
-            const enteredPin = document.getElementById('vaultPin').value;
+            const address = document.getElementById('withdrawAddress').value.trim();
+            const enteredPin = document.getElementById('vaultPin').value.trim();
             const network = document.getElementById('withdrawNetwork').value;
 
             if (!address || isNaN(amount) || amount < 10) return showError("Min withdrawal is $10.");
-            if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN.");
+            if (enteredPin !== String(currentUserData.securePin)) return showError("Incorrect Security PIN.");
             if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance.");
 
             try {
                 btn.disabled = true; btn.innerText = "Authorizing...";
                 await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
                 await addDoc(collection(db, "withdrawals"), {
-                    uid: currentUser.uid, email: currentUser.email, fullName: currentUserData.fullName,
+                    uid: currentUser.uid, email: currentUser.email, fullName: currentUserData.fullName || "",
                     amount: amount, address: address, network: network, status: "pending",
                     timestamp: serverTimestamp(), type: "Withdrawal"
                 });
@@ -221,56 +232,63 @@
             }
         };
 
-        // --- جلب الإيداعات والسحوبات معاً ---
-        async function loadTransactions(uid) {
+        // --- جلب الإيداعات والسحوبات معاً (بشكل منفصل لمنع تداخل الشروط) ---
+        function loadTransactions(uid) {
             const cont = document.getElementById('transactionHistory');
-            
+
             // مراقبة السحوبات
             onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
-                // مراقبة الإيداعات من sub-collection
-                onSnapshot(collection(db, "users", uid, "deposits"), dSnap => {
-                    let allTx = [];
-                    
-                    wSnap.forEach(doc => {
-                        allTx.push({ ...doc.data(), type: 'Withdrawal' });
-                    });
-                    
-                    dSnap.forEach(doc => {
-                        allTx.push({ ...doc.data(), type: 'Deposit' });
-                    });
-                    
-                    if (allTx.length === 0) {
-                        cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
-                        return;
-                    }
-
-                    // الترتيب حسب التاريخ الأحدث
-                    allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    
-                    cont.innerHTML = "";
-                    allTx.forEach(tx => {
-                        let color = (tx.status === 'completed' || tx.status === 'approved') ? 'text-emerald-500' : (tx.status === 'rejected' ? 'text-red-500' : 'text-amber-500');
-                        const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
-                        const displayStatus = (tx.status || 'PENDING').toUpperCase();
-                        
-                        cont.innerHTML += `
-                        <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                                    <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span>
-                                    <p class="text-[8px] text-slate-500 font-bold">${date}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                                <p class="text-[8px] font-black uppercase ${color}">${displayStatus}</p>
-                            </div>
-                        </div>`;
-                    });
+                withdrawalsList = [];
+                wSnap.forEach(doc => {
+                    withdrawalsList.push({ ...doc.data(), id: doc.id, type: 'Withdrawal' });
                 });
+                renderCombinedTransactions();
+            });
+
+            // مراقبة الإيداعات من sub-collection
+            onSnapshot(collection(db, "users", uid, "deposits"), dSnap => {
+                depositsList = [];
+                dSnap.forEach(doc => {
+                    depositsList.push({ ...doc.data(), id: doc.id, type: 'Deposit' });
+                });
+                renderCombinedTransactions();
+            });
+        }
+
+        function renderCombinedTransactions() {
+            const cont = document.getElementById('transactionHistory');
+            const allTx = [...withdrawalsList, ...depositsList];
+
+            if (allTx.length === 0) {
+                cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
+                return;
+            }
+
+            // الترتيب حسب التاريخ الأحدث
+            allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+            cont.innerHTML = "";
+            allTx.forEach(tx => {
+                let color = (tx.status === 'completed' || tx.status === 'approved') ? 'text-emerald-500' : (tx.status === 'rejected' || tx.status === 'failed' ? 'text-red-500' : 'text-amber-500');
+                const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
+                const displayStatus = (tx.status || 'PENDING').toUpperCase();
+
+                cont.innerHTML += `
+                <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                            <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span>
+                            <p class="text-[8px] text-slate-500 font-bold">${date}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
+                        <p class="text-[8px] font-black uppercase ${color}">${displayStatus}</p>
+                    </div>
+                </div>`;
             });
         }
 
@@ -278,13 +296,38 @@
             document.getElementById('depositAddrText').innerText = addr;
             const qrBox = document.getElementById('qrcode');
             qrBox.innerHTML = "";
-            new QRCode(qrBox, { text: addr, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff" });
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrBox, { text: addr, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff" });
+            }
         }
 
+        // نسخ العنوان مع دعم الحالات غير المشفرة (Non-HTTPS Fallback)
         document.getElementById('copyBtn').onclick = () => {
-            navigator.clipboard.writeText(document.getElementById('depositAddrText').innerText);
+            const textToCopy = document.getElementById('depositAddrText').innerText;
+            if(!textToCopy || textToCopy.includes("Generating")) return;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+
             Swal.fire({ icon: 'success', title: 'Address Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500, background: '#070b16', color: '#fff' });
         };
+
+        // إغلاق النوافذ عند النقر خارج المحتوى
+        document.querySelectorAll('.slide-panel').forEach(panel => {
+            panel.addEventListener('click', (e) => {
+                if (e.target === panel) {
+                    panel.classList.remove('show-panel');
+                }
+            });
+        });
     </script>
 </body>
 </html>
