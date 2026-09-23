@@ -57,10 +57,7 @@ onAuthStateChanged(auth, user => {
             }
         });
         loadTransactions(user.uid);
-
-        // بدء الفحص التلقائي في الخلفية كل 10 ثوانٍ
         startAutoPaymentChecker(user.uid);
-
     } else {
         window.location.href = 'login.html';
         if (paymentCheckerInterval) clearInterval(paymentCheckerInterval);
@@ -82,15 +79,17 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // إرسال طلب لإنشاء فاتورة مخصصة مباشرة عبر Plisio API
-        const response = await fetch(`https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_amount=${amount}&source_currency=USD&order_number=${orderNumber}&order_name=Deposit_${amount}_USD&currency=USDT_BSC`);
+        // رابط إنشاء الفاتورة من Plisio مع تحديد العملة USDT عبر شبكة BSC
+        const apiUrl = `https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_amount=${amount}&source_currency=USD&order_number=${orderNumber}&order_name=Deposit_${amount}_USD&currency=USDT_BSC`;
+        
+        const response = await fetch(apiUrl);
         const result = await response.json();
 
         if (result.status === "success" && result.result) {
             const invoiceUrl = result.result.url;
             const txnId = result.result.txn_id;
 
-            // تسجيل المعاملة في Firestore مع معرف الفاتورة الخاص بـ Plisio
+            // حفظ المعاملة في قاعدة البيانات بحالة pending حتى يتم الدفع
             await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
                 uid: currentUser.uid,
                 amount: amount,
@@ -101,9 +100,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
                 timestamp: serverTimestamp()
             });
 
-            // فتح رابط الدفع الخاص بهذه الفاتورة حصرياً
             window.open(invoiceUrl, '_blank');
-
             if(amountInput) amountInput.value = "";
 
             Swal.fire({
@@ -115,25 +112,26 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
                 timer: 5000
             });
         } else {
-            showError("Failed to create Plisio invoice. Please check API key.");
+            console.error("Plisio Error Response:", result);
+            showError(result.data?.message || "Failed to create Plisio invoice. Check API Key.");
         }
 
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Unexpected error connecting to payment gateway.");
+        showError("Unexpected network error connecting to Plisio.");
     } finally {
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
     }
 };
 
-// --- دالة الفحص التلقائي في الخلفية ---
+// --- دالة الفحص التلقائي في الخلفية (محدثة لتكون أكثر دقة وتحويل الحالة إلى approved) ---
 function startAutoPaymentChecker(uid) {
     if (paymentCheckerInterval) clearInterval(paymentCheckerInterval);
 
     paymentCheckerInterval = setInterval(async () => {
         try {
-            const res = await fetch(`https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=10`);
+            const res = await fetch(`https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`);
             const result = await res.json();
 
             if (result.status === "success" && result.data && result.data.list) {
@@ -146,25 +144,32 @@ function startAutoPaymentChecker(uid) {
                     const txData = txDoc.data();
                     const txAmount = parseFloat(txData.amount);
 
-                    const matchedOp = result.data.list.find(op => 
-                        (op.status === "completed" || op.status === "mismatch") &&
-                        Math.abs(parseFloat(op.source_amount || op.amount) - txAmount) < 0.1
-                    );
+                    // البحث إما عن طريق معرف المعاملة (txn_id) أو تقارب المبلغ
+                    const matchedOp = result.data.list.find(op => {
+                        const opAmount = parseFloat(op.source_amount || op.amount);
+                        const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
+                        const matchesId = txData.txn_id && op.txn_id === txData.txn_id;
+                        const matchesAmount = Math.abs(opAmount - txAmount) < 0.1;
+
+                        return isCompleted && (matchesId || matchesAmount);
+                    });
 
                     if (matchedOp) {
+                        // 1. تحديث رصيد المستخدم
                         await updateDoc(doc(db, "users", uid), { 
                             balance: increment(txAmount) 
                         });
 
+                        // 2. تحديث حالة المعاملة إلى approved مباشرة كما طلبت
                         await updateDoc(doc(db, "users", uid, "transactions", txDoc.id), { 
-                            status: "completed",
+                            status: "approved",
                             txn_id: matchedOp.txn_id || txData.txn_id
                         });
 
                         Swal.fire({
                             icon: 'success',
-                            title: 'DEPOSIT CREDITED!',
-                            text: `Your deposit of $${txAmount} has been verified and added to your balance automatically!`,
+                            title: 'DEPOSIT APPROVED!',
+                            text: `Your deposit of $${txAmount} has been verified and approved automatically!`,
                             background: '#0a0f1d', color: '#fff',
                             confirmButtonColor: '#10b981',
                             timer: 4000
