@@ -71,38 +71,28 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Generating Invoice...";
+        btn.innerText = "Processing...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // رابط الطلب المباشر لـ Plisio API عبر البروكسي لتفادي حظر CORS
-        const targetUrl = `https://plisio.net/api/v1/invoices/new?api_key=${encodeURIComponent(PLISIO_API_KEY)}&currency=USDT_TRX&order_name=Vault+Deposit&order_number=${orderNumber}&source_amount=${amount}&source_currency=USD&passthrough_id=${currentUser.uid}`;
+        // 1. تسجيل معالم العملية في قاعدة البيانات
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+            uid: currentUser.uid,
+            amount: amount,
+            type: "Deposit",
+            status: "pending",
+            orderNumber: orderNumber,
+            timestamp: serverTimestamp()
+        });
+
+        // 2. توجيه المستخدم لمباشرة الدفع بأمان
+        const invoiceUrl = `https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&currency=USDT_TRX&order_name=Vault+Deposit&order_number=${orderNumber}&source_amount=${amount}&source_currency=USD&passthrough_id=${currentUser.uid}`;
         
-        const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
-        const result = await response.json();
+        window.location.assign(invoiceUrl);
 
-        if (result.status === "success" && result.data && result.data.invoice_url) {
-            // تسجيل العملية في Firestore
-            await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                uid: currentUser.uid,
-                amount: amount,
-                type: "Deposit",
-                status: "pending",
-                orderNumber: orderNumber,
-                txn_id: result.data.txn_id || "",
-                timestamp: serverTimestamp()
-            });
-
-            // التوجيه المباشر لرابط الفاتورة
-            window.location.href = result.data.invoice_url;
-        } else {
-            console.error("Plisio Error:", result);
-            const errorMsg = result.data?.message || "Failed to generate payment invoice. Please try again.";
-            showError(errorMsg);
-        }
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Network connection error. Please try again.");
+        showError("Unable to initiate deposit. Please try again.");
     } finally {
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
