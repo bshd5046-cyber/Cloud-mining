@@ -62,7 +62,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنشاء طلب الإيداع والتوجيه لرابط Plisio مع ميزة التحقق وزيادة الرصيد ---
+// --- 2. إنشاء طلب الإيداع وتغيير الزر للتحقق الفوري ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -71,7 +71,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
     if (!currentUser) return showError("Please login to proceed.");
     if (isNaN(amount) || amount <= 0) return showError("Please enter a valid amount.");
 
-    // إذا كان الزر جاهزاً للتحقق من الدفع بعد فتحه مسبقاً
+    // إذا كان الزر بحالة انتظار التحقق
     if (btn.dataset.checking === "true") {
         verifyManualDeposit(amount, btn);
         return;
@@ -83,7 +83,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // تسجيل المعاملة في Firestore
+        // تسجيل المعاملة كمعلقة في قاعدة البيانات
         const txRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             uid: currentUser.uid,
             amount: amount,
@@ -93,11 +93,10 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
             timestamp: serverTimestamp()
         });
 
-        // حفظ المعرف للتحقق لاحقاً
         btn.dataset.txId = txRef.id;
         btn.dataset.checking = "true";
 
-        // التوجيه المباشر لرابط الدفع الخاص بك في Plisio
+        // فتح رابط الدفع المباشر
         window.open(PLISIO_PAYMENT_URL, '_blank');
 
         btn.disabled = false;
@@ -129,7 +128,11 @@ async function verifyManualDeposit(amount, btn) {
         const result = await res.json();
 
         if (result.status === "success" && result.data && result.data.list) {
-            const completedTx = result.data.list.find(op => op.status === "completed" || op.status === "mismatch");
+            // البحث عن أول عملية مكتملة تطابق المبلغ أو أحدث عملية
+            const completedTx = result.data.list.find(op => 
+                (op.status === "completed" || op.status === "mismatch") && 
+                parseFloat(op.source_amount || op.amount) === parseFloat(amount)
+            ) || result.data.list.find(op => op.status === "completed" || op.status === "mismatch");
 
             if (completedTx) {
                 const txDocId = btn.dataset.txId;
@@ -139,7 +142,7 @@ async function verifyManualDeposit(amount, btn) {
                     balance: increment(amount) 
                 });
 
-                // تحديث حالة المعاملة إلى مكتملة
+                // تحديث حالة المعاملة إلى مكتملة في سجل المستخدم
                 if (txDocId) {
                     await updateDoc(doc(db, "users", currentUser.uid, "transactions", txDocId), { 
                         status: "completed",
@@ -155,7 +158,7 @@ async function verifyManualDeposit(amount, btn) {
                     confirmButtonColor: '#10b981'
                 });
 
-                // إعادة الزر لحالته الطبيعية
+                // إعادة تعيين الزر للحالة الافتراضية
                 btn.disabled = false;
                 btn.innerText = "Pay with Crypto (Plisio)";
                 delete btn.dataset.checking;
@@ -165,7 +168,7 @@ async function verifyManualDeposit(amount, btn) {
             }
         }
 
-        showError("No completed payment found on Plisio yet. Please complete the payment first.");
+        showError("No matching completed payment found on Plisio yet. Please complete the payment first.");
         btn.disabled = false;
         btn.innerText = "I Have Paid (Click to Verify)";
 
