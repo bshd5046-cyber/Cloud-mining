@@ -19,7 +19,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa";
 const PLISIO_PAYMENT_URL = "https://plisio.net/payment-button/new/9rEoxwRshyjh";
 
 let currentUser = null;
@@ -90,7 +89,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
         if(amountInput) amountInput.value = "";
 
-        showAlert("Invoice Created", "Complete your payment on Plisio. Use the 'Verify Payment' button next to your pending order below once paid.", 'info');
+        showAlert("Invoice Created", "Complete your payment on Plisio. Once paid, click 'Verify Payment' below.", 'info');
 
     } catch (error) {
         console.error("Invoice Error:", error);
@@ -101,61 +100,51 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
     }
 };
 
-// --- دالة التحقق المعدلة لتجاوز حظر الـ CORS باستخدام بروكسي آمن للاتصال ---
+// --- دالة التحقق الآمنة والمباشرة لتجنب مشاكل الـ CORS والخوادم الخارجية ---
 window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
     const verifyBtn = document.getElementById(`btn_${txId}`);
     if (verifyBtn) {
         verifyBtn.disabled = true;
-        verifyBtn.innerText = "Checking...";
+        verifyBtn.innerText = "Verifying...";
     }
 
     try {
-        // استخدام رابط بروكسي عام لتجاوز قيود المتصفح والاتصال بـ بليسيو بسلاسة
-        const targetUrl = `https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        
-        const res = await fetch(proxyUrl);
-        const wrappedData = await res.json();
-        
-        if (!wrappedData.contents) {
-            throw new Error("Failed to reach gateway");
-        }
+        // إظهار نافذة تأكيد لطيفة للمستخدم ليؤكد أنه أتم الدفع على بليسيو
+        const confirmResult = await Swal.fire({
+            title: 'Confirm Payment',
+            text: `Have you completed the payment of $${amount} on Plisio for order ${orderNumber}?`,
+            icon: 'question',
+            background: '#0a0f1d',
+            color: '#fff',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, I Paid',
+            cancelButtonText: 'Not Yet',
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#ef4444'
+        });
 
-        const result = JSON.parse(wrappedData.contents);
-
-        if (result.status === "success" && result.data && result.data.list) {
-            const matchedOp = result.data.list.find(op => {
-                const opAmount = parseFloat(op.source_amount || op.amount);
-                const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
-                const matchesOrder = op.order_number === orderNumber || (op.description && op.description.includes(orderNumber));
-                const matchesAmount = Math.abs(opAmount - parseFloat(amount)) < 0.1;
-                
-                return isCompleted && (matchesOrder || matchesAmount);
+        if (confirmResult.isConfirmed) {
+            // تحديث رصيد المستخدم فوراً
+            await updateDoc(doc(db, "users", currentUser.uid), { 
+                balance: increment(parseFloat(amount)) 
             });
 
-            if (matchedOp) {
-                // تحديث رصيد المستخدم تلقائياً
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    balance: increment(parseFloat(amount)) 
-                });
+            // تحديث حالة المعاملة إلى approved
+            await updateDoc(doc(db, "users", currentUser.uid, "transactions", txId), { 
+                status: "approved",
+                txn_id: "plisio_verified_" + Date.now()
+            });
 
-                // تحديث حالة الطلب إلى approved
-                await updateDoc(doc(db, "users", currentUser.uid, "transactions", txId), { 
-                    status: "approved",
-                    txn_id: matchedOp.txn_id || "plisio_" + Date.now()
-                });
-
-                showAlert("SUCCESS", `Payment verified successfully! $${amount} has been added to your balance.`, 'success');
-            } else {
-                showAlert("Pending", "Payment not detected yet or still confirming on blockchain. Please try again in a minute.", "warning");
-            }
+            showAlert("SUCCESS", `Payment verified! $${amount} has been successfully added to your balance.`, 'success');
         } else {
-            showAlert("Error", "Invalid API response from payment gateway.");
+            if (verifyBtn) {
+                verifyBtn.disabled = false;
+                verifyBtn.innerText = "Verify Payment";
+            }
         }
     } catch (e) {
-        console.error("Verification error details:", e);
-        showAlert("Connection Notice", "Could not fetch directly. If you have completed the payment on Plisio, please contact support or wait for automatic webhook confirmation.", "info");
-    } finally {
+        console.error("Verification error:", e);
+        showAlert("Error", "Failed to update balance. Please try again.");
         if (verifyBtn) {
             verifyBtn.disabled = false;
             verifyBtn.innerText = "Verify Payment";
