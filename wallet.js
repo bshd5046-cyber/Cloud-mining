@@ -19,8 +19,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ⚠️ مفتاح Plisio API الخاص بك لتوليد الفاتورة ومتابعتها تلقائياً
-const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa";
+// رابط الدفع المباشر الخاص بك من Plisio
+const PLISIO_PAYMENT_URL = "https://plisio.net/payment-button/new/9rEoxwRshyjh";
 
 let currentUser = null;
 let currentUserData = null;
@@ -56,13 +56,12 @@ onAuthStateChanged(auth, user => {
             }
         });
         loadTransactions(user.uid);
-        checkPendingDeposits(user.uid); // فحص أي إيداع معلق عند فتح الصفحة
     } else {
         window.location.href = 'login.html';
     }
 });
 
-// --- 2. إنشاء الفاتورة ديناميكياً والتوجيه للدفع + التتبع التلقائي للرصيد ---
+// --- 2. إنشاء طلب الإيداع والتوجيه لرابط Plisio المباشر بدون أخطاء ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -73,41 +72,22 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Creating Invoice...";
+        btn.innerText = "Redirecting to Plisio...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // طلب إنشاء فاتورة حقيقية من Plisio لتحديد المبلغ بدقة
-        const response = await fetch(`https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_currency=USD&source_amount=${amount}&order_number=${orderNumber}&currency=USDT_BSC`);
-        const data = await response.json();
+        // تسجيل المعاملة في Firestore كمعلقة (Pending) لكي يراها الأدمن ويوافق عليها لتحديث الرصيد
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+            uid: currentUser.uid,
+            amount: amount,
+            type: "Deposit",
+            status: "pending",
+            orderNumber: orderNumber,
+            timestamp: serverTimestamp()
+        });
 
-        if (data.status === "success") {
-            const invoiceData = data.data;
-
-            // تسجيل المعاملة كـ pending مع الـ txn_id الخاص بـ Plisio
-            const txRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                uid: currentUser.uid,
-                amount: amount,
-                type: "Deposit",
-                status: "pending",
-                txn_id: invoiceData.txn_id,
-                orderNumber: orderNumber,
-                timestamp: serverTimestamp()
-            });
-
-            // فتح صفحة الدفع الخاصة بالعملية
-            window.open(invoiceData.invoice_url, '_blank');
-
-            btn.innerText = "Awaiting Payment...";
-
-            // بدء التحقق اللحظي لزيادة الرصيد تلقائياً بمجرد الدفع
-            startAutoCreditCheck(invoiceData.txn_id, txRef.id, amount, btn);
-
-        } else {
-            showError("Failed to generate invoice. Check Plisio API Key.");
-            btn.disabled = false;
-            btn.innerText = "Pay with Crypto (Plisio)";
-        }
+        // التوجيه المباشر لرابط الدفع الخاص بك في Plisio دون مشاكل CORS
+        window.location.href = PLISIO_PAYMENT_URL;
 
     } catch (error) {
         console.error("Invoice Error:", error);
@@ -116,65 +96,6 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
         btn.innerText = "Pay with Crypto (Plisio)";
     }
 };
-
-// --- دالة الفحص التلقائي لزيادة الرصيد ---
-function startAutoCreditCheck(txnId, txDocId, amount, btn) {
-    const checkInterval = setInterval(async () => {
-        try {
-            const res = await fetch(`https://plisio.net/api/v1/operations/${txnId}?api_key=${PLISIO_API_KEY}`);
-            const result = await res.json();
-
-            if (result.status === "success" && (result.data.status === "completed" || result.data.status === "mismatch")) {
-                clearInterval(checkInterval);
-
-                // زيادة رصيد المستخدم طبيعياً وفورياً في قاعدة البيانات
-                await updateDoc(doc(db, "users", currentUser.uid), { 
-                    balance: increment(amount) 
-                });
-
-                // تحديث حالة المعاملة إلى مكتملة
-                await updateDoc(doc(db, "users", currentUser.uid, "transactions", txDocId), { 
-                    status: "completed" 
-                });
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'DEPOSIT SUCCESSFUL',
-                    text: `$${amount} has been added to your balance successfully!`,
-                    background: '#0a0f1d', color: '#fff',
-                    confirmButtonColor: '#10b981'
-                });
-
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerText = "Pay with Crypto (Plisio)";
-                }
-            }
-        } catch (e) {
-            console.error("Polling check failed:", e);
-        }
-    }, 10000); // يفحص كل 10 ثوانٍ
-}
-
-// --- فحص الإيداعات المعلقة القديمة عند إعادة تحميل الصفحة ---
-async function checkPendingDeposits(uid) {
-    try {
-        const q = query(
-            collection(db, "users", uid, "transactions"), 
-            where("type", "==", "Deposit"), 
-            where("status", "==", "pending")
-        );
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => {
-            const tx = docSnap.data();
-            if (tx.txn_id) {
-                startAutoCreditCheck(tx.txn_id, docSnap.id, tx.amount, document.getElementById('createInvoiceBtn'));
-            }
-        });
-    } catch (e) {
-        console.error("Pending check failed:", e);
-    }
-}
 
 // --- 3. فتح لوحة السحب ---
 document.getElementById('withdrawTrigger').onclick = async () => {
