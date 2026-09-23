@@ -19,20 +19,18 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ⚠️ مفتاح Plisio API والرابط المباشر
 const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa";
 const PLISIO_PAYMENT_URL = "https://plisio.net/payment-button/new/9rEoxwRshyjh";
 
 let currentUser = null;
 let currentUserData = null;
-let paymentCheckerInterval = null;
 
-// --- دالة إظهار الخطأ ---
-function showError(msg) {
+// --- دالة إظهار التنبيهات ---
+function showAlert(title, text, icon = 'error') {
     Swal.fire({
-        icon: 'error',
-        title: 'NOTIFICATION',
-        text: msg,
+        icon: icon,
+        title: title,
+        text: text,
         background: '#0a0f1d',
         color: '#fff',
         confirmButtonColor: '#3b82f6',
@@ -58,21 +56,19 @@ onAuthStateChanged(auth, user => {
             }
         });
         loadTransactions(user.uid);
-        startAutoPaymentChecker(user.uid);
     } else {
         window.location.href = 'login.html';
-        if (paymentCheckerInterval) clearInterval(paymentCheckerInterval);
     }
 });
 
-// --- 2. إنشاء طلب الإيداع والفتح المباشر ---
+// --- 2. إنشاء طلب الإيداع ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
     const amount = parseFloat(amountInput.value);
 
-    if (!currentUser) return showError("Please login to proceed.");
-    if (isNaN(amount) || amount <= 0) return showError("Please enter a valid amount.");
+    if (!currentUser) return showAlert("Error", "Please login to proceed.");
+    if (isNaN(amount) || amount <= 0) return showAlert("Error", "Please enter a valid amount.");
 
     try {
         btn.disabled = true;
@@ -80,7 +76,6 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // تسجيل المعاملة في قاعدة البيانات كـ pending
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             uid: currentUser.uid,
             amount: amount,
@@ -90,82 +85,74 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
             timestamp: serverTimestamp()
         });
 
-        // فتح رابط الدفع المباشر
+        document.getElementById('depositPanel').classList.remove('show-panel');
         window.open(PLISIO_PAYMENT_URL, '_blank');
 
         if(amountInput) amountInput.value = "";
 
-        Swal.fire({
-            icon: 'info',
-            title: 'Waiting for Payment',
-            text: 'Complete your payment on Plisio. Your balance will update automatically once approved!',
-            background: '#0a0f1d', color: '#fff',
-            confirmButtonColor: '#3b82f6',
-            timer: 5000
-        });
+        showAlert("Invoice Created", "Complete your payment on Plisio. Use the 'Verify Payment' button next to your pending order below once paid.", 'info');
 
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Unexpected error. Please try again.");
+        showAlert("Error", "Unexpected error. Please try again.");
     } finally {
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
     }
 };
 
-// --- دالة الفحص التلقائي في الخلفية لتحويل الحالة إلى approved ---
-function startAutoPaymentChecker(uid) {
-    if (paymentCheckerInterval) clearInterval(paymentCheckerInterval);
+// --- دالة التحقق الحقيقي من بليسيو عبر الزر الواضح ---
+window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
+    const verifyBtn = document.getElementById(`btn_${txId}`);
+    if (verifyBtn) {
+        verifyBtn.disabled = true;
+        verifyBtn.innerText = "Checking...";
+    }
 
-    paymentCheckerInterval = setInterval(async () => {
-        try {
-            const res = await fetch(`https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`);
-            const result = await res.json();
+    try {
+        const res = await fetch(`https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`);
+        const result = await res.json();
 
-            if (result.status === "success" && result.data && result.data.list) {
-                const q = query(collection(db, "users", uid, "transactions"), where("status", "==", "pending"), where("type", "==", "Deposit"));
-                const pendingSnap = await getDocs(q);
+        if (result.status === "success" && result.data && result.data.list) {
+            // نبحث عن عملية مطابقة إما برقم الطلب أو بالقيمة
+            const matchedOp = result.data.list.find(op => {
+                const opAmount = parseFloat(op.source_amount || op.amount);
+                const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
+                const matchesOrder = op.order_number === orderNumber || (op.description && op.description.includes(orderNumber));
+                const matchesAmount = Math.abs(opAmount - parseFloat(amount)) < 0.1;
+                
+                return isCompleted && (matchesOrder || matchesAmount);
+            });
 
-                if (pendingSnap.empty) return;
-
-                pendingSnap.forEach(async (txDoc) => {
-                    const txData = txDoc.data();
-                    const txAmount = parseFloat(txData.amount);
-
-                    const matchedOp = result.data.list.find(op => {
-                        const opAmount = parseFloat(op.source_amount || op.amount);
-                        const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
-                        return isCompleted && Math.abs(opAmount - txAmount) < 0.1;
-                    });
-
-                    if (matchedOp) {
-                        // تحديث رصيد المستخدم
-                        await updateDoc(doc(db, "users", uid), { 
-                            balance: increment(txAmount) 
-                        });
-
-                        // تحديث حالة المعاملة إلى approved
-                        await updateDoc(doc(db, "users", uid, "transactions", txDoc.id), { 
-                            status: "approved",
-                            txn_id: matchedOp.txn_id || "plisio_" + Date.now()
-                        });
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'DEPOSIT APPROVED!',
-                            text: `Your deposit of $${txAmount} has been verified and approved automatically!`,
-                            background: '#0a0f1d', color: '#fff',
-                            confirmButtonColor: '#10b981',
-                            timer: 4000
-                        });
-                    }
+            if (matchedOp) {
+                // تحديث رصيد المستخدم فعلياً لأن الدفع نجح
+                await updateDoc(doc(db, "users", currentUser.uid), { 
+                    balance: increment(parseFloat(amount)) 
                 });
+
+                // تحديث حالة المعاملة إلى approved
+                await updateDoc(doc(db, "users", currentUser.uid, "transactions", txId), { 
+                    status: "approved",
+                    txn_id: matchedOp.txn_id || "plisio_" + Date.now()
+                });
+
+                showAlert("SUCCESS", `Payment verified successfully! $${amount} has been added to your balance.`, 'success');
+            } else {
+                showAlert("Pending", "Payment not detected yet or still confirming on blockchain. Please try again in a minute.", "warning");
             }
-        } catch (e) {
-            console.error("Auto check error:", e);
+        } else {
+            showAlert("Error", "Could not connect to payment gateway. Try again later.");
         }
-    }, 10000);
-}
+    } catch (e) {
+        console.error("Verification error:", e);
+        showAlert("Error", "Failed to verify payment. Check your connection.");
+    } finally {
+        if (verifyBtn) {
+            verifyBtn.disabled = false;
+            verifyBtn.innerText = "Verify Payment";
+        }
+    }
+};
 
 // --- 3. فتح لوحة السحب ---
 document.getElementById('withdrawTrigger').onclick = async () => {
@@ -187,14 +174,16 @@ document.getElementById('withdrawTrigger').onclick = async () => {
         const pendingSnap = await getDocs(q);
 
         if (!pendingSnap.empty) {
-            return showError("You have an active pending withdrawal. Please wait for Admin approval.");
+            return showAlert("Error", "You have an active pending withdrawal. Please wait for Admin approval.");
         }
 
-        document.getElementById('withdrawAvailableBalance').innerText = `Available: $${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+        document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
         document.getElementById('withdrawPanel').classList.add('show-panel');
         document.getElementById('vaultPin').value = "";
+        document.getElementById('withdrawAmount').value = "";
+        document.getElementById('withdrawAddress').value = "";
     } catch (e) {
-        showError("Connection error. Try again.");
+        showAlert("Error", "Connection error. Try again.");
     }
 };
 
@@ -205,10 +194,10 @@ document.getElementById('submitWithdrawBtn').onclick = async () => {
     const address = document.getElementById('withdrawAddress').value.trim();
     const enteredPin = document.getElementById('vaultPin').value.trim();
 
-    if (!address || isNaN(amount) || amount < 10) return showError("Please enter a valid address and amount (Min $10).");
-    if (enteredPin.length !== 6) return showError("Please enter your 6-digit Security PIN.");
-    if (enteredPin !== currentUserData.securePin) return showError("Incorrect Security PIN.");
-    if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance in your vault.");
+    if (!address || isNaN(amount) || amount < 10) return showAlert("Error", "Please enter a valid address and amount (Min $10).");
+    if (enteredPin.length !== 6) return showAlert("Error", "Please enter your 6-digit Security PIN.");
+    if (enteredPin !== currentUserData.securePin) return showAlert("Error", "Incorrect Security PIN.");
+    if (amount > (currentUserData.balance || 0)) return showAlert("Error", "Insufficient balance in your vault.");
 
     try {
         btn.disabled = true;
@@ -233,13 +222,7 @@ document.getElementById('submitWithdrawBtn').onclick = async () => {
             mainId: docRef.id 
         });
 
-        Swal.fire({ 
-            icon: 'success', 
-            title: 'REQUEST SENT', 
-            text: 'Your funds are locked. Admin audit in progress.', 
-            background: '#0a0f1d', color: '#fff',
-            confirmButtonColor: '#3b82f6'
-        });
+        showAlert("REQUEST SENT", 'Your funds are locked. Admin audit in progress.', 'success');
 
         document.getElementById('withdrawPanel').classList.remove('show-panel');
         document.getElementById('vaultPin').value = "";
@@ -247,14 +230,14 @@ document.getElementById('submitWithdrawBtn').onclick = async () => {
         document.getElementById('withdrawAddress').value = "";
 
     } catch (e) {
-        showError("System busy. Please try again later.");
+        showAlert("Error", "System busy. Please try again later.");
     } finally {
         btn.disabled = false;
         btn.innerText = "Confirm Withdrawal";
     }
 };
 
-// --- 5. تحديث سجل المعاملات ---
+// --- 5. تحديث سجل المعاملات مع إظهار زر تحقق بارز للطلبات المعلقة تحت المحفظة ---
 function loadTransactions(uid) {
     const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(10));
     onSnapshot(q, (snap) => {
@@ -262,26 +245,41 @@ function loadTransactions(uid) {
         cont.innerHTML = ""; 
         
         if (snap.empty) {
-            cont.innerHTML = '<p class="text-center text-[10px] py-10 opacity-30 italic">No recent activity</p>';
+            cont.innerHTML = '<p class="text-center text-[10px] text-slate-500 py-12 italic opacity-50">No recent activity</p>';
             return;
         }
 
         snap.forEach(d => {
             const tx = d.data();
+            const txId = d.id;
             let statusColor = "text-amber-500"; 
             if (tx.status === 'approved' || tx.status === 'completed') statusColor = "text-emerald-500";
             if (tx.status === 'rejected' || tx.status === 'failed') statusColor = "text-red-500";
 
+            let actionSection = "";
+            if (tx.status === 'pending' && tx.type === 'Deposit') {
+                actionSection = `
+                    <div class="mt-3 p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex flex-col gap-2">
+                        <span class="text-[9px] text-blue-300 font-semibold text-center">Order: ${tx.orderNumber || 'DEP'}</span>
+                        <button id="btn_${txId}" onclick="verifyPlisioPayment('${txId}', ${tx.amount}, '${tx.orderNumber || ''}')" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase py-2 px-3 rounded-lg shadow-lg transition-all flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-rotate"></i> Verify Payment
+                        </button>
+                    </div>`;
+            }
+
             cont.innerHTML += `
-                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-                    <div>
-                        <span class="text-[10px] font-black uppercase text-slate-400">${tx.type}</span>
-                        <p class="text-[8px] text-slate-600 font-mono">${tx.timestamp ? new Date(tx.timestamp.toDate()).toLocaleString() : 'Processing...'}</p>
+                <div class="p-4 border-b border-white/5 bg-white/[0.01] rounded-2xl mb-2">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] font-black uppercase text-slate-400">${tx.type}</span>
+                            <p class="text-[8px] text-slate-600 font-mono">${tx.timestamp ? new Date(tx.timestamp.toDate()).toLocaleString() : 'Processing...'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-black italic text-white">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
+                            <p class="text-[8px] font-black uppercase ${statusColor}">${tx.status}</p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-xs font-black italic text-white">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                        <p class="text-[8px] font-black uppercase ${statusColor}">${tx.status}</p>
-                    </div>
+                    ${actionSection}
                 </div>`;
         });
     });
