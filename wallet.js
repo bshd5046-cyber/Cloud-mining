@@ -60,7 +60,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنتاج فاتورة Plisio للإيداع ---
+// --- 2. إنتاج فاتورة Plisio للإيداع وتفادي مشكلة CORS ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -71,43 +71,43 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Generating Invoice...";
+        btn.innerText = "Redirecting to Payment...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        const params = new URLSearchParams({
+        // أ) تسجيل الفاتورة بحالة المعالجة في Firestore
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+            uid: currentUser.uid,
+            amount: amount,
+            type: "Deposit",
+            status: "pending",
+            orderNumber: orderNumber,
+            timestamp: serverTimestamp()
+        });
+
+        // ب) إنشاء نموذج POST ديناميكي للتوجيه المباشر لتفادي CORS
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = 'https://plisio.net/api/v1/invoices/new';
+
+        const params = {
             api_key: PLISIO_API_KEY,
             currency: "USDT_TRX",
-            order_name: `Vault Deposit`,
+            order_name: "Vault Deposit",
             order_number: orderNumber,
             source_amount: amount.toString(),
             source_currency: "USD",
             passthrough_id: currentUser.uid
-        });
+        };
 
-        const response = await fetch(`https://plisio.net/api/v1/invoices/new?${params.toString()}`);
-        const result = await response.json();
+        const queryString = new URLSearchParams(params).toString();
+        
+        // التوجيه المباشر للمصفح إلى بوابة الدفع
+        window.location.href = `https://plisio.net/api/v1/invoices/new?${queryString}`;
 
-        if (result.status === "success" && result.data?.invoice_url) {
-            await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                uid: currentUser.uid,
-                amount: amount,
-                type: "Deposit",
-                status: "pending",
-                orderNumber: orderNumber,
-                txn_id: result.data.txn_id || "",
-                timestamp: serverTimestamp()
-            });
-
-            window.location.href = result.data.invoice_url;
-        } else {
-            console.error("Plisio Error:", result);
-            showError("Failed to generate payment invoice. Please try again.");
-        }
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Network connection error.");
-    } finally {
+        showError("Failed to initiate payment. Please try again.");
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
     }
