@@ -19,13 +19,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// رابط الدفع المباشر الخاص بك من Plisio
-const PLISIO_PAYMENT_URL = "https://plisio.net/payment-button/new/9rEoxwRshyjh";
+// ⚠️ ضع مفتاح API الخاص بك من Plisio هنا
+const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa"; 
 
 let currentUser = null;
 let currentUserData = null;
 
-// --- دالة إظهار الخطأ ---
 function showError(msg) {
     Swal.fire({
         icon: 'error',
@@ -61,7 +60,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنشاء طلب الإيداع والتوجيه لرابط Plisio المباشر ---
+// --- 2. إنشاء فاتورة دقيقة ومراقبة الدفع التلقائي ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -72,22 +71,41 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Redirecting to Plisio...";
+        btn.innerText = "Creating Invoice...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // 1. تسجيل المعاملة في Firestore أولاً لدى المستخدم
-        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-            uid: currentUser.uid,
-            amount: amount,
-            type: "Deposit",
-            status: "pending",
-            orderNumber: orderNumber,
-            timestamp: serverTimestamp()
-        });
+        // 1. طلب إنشاء فاتورة ديناميكية من Plisio API
+        const response = await fetch(`https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_currency=USD&source_amount=${amount}&order_number=${orderNumber}&currency=USDT_BSC`);
+        const data = await response.json();
 
-        // 2. التوجيه المباشر لرابط الدفع الخاص بك في Plisio
-        window.location.href = PLISIO_PAYMENT_URL;
+        if (data.status === "success") {
+            const invoiceData = data.data;
+
+            // 2. حماية الفاتورة وتسجيلها كـ pending في Firebase
+            const txRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+                uid: currentUser.uid,
+                amount: amount,
+                type: "Deposit",
+                status: "pending",
+                txn_id: invoiceData.txn_id,
+                orderNumber: orderNumber,
+                timestamp: serverTimestamp()
+            });
+
+            // 3. فتح صفحة الدفع في تبويب جديد
+            window.open(invoiceData.invoice_url, '_blank');
+
+            btn.innerText = "Awaiting Payment...";
+
+            // 4. دالة الفحص الدائري اللحظي لتأكيد الشحن التلقائي
+            startAutoCreditCheck(invoiceData.txn_id, txRef.id, amount, btn);
+
+        } else {
+            showError("Failed to generate invoice. Check Plisio API Key.");
+            btn.disabled = false;
+            btn.innerText = "Pay with Crypto (Plisio)";
+        }
 
     } catch (error) {
         console.error("Invoice Error:", error);
@@ -96,6 +114,43 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
         btn.innerText = "Pay with Crypto (Plisio)";
     }
 };
+
+// --- دالة الفحص الآلي والشحن الفوري ---
+function startAutoCreditCheck(txnId, txDocId, amount, btn) {
+    const checkInterval = setInterval(async () => {
+        try {
+            const res = await fetch(`https://plisio.net/api/v1/operations/${txnId}?api_key=${PLISIO_API_KEY}`);
+            const result = await res.json();
+
+            if (result.status === "success" && (result.data.status === "completed" || result.data.status === "mismatch")) {
+                clearInterval(checkInterval); // إيقاف الفحص
+
+                // إضافة الرصيد للمستخدم آلياً
+                await updateDoc(doc(db, "users", currentUser.uid), { 
+                    balance: increment(amount) 
+                });
+
+                // تحديث حالة العملية في السجل
+                await updateDoc(doc(db, "users", currentUser.uid, "transactions", txDocId), { 
+                    status: "completed" 
+                });
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'DEPOSIT SUCCESSFUL',
+                    text: `$${amount} credited to your account balance!`,
+                    background: '#0a0f1d', color: '#fff',
+                    confirmButtonColor: '#10b981'
+                });
+
+                btn.disabled = false;
+                btn.innerText = "Pay with Crypto (Plisio)";
+            }
+        } catch (e) {
+            console.error("Polling check failed:", e);
+        }
+    }, 10000); // يفحص كل 10 ثوانٍ تلقائياً
+}
 
 // --- 3. فتح لوحة السحب ---
 document.getElementById('withdrawTrigger').onclick = async () => {
