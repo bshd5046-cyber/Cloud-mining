@@ -19,12 +19,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ⚠️ مفتاح API الخاص بـ Plisio
+// ⚠️ ضع مفتاح API الخاص بك من Plisio هنا
 const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa"; 
 
 let currentUser = null;
 let currentUserData = null;
-let activeCheckInterval = null;
 
 function showError(msg) {
     Swal.fire({
@@ -60,16 +59,16 @@ onAuthStateChanged(auth, user => {
             }
         });
         loadTransactions(user.uid);
-        checkPendingDeposits(user.uid); // الفحص التلقائي لأي إيداع معلق عند تسجيل الدخول أو تحديث الصفحة
     } else {
         window.location.href = 'login.html';
     }
 });
 
-// --- 2. إنشاء فاتورة ومراقبة الدفع التلقائي ---
-const createBtn = document.getElementById('createInvoiceBtn');
-if (createBtn) {
-    createBtn.onclick = async () => {
+// --- 2. إنشاء فاتورة دقيقة ومراقبة الدفع التلقائي ---
+const createInvoiceBtn = document.getElementById('createInvoiceBtn');
+if (createInvoiceBtn) {
+    createInvoiceBtn.onclick = async () => {
+        const btn = createInvoiceBtn;
         const amountInput = document.getElementById('depositAmountInput');
         const amount = parseFloat(amountInput ? amountInput.value : 0);
 
@@ -77,19 +76,19 @@ if (createBtn) {
         if (isNaN(amount) || amount <= 0) return showError("Please enter a valid amount.");
 
         try {
-            createBtn.disabled = true;
-            createBtn.innerText = "Creating Invoice...";
+            btn.disabled = true;
+            btn.innerText = "Creating Invoice...";
 
             const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-            // طلب إنشاء فاتورة من Plisio API
+            // 1. طلب إنشاء فاتورة ديناميكية من Plisio API مباشرة كما كانت
             const response = await fetch(`https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_currency=USD&source_amount=${amount}&order_number=${orderNumber}&currency=USDT_BSC`);
             const data = await response.json();
 
             if (data.status === "success") {
                 const invoiceData = data.data;
 
-                // تسجيل الفاتورة كـ pending في Firestore
+                // 2. حماية الفاتورة وتسجيلها كـ pending في Firebase
                 const txRef = await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
                     uid: currentUser.uid,
                     amount: amount,
@@ -100,47 +99,45 @@ if (createBtn) {
                     timestamp: serverTimestamp()
                 });
 
-                // فتح صفحة الدفع
+                // 3. فتح صفحة الدفع في تبويب جديد
                 window.open(invoiceData.invoice_url, '_blank');
 
-                createBtn.innerText = "Awaiting Payment...";
+                btn.innerText = "Awaiting Payment...";
 
-                // بدء التتبع والتحقق
-                startAutoCreditCheck(invoiceData.txn_id, txRef.id, amount, createBtn);
+                // 4. دالة الفحص الدائري اللحظي لتأكيد الشحن التلقائي
+                startAutoCreditCheck(invoiceData.txn_id, txRef.id, amount, btn);
 
             } else {
                 showError("Failed to generate invoice. Check Plisio API Key.");
-                createBtn.disabled = false;
-                createBtn.innerText = "Pay with Crypto (Plisio)";
+                btn.disabled = false;
+                btn.innerText = "Pay with Crypto (Plisio)";
             }
 
         } catch (error) {
             console.error("Invoice Error:", error);
             showError("Unexpected error. Please try again.");
-            createBtn.disabled = false;
-            createBtn.innerText = "Pay with Crypto (Plisio)";
+            btn.disabled = false;
+            btn.innerText = "Pay with Crypto (Plisio)";
         }
     };
 }
 
 // --- دالة الفحص الآلي والشحن الفوري ---
 function startAutoCreditCheck(txnId, txDocId, amount, btn) {
-    if (activeCheckInterval) clearInterval(activeCheckInterval);
-
-    activeCheckInterval = setInterval(async () => {
+    const checkInterval = setInterval(async () => {
         try {
             const res = await fetch(`https://plisio.net/api/v1/operations/${txnId}?api_key=${PLISIO_API_KEY}`);
             const result = await res.json();
 
             if (result.status === "success" && (result.data.status === "completed" || result.data.status === "mismatch")) {
-                clearInterval(activeCheckInterval);
+                clearInterval(checkInterval); // إيقاف الفحص
 
-                // إضافة الرصيد تلقائياً
+                // إضافة الرصيد للمستخدم آلياً
                 await updateDoc(doc(db, "users", currentUser.uid), { 
                     balance: increment(amount) 
                 });
 
-                // تحديث المعاملة إلى completed
+                // تحديث حالة العملية في السجل
                 await updateDoc(doc(db, "users", currentUser.uid, "transactions", txDocId), { 
                     status: "completed" 
                 });
@@ -161,27 +158,7 @@ function startAutoCreditCheck(txnId, txDocId, amount, btn) {
         } catch (e) {
             console.error("Polling check failed:", e);
         }
-    }, 10000); // يفحص كل 10 ثوانٍ
-}
-
-// --- فحص المعاملات المعلقة في حال إغلاق المتصفح وإعادة فتحه ---
-async function checkPendingDeposits(uid) {
-    try {
-        const q = query(
-            collection(db, "users", uid, "transactions"), 
-            where("type", "==", "Deposit"), 
-            where("status", "==", "pending")
-        );
-        const snap = await getDocs(q);
-        snap.forEach(docSnap => {
-            const tx = docSnap.data();
-            if (tx.txn_id) {
-                startAutoCreditCheck(tx.txn_id, docSnap.id, tx.amount, createBtn);
-            }
-        });
-    } catch (e) {
-        console.error("Pending check failed:", e);
-    }
+    }, 10000); // يفحص كل 10 ثوانٍ تلقائياً
 }
 
 // --- 3. فتح لوحة السحب ---
@@ -209,13 +186,13 @@ if (withdrawTrigger) {
                 return showError("You have an active pending withdrawal. Please wait for Admin approval.");
             }
 
-            const availEl = document.getElementById('withdrawAvailableBalance');
-            const panelEl = document.getElementById('withdrawPanel');
-            const pinEl = document.getElementById('vaultPin');
+            const availBal = document.getElementById('withdrawAvailableBalance');
+            const withdrawPanel = document.getElementById('withdrawPanel');
+            const vaultPin = document.getElementById('vaultPin');
 
-            if (availEl) availEl.innerText = `Available: $${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-            if (panelEl) panelEl.classList.add('show-panel');
-            if (pinEl) pinEl.value = "";
+            if (availBal) availBal.innerText = `Available: $${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
+            if (withdrawPanel) withdrawPanel.classList.add('show-panel');
+            if (vaultPin) vaultPin.value = "";
         } catch (e) {
             showError("Connection error. Try again.");
         }
@@ -226,6 +203,7 @@ if (withdrawTrigger) {
 const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
 if (submitWithdrawBtn) {
     submitWithdrawBtn.onclick = async () => {
+        const btn = submitWithdrawBtn;
         const amountInput = document.getElementById('withdrawAmount');
         const addressInput = document.getElementById('withdrawAddress');
         const pinInput = document.getElementById('vaultPin');
@@ -240,10 +218,9 @@ if (submitWithdrawBtn) {
         if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance in your vault.");
 
         try {
-            submitWithdrawBtn.disabled = true;
-            submitWithdrawBtn.innerText = "Verifying...";
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
 
-            // خصم الرصيد فوراً وحفظ الطلب
             await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
 
             const withdrawData = {
@@ -271,8 +248,8 @@ if (submitWithdrawBtn) {
                 confirmButtonColor: '#3b82f6'
             });
 
-            const panelEl = document.getElementById('withdrawPanel');
-            if (panelEl) panelEl.classList.remove('show-panel');
+            const withdrawPanel = document.getElementById('withdrawPanel');
+            if (withdrawPanel) withdrawPanel.classList.remove('show-panel');
             if (pinInput) pinInput.value = "";
             if (amountInput) amountInput.value = "";
             if (addressInput) addressInput.value = "";
@@ -280,8 +257,8 @@ if (submitWithdrawBtn) {
         } catch (e) {
             showError("System busy. Please try again later.");
         } finally {
-            submitWithdrawBtn.disabled = false;
-            submitWithdrawBtn.innerText = "Confirm Withdrawal";
+            btn.disabled = false;
+            btn.innerText = "Confirm Withdrawal";
         }
     };
 }
@@ -294,7 +271,7 @@ function loadTransactions(uid) {
         if (!cont) return;
 
         cont.innerHTML = ""; 
-
+        
         if (snap.empty) {
             cont.innerHTML = '<p class="text-center text-[10px] py-10 opacity-30 italic">No recent activity</p>';
             return;
