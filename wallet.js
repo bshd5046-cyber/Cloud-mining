@@ -19,8 +19,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// رابط الدفع المباشر الخاص بك من Plisio
-const PLISIO_PAYMENT_URL = "ضع_الرابط_الذي_نسخته_من_Plisio_هنا";
+// ⚠️ استبدل هذا الرابط برابط الدفع المباشر الخاص بك من Plisio
+const PLISIO_PAYMENT_URL = "https://plisio.net/p/xxxxxx";
 
 let currentUser = null;
 let currentUserData = null;
