@@ -19,8 +19,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ⚠️ مفتاح Plisio API الخاص بك
+// ⚠️ مفتاح Plisio API والرابط المباشر
 const PLISIO_API_KEY = "Q4bxjujHY_e8X60i3CHtg-yj3Ivyz2OGqx9WTr1bBrvQx0bEHT40Mt2PHsZ57lsa";
+const PLISIO_PAYMENT_URL = "https://plisio.net/payment-button/new/9rEoxwRshyjh";
 
 let currentUser = null;
 let currentUserData = null;
@@ -64,68 +65,55 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنشاء طلب الإيداع الديناميكي عبر Plisio API ---
+// --- 2. إنشاء طلب الإيداع والفتح المباشر ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
     const amount = parseFloat(amountInput.value);
 
     if (!currentUser) return showError("Please login to proceed.");
-    if (isNaN(amount) || amount < 5) return showError("Please enter a valid amount (Min $5).");
+    if (isNaN(amount) || amount <= 0) return showError("Please enter a valid amount.");
 
     try {
         btn.disabled = true;
-        btn.innerText = "Creating Invoice...";
+        btn.innerText = "Redirecting to Plisio...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // رابط إنشاء الفاتورة من Plisio مع تحديد العملة USDT عبر شبكة BSC
-        const apiUrl = `https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&source_amount=${amount}&source_currency=USD&order_number=${orderNumber}&order_name=Deposit_${amount}_USD&currency=USDT_BSC`;
-        
-        const response = await fetch(apiUrl);
-        const result = await response.json();
+        // تسجيل المعاملة في قاعدة البيانات كـ pending
+        await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
+            uid: currentUser.uid,
+            amount: amount,
+            type: "Deposit",
+            status: "pending",
+            orderNumber: orderNumber,
+            timestamp: serverTimestamp()
+        });
 
-        if (result.status === "success" && result.result) {
-            const invoiceUrl = result.result.url;
-            const txnId = result.result.txn_id;
+        // فتح رابط الدفع المباشر
+        window.open(PLISIO_PAYMENT_URL, '_blank');
 
-            // حفظ المعاملة في قاعدة البيانات بحالة pending حتى يتم الدفع
-            await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
-                uid: currentUser.uid,
-                amount: amount,
-                type: "Deposit",
-                status: "pending",
-                orderNumber: orderNumber,
-                txn_id: txnId,
-                timestamp: serverTimestamp()
-            });
+        if(amountInput) amountInput.value = "";
 
-            window.open(invoiceUrl, '_blank');
-            if(amountInput) amountInput.value = "";
-
-            Swal.fire({
-                icon: 'info',
-                title: 'Waiting for Payment',
-                text: 'Complete your payment on Plisio. Your balance will update automatically once confirmed!',
-                background: '#0a0f1d', color: '#fff',
-                confirmButtonColor: '#3b82f6',
-                timer: 5000
-            });
-        } else {
-            console.error("Plisio Error Response:", result);
-            showError(result.data?.message || "Failed to create Plisio invoice. Check API Key.");
-        }
+        Swal.fire({
+            icon: 'info',
+            title: 'Waiting for Payment',
+            text: 'Complete your payment on Plisio. Your balance will update automatically once approved!',
+            background: '#0a0f1d', color: '#fff',
+            confirmButtonColor: '#3b82f6',
+            timer: 5000
+        });
 
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Unexpected network error connecting to Plisio.");
+        showError("Unexpected error. Please try again.");
     } finally {
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
     }
 };
 
-// --- دالة الفحص التلقائي في الخلفية (محدثة لتكون أكثر دقة وتحويل الحالة إلى approved) ---
+// --- دالة الفحص التلقائي في الخلفية لتحويل الحالة إلى approved ---
 function startAutoPaymentChecker(uid) {
     if (paymentCheckerInterval) clearInterval(paymentCheckerInterval);
 
@@ -144,26 +132,22 @@ function startAutoPaymentChecker(uid) {
                     const txData = txDoc.data();
                     const txAmount = parseFloat(txData.amount);
 
-                    // البحث إما عن طريق معرف المعاملة (txn_id) أو تقارب المبلغ
                     const matchedOp = result.data.list.find(op => {
                         const opAmount = parseFloat(op.source_amount || op.amount);
                         const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
-                        const matchesId = txData.txn_id && op.txn_id === txData.txn_id;
-                        const matchesAmount = Math.abs(opAmount - txAmount) < 0.1;
-
-                        return isCompleted && (matchesId || matchesAmount);
+                        return isCompleted && Math.abs(opAmount - txAmount) < 0.1;
                     });
 
                     if (matchedOp) {
-                        // 1. تحديث رصيد المستخدم
+                        // تحديث رصيد المستخدم
                         await updateDoc(doc(db, "users", uid), { 
                             balance: increment(txAmount) 
                         });
 
-                        // 2. تحديث حالة المعاملة إلى approved مباشرة كما طلبت
+                        // تحديث حالة المعاملة إلى approved
                         await updateDoc(doc(db, "users", uid, "transactions", txDoc.id), { 
                             status: "approved",
-                            txn_id: matchedOp.txn_id || txData.txn_id
+                            txn_id: matchedOp.txn_id || "plisio_" + Date.now()
                         });
 
                         Swal.fire({
