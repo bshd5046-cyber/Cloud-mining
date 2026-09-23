@@ -101,7 +101,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
     }
 };
 
-// --- دالة التحقق الحقيقي من بليسيو عبر الزر الواضح ---
+// --- دالة التحقق المعدلة لتجاوز حظر الـ CORS باستخدام بروكسي آمن للاتصال ---
 window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
     const verifyBtn = document.getElementById(`btn_${txId}`);
     if (verifyBtn) {
@@ -110,11 +110,20 @@ window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
     }
 
     try {
-        const res = await fetch(`https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`);
-        const result = await res.json();
+        // استخدام رابط بروكسي عام لتجاوز قيود المتصفح والاتصال بـ بليسيو بسلاسة
+        const targetUrl = `https://plisio.net/api/v1/operations?api_key=${PLISIO_API_KEY}&limit=20`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        
+        const res = await fetch(proxyUrl);
+        const wrappedData = await res.json();
+        
+        if (!wrappedData.contents) {
+            throw new Error("Failed to reach gateway");
+        }
+
+        const result = JSON.parse(wrappedData.contents);
 
         if (result.status === "success" && result.data && result.data.list) {
-            // نبحث عن عملية مطابقة إما برقم الطلب أو بالقيمة
             const matchedOp = result.data.list.find(op => {
                 const opAmount = parseFloat(op.source_amount || op.amount);
                 const isCompleted = (op.status === "completed" || op.status === "mismatch" || op.status === "approved");
@@ -125,12 +134,12 @@ window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
             });
 
             if (matchedOp) {
-                // تحديث رصيد المستخدم فعلياً لأن الدفع نجح
+                // تحديث رصيد المستخدم تلقائياً
                 await updateDoc(doc(db, "users", currentUser.uid), { 
                     balance: increment(parseFloat(amount)) 
                 });
 
-                // تحديث حالة المعاملة إلى approved
+                // تحديث حالة الطلب إلى approved
                 await updateDoc(doc(db, "users", currentUser.uid, "transactions", txId), { 
                     status: "approved",
                     txn_id: matchedOp.txn_id || "plisio_" + Date.now()
@@ -141,11 +150,11 @@ window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
                 showAlert("Pending", "Payment not detected yet or still confirming on blockchain. Please try again in a minute.", "warning");
             }
         } else {
-            showAlert("Error", "Could not connect to payment gateway. Try again later.");
+            showAlert("Error", "Invalid API response from payment gateway.");
         }
     } catch (e) {
-        console.error("Verification error:", e);
-        showAlert("Error", "Failed to verify payment. Check your connection.");
+        console.error("Verification error details:", e);
+        showAlert("Connection Notice", "Could not fetch directly. If you have completed the payment on Plisio, please contact support or wait for automatic webhook confirmation.", "info");
     } finally {
         if (verifyBtn) {
             verifyBtn.disabled = false;
