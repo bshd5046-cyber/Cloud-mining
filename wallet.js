@@ -19,7 +19,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const PLISIO_API_KEY = "Q4bxjujHY_e8X6Oi3CHtg-yj3lvyz2OGqx9WTr1b";
+// رابط الدفع المباشر الخاص بك من Plisio
+const PLISIO_PAYMENT_URL = "ضع_الرابط_الذي_نسخته_من_Plisio_هنا";
 
 let currentUser = null;
 let currentUserData = null;
@@ -60,7 +61,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنتاج فاتورة Plisio للإيداع عبر نموذج مباشر ---
+// --- 2. إنشاء طلب الإيداع والتوجيه لرابط Plisio المباشر ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -75,7 +76,7 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // 1. تسحيل العملية أولاً في Firestore لدى المستخدم
+        // 1. تسجيل المعاملة في Firestore أولاً لدى المستخدم
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             uid: currentUser.uid,
             amount: amount,
@@ -85,31 +86,8 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
             timestamp: serverTimestamp()
         });
 
-        // 2. إنشاء Form خفي وإرساله مباشرة لتفادي مشاكل المتصفح و الـ API
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = 'https://plisio.net/api/v1/invoices/new';
-
-        const fields = {
-            'api_key': PLISIO_API_KEY,
-            'currency': 'USDT_TRX',
-            'order_name': 'Vault Deposit',
-            'order_number': orderNumber,
-            'source_amount': amount,
-            'source_currency': 'USD',
-            'passthrough_id': currentUser.uid
-        };
-
-        for (const key in fields) {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = fields[key];
-            form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
+        // 2. التوجيه المباشر لرابط الدفع الخاص بك في Plisio
+        window.location.href = PLISIO_PAYMENT_URL;
 
     } catch (error) {
         console.error("Invoice Error:", error);
