@@ -71,20 +71,24 @@
     <!-- Deposit Panel -->
     <div id="depositPanel" class="slide-panel">
         <div class="panel-content text-center">
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-black uppercase text-blue-500 italic">Deposit Asset</h3>
                 <button onclick="document.getElementById('depositPanel').classList.remove('show-panel')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">&times;</button>
             </div>
-            <div id="qrcode" class="mb-6 bg-white p-4 rounded-[2rem] inline-block mx-auto shadow-2xl shadow-blue-500/20"></div>
-            <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2">Personal Deposit Address</p>
-            <p id="depositAddrText" class="text-[10px] font-mono text-blue-400 font-bold mb-6 break-all px-4 tracking-tight">Generating secure address...</p>
-            <button id="copyBtn" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase mb-8 shadow-lg shadow-blue-900/40 transition-all active:scale-95">Copy Address</button>
+
+            <div class="space-y-4 mb-6">
+                <input id="depositAmountInput" type="number" step="any" class="field text-center font-bold text-lg" placeholder="Enter Amount ($ USD)">
+                <button id="createInvoiceBtn" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-blue-900/40">
+                    Pay with Crypto (Plisio)
+                </button>
+            </div>
+
             <div class="border-t border-white/5 pt-6">
                 <div class="flex items-center justify-center gap-2 text-emerald-500 mb-2">
                     <i class="fas fa-bolt-lightning animate-pulse"></i>
-                    <span class="text-[10px] font-black uppercase">Automatic Sync Active</span>
+                    <span class="text-[10px] font-black uppercase">Instant Automated Checkout</span>
                 </div>
-                <p class="text-[9px] text-slate-500 italic px-6">The system will automatically detect your transfer and credit your vault within minutes.</p>
+                <p class="text-[9px] text-slate-500 italic px-6">You will be redirected to the secure gateway to complete your transfer.</p>
             </div>
         </div>
     </div>
@@ -124,203 +128,8 @@
         <a href="profile.html" class="nav-item"><i class="fas fa-circle-user"></i><span>Profile</span></a>
     </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, collection, query, addDoc, serverTimestamp, updateDoc, where, getDocs, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmlAKs35FG4hbcaPkVQ_s0FSaZsvWzFak",
-            authDomain: "cloud-mining-6f190.firebaseapp.com",
-            projectId: "cloud-mining-6f190",
-            storageBucket: "cloud-mining-6f190.firebasestorage.app",
-            messagingSenderId: "144227180849",
-            appId: "1:144227180849:web:ccbda447d074efbbddd010"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let currentUserData = null;
-
-        let withdrawalsList = [];
-        let depositsList = [];
-
-        function showError(msg) {
-            Swal.fire({
-                icon: 'error', title: 'ACCESS DENIED', text: msg,
-                background: '#070b16', color: '#fff', confirmButtonColor: '#3b82f6',
-                customClass: { popup: 'ios-alert', confirmButton: 'ios-btn' }
-            });
-        }
-
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                currentUser = user;
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
-                    currentUserData = snap.data();
-                    if (currentUserData) {
-                        document.getElementById('userBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        document.getElementById('userName').innerText = currentUserData.fullName || "IDENTIFIED USER";
-                        document.getElementById('userTier').innerText = currentUserData.tier || "Tier 1";
-                        if (currentUserData.depositAddress) {
-                            enableAddressUI(currentUserData.depositAddress);
-                        } else {
-                            document.getElementById('depositAddrText').innerText = "No deposit address generated.";
-                        }
-                    }
-                });
-                loadTransactions(user.uid);
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-
-        // Withdrawal Trigger Logic
-        document.getElementById('withdrawTrigger').onclick = async () => {
-            if (!currentUserData?.securePin) {
-                return Swal.fire({
-                    icon: 'lock', title: 'Security Required', text: 'Please set your 6-digit Vault PIN in Profile.',
-                    showCancelButton: true, confirmButtonText: 'Go to Profile', background: '#070b16', color: '#fff'
-                }).then(res => { if(res.isConfirmed) window.location.href='profile.html' });
-            }
-
-            try {
-                const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid), where("status", "==", "pending"));
-                const pendingSnap = await getDocs(q);
-                if (!pendingSnap.empty) return showError("You already have a pending withdrawal request.");
-
-                document.getElementById('vaultPin').value = "";
-                document.getElementById('withdrawAmount').value = "";
-                document.getElementById('withdrawAddress').value = "";
-                document.getElementById('withdrawAvailableBalance').innerText = `$${parseFloat(currentUserData.balance || 0).toFixed(2)}`;
-                document.getElementById('withdrawPanel').classList.add('show-panel');
-            } catch (e) {
-                showError("Relay error.");
-            }
-        };
-
-        // Submit Withdrawal
-        document.getElementById('submitWithdrawBtn').onclick = async () => {
-            const btn = document.getElementById('submitWithdrawBtn');
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const address = document.getElementById('withdrawAddress').value.trim();
-            const enteredPin = document.getElementById('vaultPin').value.trim();
-            const network = document.getElementById('withdrawNetwork').value;
-
-            if (!address || isNaN(amount) || amount < 10) return showError("Min withdrawal is $10.");
-            if (enteredPin !== String(currentUserData.securePin)) return showError("Incorrect Security PIN.");
-            if (amount > (currentUserData.balance || 0)) return showError("Insufficient balance.");
-
-            try {
-                btn.disabled = true; btn.innerText = "Authorizing...";
-                await updateDoc(doc(db, "users", currentUser.uid), { balance: increment(-amount) });
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: currentUser.uid, email: currentUser.email, fullName: currentUserData.fullName || "",
-                    amount: amount, address: address, network: network, status: "pending",
-                    timestamp: serverTimestamp(), type: "Withdrawal"
-                });
-
-                Swal.fire({ icon: 'success', title: 'SUCCESS', text: 'Request sent for audit.', background: '#070b16', color: '#fff' });
-                document.getElementById('withdrawPanel').classList.remove('show-panel');
-            } catch (e) {
-                showError("System busy.");
-            } finally {
-                btn.disabled = false; btn.innerText = "Confirm Withdrawal";
-            }
-        };
-
-        // --- جلب الإيداعات والسحوبات معاً (بشكل منفصل لمنع تداخل الشروط) ---
-        function loadTransactions(uid) {
-            const cont = document.getElementById('transactionHistory');
-
-            // مراقبة السحوبات
-            onSnapshot(query(collection(db, "withdrawals"), where("uid", "==", uid)), wSnap => {
-                withdrawalsList = [];
-                wSnap.forEach(doc => {
-                    withdrawalsList.push({ ...doc.data(), id: doc.id, type: 'Withdrawal' });
-                });
-                renderCombinedTransactions();
-            });
-
-            // مراقبة الإيداعات من sub-collection
-            onSnapshot(collection(db, "users", uid, "deposits"), dSnap => {
-                depositsList = [];
-                dSnap.forEach(doc => {
-                    depositsList.push({ ...doc.data(), id: doc.id, type: 'Deposit' });
-                });
-                renderCombinedTransactions();
-            });
-        }
-
-        function renderCombinedTransactions() {
-            const cont = document.getElementById('transactionHistory');
-            const allTx = [...withdrawalsList, ...depositsList];
-
-            if (allTx.length === 0) {
-                cont.innerHTML = '<p class="text-center text-[10px] py-12 opacity-30 italic font-black uppercase tracking-widest">No Activity Found</p>';
-                return;
-            }
-
-            // الترتيب حسب التاريخ الأحدث
-            allTx.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-            cont.innerHTML = "";
-            allTx.forEach(tx => {
-                let color = (tx.status === 'completed' || tx.status === 'approved') ? 'text-emerald-500' : (tx.status === 'rejected' || tx.status === 'failed' ? 'text-red-500' : 'text-amber-500');
-                const date = tx.timestamp ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString([], {month:'short', day:'numeric'}) : 'Pending';
-                const displayStatus = (tx.status || 'PENDING').toUpperCase();
-
-                cont.innerHTML += `
-                <div class="p-4 border-b border-white/5 flex justify-between items-center animate-fade-in">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                            <i class="fas ${tx.type === 'Deposit' ? 'fa-arrow-down text-emerald-500' : 'fa-arrow-up text-blue-500'} text-[10px]"></i>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-black uppercase text-slate-300 tracking-tighter">${tx.type}</span>
-                            <p class="text-[8px] text-slate-500 font-bold">${date}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-black italic">$${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                        <p class="text-[8px] font-black uppercase ${color}">${displayStatus}</p>
-                    </div>
-                </div>`;
-            });
-        }
-
-        function enableAddressUI(addr) {
-            document.getElementById('depositAddrText').innerText = addr;
-            const qrBox = document.getElementById('qrcode');
-            qrBox.innerHTML = "";
-            if (typeof QRCode !== 'undefined') {
-                new QRCode(qrBox, { text: addr, width: 140, height: 140, colorDark : "#000000", colorLight : "#ffffff" });
-            }
-        }
-
-        // نسخ العنوان مع دعم الحالات غير المشفرة (Non-HTTPS Fallback)
-        document.getElementById('copyBtn').onclick = () => {
-            const textToCopy = document.getElementById('depositAddrText').innerText;
-            if(!textToCopy || textToCopy.includes("Generating")) return;
-
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(textToCopy);
-            } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = textToCopy;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-            }
-
-            Swal.fire({ icon: 'success', title: 'Address Copied', toast: true, position: 'top', showConfirmButton: false, timer: 1500, background: '#070b16', color: '#fff' });
-        };
-
-        // إغلاق النوافذ عند النقر خارج المحتوى
+    <script type="module" src="wallet.js"></script>
+    <script>
         document.querySelectorAll('.slide-panel').forEach(panel => {
             panel.addEventListener('click', (e) => {
                 if (e.target === panel) {
