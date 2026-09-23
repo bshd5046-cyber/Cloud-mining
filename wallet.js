@@ -60,7 +60,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنتاج فاتورة Plisio للإيداع ---
+// --- 2. إنتاج فاتورة Plisio للإيداع عبر نموذج مباشر ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -71,11 +71,11 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
 
     try {
         btn.disabled = true;
-        btn.innerText = "Processing...";
+        btn.innerText = "Redirecting to Plisio...";
 
         const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
 
-        // 1. تسجيل معالم العملية في قاعدة البيانات
+        // 1. تسحيل العملية أولاً في Firestore لدى المستخدم
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             uid: currentUser.uid,
             amount: amount,
@@ -85,15 +85,35 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
             timestamp: serverTimestamp()
         });
 
-        // 2. توجيه المستخدم لمباشرة الدفع بأمان
-        const invoiceUrl = `https://plisio.net/api/v1/invoices/new?api_key=${PLISIO_API_KEY}&currency=USDT_TRX&order_name=Vault+Deposit&order_number=${orderNumber}&source_amount=${amount}&source_currency=USD&passthrough_id=${currentUser.uid}`;
-        
-        window.location.assign(invoiceUrl);
+        // 2. إنشاء Form خفي وإرساله مباشرة لتفادي مشاكل المتصفح و الـ API
+        const form = document.createElement('form');
+        form.method = 'GET';
+        form.action = 'https://plisio.net/api/v1/invoices/new';
+
+        const fields = {
+            'api_key': PLISIO_API_KEY,
+            'currency': 'USDT_TRX',
+            'order_name': 'Vault Deposit',
+            'order_number': orderNumber,
+            'source_amount': amount,
+            'source_currency': 'USD',
+            'passthrough_id': currentUser.uid
+        };
+
+        for (const key in fields) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = fields[key];
+            form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
 
     } catch (error) {
         console.error("Invoice Error:", error);
-        showError("Unable to initiate deposit. Please try again.");
-    } finally {
+        showError("Unexpected error. Please try again.");
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
     }
