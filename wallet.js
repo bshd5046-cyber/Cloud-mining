@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { 
     getFirestore, doc, onSnapshot, collection, query, orderBy, limit, 
-    addDoc, serverTimestamp, updateDoc, where, getDocs, increment 
+    addDoc, serverTimestamp, getDocs, increment 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- Firebase Configuration ---
@@ -60,7 +60,7 @@ onAuthStateChanged(auth, user => {
     }
 });
 
-// --- 2. إنشاء طلب الإيداع ---
+// --- 2. إنشاء طلب الإيداع (أوتوماتيكي بالكامل) ---
 document.getElementById('createInvoiceBtn').onclick = async () => {
     const btn = document.getElementById('createInvoiceBtn');
     const amountInput = document.getElementById('depositAmountInput');
@@ -73,7 +73,8 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
         btn.disabled = true;
         btn.innerText = "Redirecting to Plisio...";
 
-        const orderNumber = `DEP_${currentUser.uid.substring(0, 5)}_${Date.now()}`;
+        // جعل الـ orderNumber يبدأ بالـ uid لكي يستخرجه نظام الأتمتة (Make.com) بكل سهولة
+        const orderNumber = `${currentUser.uid}_${Date.now()}`;
 
         await addDoc(collection(db, "users", currentUser.uid, "transactions"), {
             uid: currentUser.uid,
@@ -85,11 +86,14 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
         });
 
         document.getElementById('depositPanel').classList.remove('show-panel');
-        window.open(PLISIO_PAYMENT_URL, '_blank');
+        
+        // توجيه المستخدم لبليسيو مع تمرير القيم للرابط
+        const plisioRedirectUrl = `${PLISIO_PAYMENT_URL}?source_amount=${amount}&source_currency=USD&order_number=${orderNumber}&order_name=Deposit_${amount}`;
+        window.open(plisioRedirectUrl, '_blank');
 
         if(amountInput) amountInput.value = "";
 
-        showAlert("Invoice Created", "Complete your payment on Plisio. Once paid, click 'Verify Payment' below.", 'info');
+        showAlert("Invoice Created", "Complete your payment on Plisio. Your balance will update automatically once completed!", 'info');
 
     } catch (error) {
         console.error("Invoice Error:", error);
@@ -97,58 +101,6 @@ document.getElementById('createInvoiceBtn').onclick = async () => {
     } finally {
         btn.disabled = false;
         btn.innerText = "Pay with Crypto (Plisio)";
-    }
-};
-
-// --- دالة التحقق الآمنة والمباشرة لتجنب مشاكل الـ CORS والخوادم الخارجية ---
-window.verifyPlisioPayment = async function(txId, amount, orderNumber) {
-    const verifyBtn = document.getElementById(`btn_${txId}`);
-    if (verifyBtn) {
-        verifyBtn.disabled = true;
-        verifyBtn.innerText = "Verifying...";
-    }
-
-    try {
-        // إظهار نافذة تأكيد لطيفة للمستخدم ليؤكد أنه أتم الدفع على بليسيو
-        const confirmResult = await Swal.fire({
-            title: 'Confirm Payment',
-            text: `Have you completed the payment of $${amount} on Plisio for order ${orderNumber}?`,
-            icon: 'question',
-            background: '#0a0f1d',
-            color: '#fff',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, I Paid',
-            cancelButtonText: 'Not Yet',
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#ef4444'
-        });
-
-        if (confirmResult.isConfirmed) {
-            // تحديث رصيد المستخدم فوراً
-            await updateDoc(doc(db, "users", currentUser.uid), { 
-                balance: increment(parseFloat(amount)) 
-            });
-
-            // تحديث حالة المعاملة إلى approved
-            await updateDoc(doc(db, "users", currentUser.uid, "transactions", txId), { 
-                status: "approved",
-                txn_id: "plisio_verified_" + Date.now()
-            });
-
-            showAlert("SUCCESS", `Payment verified! $${amount} has been successfully added to your balance.`, 'success');
-        } else {
-            if (verifyBtn) {
-                verifyBtn.disabled = false;
-                verifyBtn.innerText = "Verify Payment";
-            }
-        }
-    } catch (e) {
-        console.error("Verification error:", e);
-        showAlert("Error", "Failed to update balance. Please try again.");
-        if (verifyBtn) {
-            verifyBtn.disabled = false;
-            verifyBtn.innerText = "Verify Payment";
-        }
     }
 };
 
@@ -235,7 +187,7 @@ document.getElementById('submitWithdrawBtn').onclick = async () => {
     }
 };
 
-// --- 5. تحديث سجل المعاملات مع إظهار زر تحقق بارز للطلبات المعلقة تحت المحفظة ---
+// --- 5. عرض سجل المعاملات (بدون أزرار يدوية - التحديث يتم آلياً بالكامل) ---
 function loadTransactions(uid) {
     const q = query(collection(db, "users", uid, "transactions"), orderBy("timestamp", "desc"), limit(10));
     onSnapshot(q, (snap) => {
@@ -249,21 +201,9 @@ function loadTransactions(uid) {
 
         snap.forEach(d => {
             const tx = d.data();
-            const txId = d.id;
             let statusColor = "text-amber-500"; 
             if (tx.status === 'approved' || tx.status === 'completed') statusColor = "text-emerald-500";
             if (tx.status === 'rejected' || tx.status === 'failed') statusColor = "text-red-500";
-
-            let actionSection = "";
-            if (tx.status === 'pending' && tx.type === 'Deposit') {
-                actionSection = `
-                    <div class="mt-3 p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl flex flex-col gap-2">
-                        <span class="text-[9px] text-blue-300 font-semibold text-center">Order: ${tx.orderNumber || 'DEP'}</span>
-                        <button id="btn_${txId}" onclick="verifyPlisioPayment('${txId}', ${tx.amount}, '${tx.orderNumber || ''}')" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase py-2 px-3 rounded-lg shadow-lg transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-rotate"></i> Verify Payment
-                        </button>
-                    </div>`;
-            }
 
             cont.innerHTML += `
                 <div class="p-4 border-b border-white/5 bg-white/[0.01] rounded-2xl mb-2">
@@ -277,7 +217,6 @@ function loadTransactions(uid) {
                             <p class="text-[8px] font-black uppercase ${statusColor}">${tx.status}</p>
                         </div>
                     </div>
-                    ${actionSection}
                 </div>`;
         });
     });
